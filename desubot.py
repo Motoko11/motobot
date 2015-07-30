@@ -1,7 +1,8 @@
 from motobot import IRCBot
+import desubot as this
 
-
-bot = IRCBot('desubot', 'irc.rizon.net')
 
 if __name__ == '__main__':
-    bot.run()
+    this.bot.run()
+else:
+    bot = IRCBot('desubot', 'irc.rizon.net')
