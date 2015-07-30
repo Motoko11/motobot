@@ -9,13 +9,15 @@ class IRCBot(Bot):
 
     """ Class to inherit from Bot and abstract the IRC protocol. """
 
+    message_hooks = {}
+
     def __init__(self, nick, server, port=6667, command_prefix='.'):
         """ Create a new IRCBot instance. """
         Bot.__init__(self, server, port, message_ending='\r\n')
         self.nick = nick
         self.command_prefix = command_prefix
         self.userlist = {}
-        self.hook(message_handler)
+        self.msg_hook(IRCBot.msg_handler)
 
     def init(self):
         """ Overload init function to load plugin modules. """
@@ -37,6 +39,24 @@ class IRCBot(Bot):
                 module = file[:-3]
                 plugin = __import__(modules_folder + '.' + module,
                                     globals(), locals(), -1)
+
+    @staticmethod
+    def message_hook(command):
+        """ Hooks a function to handle an IRCMessage object for a given command. """
+        def register_hook(func):
+            IRCBot.message_hooks[command] = func
+            return func
+        return register_hook
+
+    def msg_handler(self, msg):
+        """ Constructs an IRCMessage from msg and passes it to the appropriate message_hook. """
+        message = IRCMessage(msg)
+        print(message)
+
+        response = None
+        if message.command in IRCBot.message_hooks:
+            response = IRCBot.message_hooks[message.command](self, message)
+        return response
 
     def command(self, name):
         """ Decorator to register a command to the bot.
@@ -72,28 +92,9 @@ class IRCBot(Bot):
 # Clean all this shit up.
 # I want to restructure it to a more readable/followable form
 # and to make it more clearly extensible as it really is.
-message_handlers = {}
 
 
-def hook(name):
-    def register_hook(func):
-        message_handlers[name] = func
-        return func
-    return register_hook
-
-
-def message_handler(bot, msg):
-    message = IRCMessage(msg)
-    print(message)
-    response = None
-
-    if message.command in message_handlers:
-        response = message_handlers[message.command](bot, message)
-
-    return response
-
-
-@hook('439')
+@IRCBot.message_hook('439')
 def identify_hook(bot, message):
     bot.send('USER MotoBot localhost localhost MotoBot')
     sleep(1)
@@ -101,25 +102,25 @@ def identify_hook(bot, message):
     # TODO: Actually make a way (Other than inviting) to have the bot join
     bot.send('JOIN #Moto-chan')
     bot.send('JOIN #animu')
-    bot.send('JOIN #anime-planet.com')
+    # bot.send('JOIN #anime-planet.com')
 
 
-@hook('PING')
+@IRCBot.message_hook('PING')
 def ping_hook(bot, message):
     return 'PONG :' + message.message
 
 
-@hook('ERROR')
+@IRCBot.message_hook('ERROR')
 def error_hook(bot, message):
     bot.connected = False
 
 
-@hook('INVITE')
+@IRCBot.message_hook('INVITE')
 def invite_hook(bot, message):
     return 'JOIN ' + message.message
 
 
-@hook('353')
+@IRCBot.message_hook('353')
 def names_hook(bot, message):
     channel = message.channel.split(' ')[2]
 
@@ -140,7 +141,7 @@ def get_level(symbol):
     return mapping[symbol] if symbol in mapping else 0
 
 
-@hook('PRIVMSG')
+@IRCBot.message_hook('PRIVMSG')
 def msg_hook(bot, message):
     response = None
     if message.message.startswith(bot.command_prefix):

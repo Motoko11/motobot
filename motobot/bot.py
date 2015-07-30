@@ -14,7 +14,7 @@ class Bot:
         self.message_ending = message_ending
         self.buffer_size = buffer_size
 
-        self.hooks = []
+        self.msg_hooks = []
 
         self.running = False
         self.connected = False
@@ -75,13 +75,13 @@ class Bot:
 
     def handle_msg(self, msg):
         """ Handle a message by forwarding it to hooked functions. """
-        for hook in self.hooks:
+        for hook in self.msg_hooks:
             response = hook(self, msg)
             self.send(response)
 
-    def hook(self, f):
+    def msg_hook(self, f):
         """ Hook a function to be used by handle_msg. """
-        self.hooks.append(f)
+        self.msg_hooks.append(f)
 
     def init(self):
         """ Function to be called when bot starts running. """
