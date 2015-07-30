@@ -58,7 +58,7 @@ class IRCBot(Bot):
 
         """
         def register_pattern(func):
-            self.patterns.append((re.compile(pattern), func))
+            self.patterns.append((re.compile(pattern, re.IGNORECASE), func))
             return func
         return register_pattern
 
@@ -71,7 +71,7 @@ class IRCBot(Bot):
 # TODO:
 # Clean all this shit up.
 # I want to restructure it to a more readable/followable form
-# snd to make it more clearly extensible as it really is.
+# and to make it more clearly extensible as it really is.
 message_handlers = {}
 
 
