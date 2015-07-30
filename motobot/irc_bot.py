@@ -84,6 +84,7 @@ def hook(name):
 
 def message_handler(bot, msg):
     message = IRCMessage(msg)
+    print(message)
     response = None
 
     if message.command in message_handlers:
