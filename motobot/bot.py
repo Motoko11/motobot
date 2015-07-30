@@ -45,12 +45,12 @@ class Bot:
                     traceback.print_exc()
         self.destroy()
 
-    def connect(self):
+    def __connect(self):
         """ Connect the socket. """
         self.socket = create_connection((self.server, self.port))
         self.connected = True
 
-    def disconnect(self):
+    def __disconnect(self):
         """ Disconnect and stop running the bot. """
         self.connected = self.running = False
 
@@ -60,7 +60,7 @@ class Bot:
             self.socket.send(bytes(msg + self.message_ending, 'UTF-8'))
             print("Sent: {}".format(msg))
 
-    def recv(self):
+    def __recv(self):
         """ Receive messages from socket, splitting by message ending. """
         self.read_buffer += self.socket.recv(self.buffer_size).decode('UTF-8')
 
@@ -73,7 +73,7 @@ class Bot:
 
         return msgs
 
-    def handle_msg(self, msg):
+    def __handle_msg(self, msg):
         """ Handle a message by forwarding it to hooked functions. """
         for hook in self.msg_hooks:
             response = hook(self, msg)

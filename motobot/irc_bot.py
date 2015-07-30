@@ -17,7 +17,7 @@ class IRCBot(Bot):
         self.nick = nick
         self.command_prefix = command_prefix
         self.userlist = {}
-        self.msg_hook(IRCBot.msg_handler)
+        self.msg_hook(IRCBot.handle_msg)
 
     def init(self):
         """ Overload init function to load plugin modules. """
@@ -48,7 +48,7 @@ class IRCBot(Bot):
             return func
         return register_hook
 
-    def msg_handler(self, msg):
+    def handle_msg(self, msg):
         """ Constructs an IRCMessage from msg and passes it to the appropriate message_hook. """
         message = IRCMessage(msg)
         print(message)
