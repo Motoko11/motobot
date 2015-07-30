@@ -97,6 +97,7 @@ def identify_hook(bot, message):
     bot.send('USER MotoBot localhost localhost MotoBot')
     sleep(1)
     bot.send('NICK ' + bot.nick)
+    # TODO: Actually make a way (Other than inviting) to have the bot join
     bot.send('JOIN #Moto-chan')
     bot.send('JOIN #animu')
     bot.send('JOIN #anime-planet.com')
