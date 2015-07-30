@@ -138,27 +138,10 @@ def get_level(symbol):
     return mapping[symbol] if symbol in mapping else 0
 
 
-@hook('MODE')
-def mode_hook(bot, message):
-    pass
-
-
-def is_ctcp(message):
-    return message.message.startswith('\u0001') \
-           and message.message.endswith('\u0001')
-
-
-def handle_ctcp(message):
-    return None
-    return '\u0001' + response + '\u0001'
-
-
 @hook('PRIVMSG')
 def msg_hook(bot, message):
     response = None
-    if is_ctcp(message):
-        response = handle_ctcp(message)
-    elif message.message.startswith(bot.command_prefix):
+    if message.message.startswith(bot.command_prefix):
         command = message.message.split(' ')[0][1:]
         if command in bot.commands:
             response = bot.commands[command](message)
@@ -168,11 +151,10 @@ def msg_hook(bot, message):
             if pattern.search(message.message):
                 response = func(message)
 
-    response_type = 'PRIVMSG' if not is_ctcp(message) else 'NOTICE'
-    target = message.channel if is_channel(message.channel) else message.nick
-
     if response is not None:
-        return response_type + ' ' + target + ' :' + response
+        target = message.channel \
+            if is_channel(message.channel) else message.nick
+        return 'PRIVMSG ' + target + ' :' + response
 
 
 def is_channel(channel_name):
