@@ -31,16 +31,16 @@ class Bot:
         self.init()
 
         while self.running:
-            self.connect()
+            self.__connect()
 
             while self.connected:
                 try:
-                    msgs = self.recv()
+                    msgs = self.__recv()
                     for msg in msgs:
-                        self.handle_msg(msg)
+                        self.__handle_msg(msg)
 
                 except KeyboardInterrupt:
-                    self.disconnect()
+                    self.__disconnect()
                 except:
                     traceback.print_exc()
         self.destroy()
