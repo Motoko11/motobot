@@ -11,7 +11,7 @@ class IRCMessage:
 
     def __init__(self, msg):
         """ Parse a raw IRC message to IRCMessage. """
-        match = IRCMessage.parse.match(msg)
+        match = IRCMessage.parse_pattern.match(msg)
         self.sender, self.command, self.channel, self.message = match.groups()
         self.nick = get_nick(self.sender)
 
