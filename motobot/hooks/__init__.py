@@ -9,7 +9,7 @@ def identify_hook(bot, message):
     # TODO: Actually make a way (Other than inviting) to have the bot join
     bot.send('JOIN #Moto-chan')
     bot.send('JOIN #animu')
-    # bot.send('JOIN #anime-planet.com')
+    bot.send('JOIN #anime-planet.com')
 
 
 @IRCBot.message_hook('PING')

@@ -1,7 +1,7 @@
 from . import Bot
 from . import IRCMessage
 from os import listdir
-from importlib import import_module
+from importlib import import_module, reload
 import re
 
 
@@ -9,6 +9,7 @@ class IRCBot(Bot):
 
     """ Class to inherit from Bot and abstract the IRC protocol. """
 
+    message_module = None
     message_hooks = {}
 
     def __init__(self, nick, server, port=6667, command_prefix='.'):
@@ -17,6 +18,7 @@ class IRCBot(Bot):
         self.nick = nick
         self.command_prefix = command_prefix
 
+        self.loaded_modules = {}
         self.userlist = {}
         self.commands = {}
         self.patterns = []
@@ -25,8 +27,10 @@ class IRCBot(Bot):
 
     def init(self):
         """ Overload init function to load plugin modules. """
+        print("Loading hooks and modules...")
         IRCBot.load_hooks()
         self.load_modules()
+        print("Loaded!")
 
     def load_modules(self):
         """ Load the plugin modules for the bot.
@@ -41,9 +45,27 @@ class IRCBot(Bot):
         modules_package = 'modules'
         for file in listdir(modules_package):
             if file.endswith('.py'):
-                module = file[:-3]
-                plugin = __import__(modules_package + '.' + module,
-                                    globals(), locals(), -1)
+                module_name = file[:-3]
+                if module_name not in self.loaded_modules:
+                    module = __import__(modules_package + '.' + module_name,
+                                        globals(), locals(), -1)
+                    self.loaded_modules[module_name] = module
+                else:
+                    reload(self.loaded_modules[module_name])
+
+    @staticmethod
+    def load_hooks():
+        """ Load or reloads the message hook functions for the bot.
+
+        Loads the hooks from the package 'hooks' within motobot.
+
+        """
+        IRCBot.message_hooks = {}
+
+        if IRCBot.message_module is None:
+            IRCBot.message_module = import_module('motobot.hooks')
+        else:
+            reload(IRCBot.message_module)
 
     @staticmethod
     def message_hook(command):
@@ -52,16 +74,6 @@ class IRCBot(Bot):
             IRCBot.message_hooks[command] = func
             return func
         return register_hook
-
-    @staticmethod
-    def load_hooks():
-        """ Load the message hook functions for the bot.
-
-        Loads the hooks from the package 'hooks' within motobot.
-
-        """
-        IRCBot.message_hooks = {}
-        import_module('motobot.hooks')
 
     def __handle_msg(self, msg):
         """ Constructs an IRCMessage from msg and passes it to the appropriate message_hook. """

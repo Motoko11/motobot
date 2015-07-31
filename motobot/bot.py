@@ -39,8 +39,9 @@ class Bot:
                     for msg in msgs:
                         self.__handle_msg(msg)
 
-                except KeyboardInterrupt:
-                    self.__disconnect()
+                except KeyboardInterrupt as ex:
+                    self.init()
+                    # self.__disconnect()
                 except:
                     traceback.print_exc()
         self.destroy()
