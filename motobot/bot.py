@@ -70,7 +70,7 @@ class Bot:
             self.read_buffer = msgs.pop()
         else:
             msgs = [read_buffer]
-            self.read_buffer = msgs.pop()
+            self.read_buffer = ''
 
         return msgs
 

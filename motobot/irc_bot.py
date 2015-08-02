@@ -113,9 +113,3 @@ class IRCBot(Bot):
         """ Return the userlevel of a user in a given channel. """
         # TODO: As per raylu's suggestion, integrate this into the decorator
         return self.userlist[(channel, nick)]
-
-
-# TODO:
-# Clean all this shit up.
-# I want to restructure it to a more readable/followable form
-# and to make it more clearly extensible as it really is.
