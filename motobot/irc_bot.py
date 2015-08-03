@@ -29,8 +29,6 @@ class IRCBot:
         self.commands = {}
         self.patterns = []
 
-        self.flood_guard = {}
-
     def run(self):
         """ Run the bot.
 
@@ -243,7 +241,7 @@ class IRCBot:
 
     def __handle_join(self, message):
         """ Handle the join of a user. """
-        pass
+        self.userlevels[(message.nick, message.message)] = [0]
 
     def __handle_leave(self, message):
         """ Handle the part or quit of a user. """
@@ -260,8 +258,9 @@ class IRCBot:
 
 def is_channel(name):
     """ Check if a name is a valid channel name or not. """
-    valid = ['#', '!', '@', '&']
-    return name[0] in valid and ' ' not in name and ',' not in name
+    valid = ['&', '#', '+', '!']
+    invalid = [' ', ',', '\u0007']
+    return (name[0] in valid) and all(c not in invalid for c in name)
 
 
 def is_ctcp(message):
