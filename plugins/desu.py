@@ -1,4 +1,5 @@
 from desubot import bot
+from desubot import IRCLevel
 from random import uniform, normalvariate
 
 
@@ -10,17 +11,16 @@ def generate_spam(str):
     return un, number, string
 
 
-@bot.match(r'^desu.*')
+@bot.match(r'^desu(\W|$)')
 def desu_match(message):
     un, number, string = generate_spam('desu')
     return string
 
 
-@bot.match(r'^baka.*')
+@bot.match(r'^baka(\W|$)', IRCLevel.op)
 def baka_match(message):
-    if bot.get_userlevel(message.nick, message.channel) >= 3:
-        un, number, string = generate_spam('baka')
-        return string
+    un, number, string = generate_spam('baka')
+    return string
 
 
 @bot.command('desu')

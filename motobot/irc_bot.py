@@ -1,115 +1,221 @@
-from . import Bot
-from . import IRCMessage
-from os import listdir
+from .irc_message import IRCMessage
+from .irc_level import IRCLevel, get_userlevels
+from socket import create_connection
 from importlib import import_module, reload
+from os import listdir
+from time import strftime, localtime
 import re
+import traceback
 
 
-class IRCBot(Bot):
-
-    """ Class to inherit from Bot and abstract the IRC protocol. """
-
-    message_module = None
-    message_hooks = {}
-
+class IRCBot:
     def __init__(self, nick, server, port=6667, command_prefix='.'):
-        """ Create a new IRCBot instance. """
-        Bot.__init__(self, server, port, message_ending='\r\n')
         self.nick = nick
+        self.server = server
+        self.port = port
         self.command_prefix = command_prefix
 
-        self.loaded_modules = {}
-        self.userlist = {}
+        self.socket = None
+        self.running = self.connected = self.identified = False
+        self.read_buffer = ''
+
+        self.database = None
+        self.channels = []
+        self.ignore_list = []
+        self.userlevels = {}
+
+        self.plugins = {}
         self.commands = {}
         self.patterns = []
 
-        self.msg_hook(IRCBot.__handle_msg)
+        self.flood_guard = {}
 
-    def init(self):
-        """ Overload init function to load plugin modules. """
-        print("Loading hooks and modules...")
-        IRCBot.load_hooks()
-        self.load_modules()
-        print("Loaded!")
+    def run(self):
+        self.running = True
+        while self.running:
+            self.__connect()
+            while self.connected:
+                try:
+                    for msg in self.__recv():
+                        message = IRCMessage(msg)
+                        self.__handle_message(message)
+                except:
+                    traceback.print_exc()
 
-    def load_modules(self):
-        """ Load the plugin modules for the bot.
-
-        Loads the modules from the package 'modules'.
-        This can easily be abstracted later to an __init__ argument.
-
-        """
+    def load_plugins(self, folder):
         self.commands = {}
         self.patterns = []
 
-        modules_package = 'modules'
-        for file in listdir(modules_package):
+        for file in listdir(folder):
             if file.endswith('.py'):
-                module_name = file[:-3]
-                if module_name not in self.loaded_modules:
-                    module = __import__(modules_package + '.' + module_name,
-                                        globals(), locals(), -1)
-                    self.loaded_modules[module_name] = module
+                module_name = folder + '.' + file[:-3]
+                if module_name not in self.plugins:
+                    print("Loading {}".format(module_name))
+                    module = import_module(module_name)
+                    self.plugins[module_name] = module
                 else:
-                    reload(self.loaded_modules[module_name])
+                    print("Reloading {}".format(module_name))
+                    reload(self.plugins[module_name])
 
-    @staticmethod
-    def load_hooks():
-        """ Load or reloads the message hook functions for the bot.
+    def reload_plugins(self):
+        for module_name, module in self.plugins.items():
+            print("Reloading {}".format(module_name))
+            reload(module)
 
-        Loads the hooks from the package 'hooks' within motobot.
+    def load_database(self, database_path):
+        pass
 
-        """
-        IRCBot.message_hooks = {}
+    def set_val(self, name, val):
+        pass
 
-        if IRCBot.message_module is None:
-            IRCBot.message_module = import_module('motobot.hooks')
+    def get_val(self, name, default=None):
+        pass
+
+    def join(self, channel):
+        if self.connected:
+            self.send('JOIN ' + channel)
+        self.channels.append(channel)
+
+    def ignore(self, hostmask):
+        pattern = re.compile(hostmask.replace('*', '.*'), re.IGNORECASE)
+        self.ignore_list.append(pattern)
+
+    def __ignored(self, host):
+        if host is None:
+            return False
+
+        for pattern in self.ignore_list:
+            if pattern.match(host):
+                return True
         else:
-            reload(IRCBot.message_module)
+            return False
 
-    @staticmethod
-    def message_hook(command):
-        """ Hooks a function to handle an IRCMessage object for a given command. """
-        def register_hook(func):
-            IRCBot.message_hooks[command] = func
-            return func
-        return register_hook
+    def userlevel_wrapper(self, level, func):
+        def wrapped(message):
+            userlevel = max(self.userlevels.get(
+                (message.nick, message.channel), IRCLevel.user))
+            if userlevel >= level:
+                return func(message)
+        return wrapped
 
-    def __handle_msg(self, msg):
-        """ Constructs an IRCMessage from msg and passes it to the appropriate message_hook. """
-        message = IRCMessage(msg)
-        print(message)
-
-        response = None
-        if message.command in IRCBot.message_hooks:
-            response = IRCBot.message_hooks[message.command](self, message)
-        return response
-
-    def command(self, name):
-        """ Decorator to register a command to the bot.
-
-        Commands are triggered the the string name and
-        are prefixed with command_prefix.
-
-        """
+    def command(self, name, level=IRCLevel.user):
         def register_command(func):
+            func = self.userlevel_wrapper(level, func)
             self.commands[name] = func
             return func
         return register_command
 
-    def match(self, pattern):
-        """ Decorator to register a regex pattern to the bot.
-
-        Commands are triggered when a message sent to the bot or
-        a channel the bot occupies matches for the given pattern.
-
-        """
+    def match(self, pattern, level=IRCLevel.user):
         def register_pattern(func):
+            func = self.userlevel_wrapper(level, func)
             self.patterns.append((re.compile(pattern, re.IGNORECASE), func))
             return func
         return register_pattern
 
-    def get_userlevel(self, nick, channel):
-        """ Return the userlevel of a user in a given channel. """
-        # TODO: As per raylu's suggestion, integrate this into the decorator
-        return self.userlist[(channel, nick)]
+    def __connect(self):
+        self.socket = create_connection((self.server, self.port))
+        self.connected = True
+        self.identified = False
+
+    def disconnect(self):
+        self.running = self.connected = self.identified = False
+
+    def __recv(self):
+        self.read_buffer += self.socket.recv(512).decode('UTF-8')
+        msgs = self.read_buffer.split('\r\n')
+        self.read_buffer = msgs.pop()
+        return msgs
+
+    def send(self, msg):
+        if msg is not None:
+            self.socket.send(bytes(msg + '\r\n', 'UTF-8'))
+            print("Sent: {}".format(msg))
+
+    def __handle_message(self, message):
+        print(message)
+
+        if self.__ignored(message.sender):
+            print("Ignored!")
+            return
+
+        mapping = {
+            'PING': IRCBot.__handle_ping,
+            'PRIVMSG': IRCBot.__handle_privmsg,
+            'NOTICE': IRCBot.__handle_notice,
+            'INVITE': IRCBot.__handle_invite,
+            '353': IRCBot.__handle_names,
+            'ERROR': IRCBot.__handle_error
+        }
+        if message.command.upper() in mapping:
+            self.send(mapping[message.command.upper()](self, message))
+        else:
+            print("Unknown command: {}".format(message.command))
+
+    def __handle_ping(self, message):
+        self.send('PONG :' + message.message)
+
+    def __handle_privmsg(self, message):
+        response = None
+
+        target = message.channel \
+            if is_channel(message.channel) \
+            else message.nick
+
+        if message.message.startswith(self.command_prefix):
+            response = self.commands[len(self.command_prefix):](message)
+            if response is not None:
+                response = 'PRIVMSG {} :{}'.format(target, response)
+
+        elif is_ctcp(message):
+            response = ctcp_response(message.message[1:-1])
+            if response is not None:
+                response = 'NOTICE {} :\u0001{}\u0001'.format(target, response)
+
+        else:
+            for pattern, func in self.patterns:
+                if pattern.search(message.message):
+                    response = func(message)
+                    if response is not None:
+                        response = 'PRIVMSG {} :{}'.format(target, response)
+
+        return response
+
+    def __handle_notice(self, message):
+        if not self.identified:
+            self.send('USER MotoBot localhost localhost MotoBot')
+            self.send('NICK ' + self.nick)
+            for channel in self.channels:
+                self.send('JOIN ' + channel)
+            self.identified = True
+
+    def __handle_invite(self, message):
+        self.join(message.message)
+
+    def __handle_names(self, message):
+        channel = message.channel.split(' ')[-1]
+        for nick in message.message.split(' '):
+            self.userlevels[(nick.lstrip('+%@&~'), channel)] = \
+                get_userlevels(nick)
+
+    def __handle_error(self, message):
+        self.connected = self.identified = False
+
+
+def is_channel(name):
+    valid = ['#', '!', '@', '&']
+    return name[0] in valid and ' ' not in name and ',' not in name
+
+
+def is_ctcp(message):
+    return message.message.startswith('\u0001') and \
+        message.message.endswith('\u0001')
+
+
+def ctcp_response(message):
+    mapping = {
+        'VERSION': 'MotoBot Version 2.0',
+        'FINGER': 'Oh you dirty man!',
+        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
+        'PING': message
+    }
+    return mapping.get(message.split(' ')[0].upper(), None)
