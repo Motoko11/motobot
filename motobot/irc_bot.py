@@ -109,7 +109,7 @@ class IRCBot:
         """ Wraps a function to only be triggered by a user of appropriate userlevel. """
         def wrapped(message):
             userlevel = max(self.userlevels.get(
-                (message.nick, message.channel), IRCLevel.user))
+                (message.nick, message.channel), [IRCLevel.user]))
             if userlevel >= level:
                 return func(message)
         return wrapped
@@ -170,7 +170,11 @@ class IRCBot:
             'PRIVMSG': IRCBot.__handle_privmsg,
             'NOTICE': IRCBot.__handle_notice,
             'INVITE': IRCBot.__handle_invite,
+            'JOIN': IRCBot.__handle_join,
+            'PART': IRCBot.__handle_leave,
+            'QUIT': IRCBot.__handle_leave,
             '353': IRCBot.__handle_names,
+            'MODE': IRCBot.__handle_mode,
             'ERROR': IRCBot.__handle_error
         }
         if message.command.upper() in mapping:
@@ -198,7 +202,8 @@ class IRCBot:
             else message.nick
 
         if message.message.startswith(self.command_prefix):
-            response = self.commands[len(self.command_prefix):](message)
+            command = message.message.split(' ')[0][len(self.command_prefix):]
+            response = self.commands[command](message)
             if response is not None:
                 response = 'PRIVMSG {} :{}'.format(target, response)
 
@@ -235,6 +240,18 @@ class IRCBot:
         for nick in message.message.split(' '):
             self.userlevels[(nick.lstrip('+%@&~'), channel)] = \
                 get_userlevels(nick)
+
+    def __handle_join(self, message):
+        """ Handle the join of a user. """
+        pass
+
+    def __handle_leave(self, message):
+        """ Handle the part or quit of a user. """
+        pass
+
+    def __handle_mode(self, message):
+        """ Handle the mode command and update userlevels accordingly. """
+        pass
 
     def __handle_error(self, message):
         """ Handle an error message from the server. """
