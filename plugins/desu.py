@@ -5,7 +5,7 @@ from random import uniform, normalvariate
 
 def generate_spam(str):
     """ The needless variables are for later, when stats are added. """
-    un = uniform(0, 1) < 0.05
+    un = uniform(0, 1) < 0.01
     number = int(round(normalvariate(10, 3)))
     string = 'un' + str if un else str * number
     return un, number, string
