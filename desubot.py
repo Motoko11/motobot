@@ -9,8 +9,6 @@ def main():
     desubot.bot.load_plugins('plugins')
     desubot.bot.ignore('*!*@will.shenan.again')
     desubot.bot.join('#Moto-chan')
-    desubot.bot.join('#animu')
-    desubot.bot.join('#anime-planet.com')
     
     thread = threading.Thread(target=worker)
     thread.start()
@@ -26,4 +24,4 @@ if __name__ == '__main__':
     main()
 
 else:
-    bot = IRCBot('desubot', 'irc.rizon.net')
+    bot = IRCBot('desutest', 'irc.rizon.net')
