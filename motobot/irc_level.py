@@ -1,4 +1,5 @@
 class IRCLevel:
+    """ Enum class (Not really) for userlevels. """
     user = 0
     voice = 1
     hop = 2
@@ -8,6 +9,7 @@ class IRCLevel:
 
 
 def get_userlevels(nick):
+    """ Return the userlevels in a list from a nick. """
     mapping = {
         '+': IRCLevel.voice,
         '%': IRCLevel.hop,
