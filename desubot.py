@@ -24,4 +24,4 @@ if __name__ == '__main__':
     main()
 
 else:
-    bot = IRCBot('desutest', 'irc.rizon.net')
+    bot = IRCBot('desutest', 'irc.rizon.net', command_prefix='!')
