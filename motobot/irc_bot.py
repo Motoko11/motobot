@@ -278,3 +278,10 @@ def ctcp_response(message):
         'PING': message
     }
     return mapping.get(message.split(' ')[0].upper(), None)
+
+
+def strip_control_codes(input):
+    #return input
+    pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F')
+    output = pattern.sub('', input)
+    return output
