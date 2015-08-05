@@ -140,7 +140,8 @@ class IRCBot:
 
     def __recv(self):
         """ Receive messages from the socket. """
-        self.read_buffer += self.socket.recv(512).decode('UTF-8')
+        self.read_buffer += str(self.socket.recv(512), 'ASCII', 'ignore')
+        self.read_buffer = strip_control_codes(self.read_buffer)
         msgs = self.read_buffer.split('\r\n')
         self.read_buffer = msgs.pop()
         return msgs
