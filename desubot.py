@@ -7,7 +7,6 @@ def worker():
 
 def main():
     desubot.bot.load_plugins('plugins')
-    desubot.bot.ignore('*!*@will.shenan.again')
     desubot.bot.join('#Moto-chan')
     
     thread = threading.Thread(target=worker)
