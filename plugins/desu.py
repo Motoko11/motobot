@@ -11,16 +11,22 @@ def generate_spam(str):
     return un, number, string
 
 
-@bot.match(r'^desu(\W|$)')
+@bot.match(r'^desu( *)$')
 def desu_match(message):
     un, number, string = generate_spam('desu')
     return string
 
 
-@bot.match(r'^baka(\W|$)', IRCLevel.op)
+@bot.match(r'^baka( *)$', IRCLevel.op)
 def baka_match(message):
     un, number, string = generate_spam('baka')
     return string
+
+
+@bot.match(r'^nya(a+)?n*?(\W|$)')
+def nyan_match(message):
+    num = int(round(normalvariate(15, 3)))
+    return 'Ny' + 'a' * num + '~'
 
 
 @bot.command('desu')
