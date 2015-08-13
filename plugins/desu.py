@@ -23,6 +23,12 @@ def baka_match(message):
     return string
 
 
+@bot.match(r'^nya(a+)?n*?(\W|$)')
+def nyan_match(message):
+    num = int(round(normalvariate(15, 3)))
+    return 'Ny' + 'a' * num + '~'
+
+
 @bot.command('desu')
 @bot.command('desustats')
 def desu_command(message):
