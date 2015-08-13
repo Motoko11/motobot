@@ -8,6 +8,9 @@ def worker():
 
 def main():
     desubot.bot.load_plugins('plugins')
+    desubot.bot.ignore('*!*@will.shenan.again')
+    desubot.bot.ignore('*!*@Rip.And.Tear')
+    desubot.bot.ignore('((eleuin*)|(nerdtaco)|(*taco))!*@*')
     desubot.bot.join('#Moto-chan')
     desubot.bot.join('#animu')
     desubot.bot.join('#anime-planet.com')
