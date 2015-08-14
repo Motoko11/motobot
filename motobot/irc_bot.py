@@ -105,27 +105,18 @@ class IRCBot:
         else:
             return False
 
-    def __userlevel_wrapper(self, level, func):
-        """ Wraps a function to only be triggered by a user of appropriate userlevel. """
-        def wrapped(message):
-            userlevel = max(self.userlevels.get(
-                (message.nick, message.channel), [IRCLevel.user]))
-            if userlevel >= level:
-                return func(message)
-        return wrapped
-
-    def command(self, name, level=IRCLevel.user):
+    @staticmethod
+    def command(name, level=IRCLevel.user):
         """ Decorator to add a command to the bot. """
         def register_command(func):
-            func = self.__userlevel_wrapper(level, func)
             IRCBot.commands[name] = func
             return func
         return register_command
 
-    def match(self, pattern, level=IRCLevel.user):
+    @staticmethod
+    def match(pattern, level=IRCLevel.user):
         """ Decorator to add a regex pattern to the bot. """
         def register_pattern(func):
-            func = self.__userlevel_wrapper(level, func)
             IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), func))
             return func
         return register_pattern
