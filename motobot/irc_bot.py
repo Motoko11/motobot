@@ -243,8 +243,8 @@ def userlevel_wrapper(func, level):
 def command(name, level=IRCLevel.user):
     """ Decorator to add a command to the bot. """
     def register_command(func):
-        func = userlevel_wrapper(func, level)
-        IRCBot.commands[name] = func
+        wrapped = userlevel_wrapper(func, level)
+        IRCBot.commands[name] = wrapped
         return func
     return register_command
 
@@ -252,8 +252,8 @@ def command(name, level=IRCLevel.user):
 def match(pattern, level=IRCLevel.user):
     """ Decorator to add a regex pattern to the bot. """
     def register_pattern(func):
-        func = userlevel_wrapper(func, level)
-        IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), func))
+        wrapped = userlevel_wrapper(func, level)
+        IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), wrapped))
         return func
     return register_pattern
 
