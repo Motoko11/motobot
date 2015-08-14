@@ -235,20 +235,26 @@ class IRCBot:
         self.connected = self.identified = False
 
 
+def userlevel_wrapper(func, level):
+    return func
+
+
 def command(name, level=IRCLevel.user):
     """ Decorator to add a command to the bot. """
     def register_command(func):
+        func = userlevel_wrapper(func, level)
         IRCBot.commands[name] = func
         return func
     return register_command
 
 
 def match(pattern, level=IRCLevel.user):
-        """ Decorator to add a regex pattern to the bot. """
-        def register_pattern(func):
-            IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), func))
-            return func
-        return register_pattern
+    """ Decorator to add a regex pattern to the bot. """
+    def register_pattern(func):
+        func = userlevel_wrapper(func, level)
+        IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), func))
+        return func
+    return register_pattern
 
 
 def action(message):
