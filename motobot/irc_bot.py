@@ -9,6 +9,10 @@ import traceback
 
 
 class IRCBot:
+    plugins = {}
+    commands = {}
+    patterns = []
+
     def __init__(self, nick, server, port=6667, command_prefix='.'):
         """ Create a new instance of IRCBot. """
         self.nick = nick
@@ -24,10 +28,6 @@ class IRCBot:
         self.channels = []
         self.ignore_list = []
         self.userlevels = {}
-
-        self.plugins = {}
-        self.commands = {}
-        self.patterns = []
 
     def run(self):
         """ Run the bot.
@@ -47,25 +47,27 @@ class IRCBot:
                 except:
                     traceback.print_exc()
 
-    def load_plugins(self, folder):
+    @staticmethod
+    def load_plugins(folder):
         """ Load or reload plugins from folder. """
-        self.commands = {}
-        self.patterns = []
+        IRCBot.commands = {}
+        IRCBot.patterns = []
 
         for file in listdir(folder):
             if file.endswith('.py'):
                 module_name = folder + '.' + file[:-3]
-                if module_name not in self.plugins:
+                if module_name not in IRCBot.plugins:
                     print("Loading {}".format(module_name))
                     module = import_module(module_name)
-                    self.plugins[module_name] = module
+                    IRCBot.plugins[module_name] = module
                 else:
                     print("Reloading {}".format(module_name))
-                    reload(self.plugins[module_name])
+                    reload(IRCBot.plugins[module_name])
 
-    def reload_plugins(self):
+    @staticmethod
+    def reload_plugins():
         """ Reloads all loaded plugins. """
-        for module_name, module in self.plugins.items():
+        for module_name, module in IRCBot.plugins.items():
             print("Reloading {}".format(module_name))
             reload(module)
 
@@ -116,7 +118,7 @@ class IRCBot:
         """ Decorator to add a command to the bot. """
         def register_command(func):
             func = self.__userlevel_wrapper(level, func)
-            self.commands[name] = func
+            IRCBot.commands[name] = func
             return func
         return register_command
 
@@ -124,7 +126,7 @@ class IRCBot:
         """ Decorator to add a regex pattern to the bot. """
         def register_pattern(func):
             func = self.__userlevel_wrapper(level, func)
-            self.patterns.append((re.compile(pattern, re.IGNORECASE), func))
+            IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), func))
             return func
         return register_pattern
 
@@ -203,7 +205,7 @@ class IRCBot:
 
         if message.message.startswith(self.command_prefix):
             command = message.message.split(' ')[0][len(self.command_prefix):]
-            response = self.commands[command](message)
+            response = IRCBot.commands[command](message)
             if response is not None:
                 response = 'PRIVMSG {} :{}'.format(target, response)
 
@@ -213,7 +215,7 @@ class IRCBot:
                 response = 'NOTICE {} :\u0001{}\u0001'.format(target, response)
 
         else:
-            for pattern, func in self.patterns:
+            for pattern, func in IRCBot.patterns:
                 if pattern.search(message.message):
                     response = func(message)
                     if response is not None:
@@ -283,7 +285,6 @@ def ctcp_response(message):
 
 
 def strip_control_codes(input):
-    #return input
     pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F')
     output = pattern.sub('', input)
     return output
