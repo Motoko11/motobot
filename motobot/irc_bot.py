@@ -251,6 +251,9 @@ def match(pattern, level=IRCLevel.user):
         return register_pattern
 
 
+def action(message):
+    return '\u0001ACTION {}\u0001'.format(message)
+
 
 def is_channel(name):
     """ Check if a name is a valid channel name or not. """

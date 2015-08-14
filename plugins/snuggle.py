@@ -1,8 +1,4 @@
-from motobot import command
-
-
-def action(message):
-    return '\u0001ACTION {}\u0001'.format(message)
+from motobot import command, action
 
 
 @command('snuggle')
