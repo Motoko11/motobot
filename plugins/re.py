@@ -9,7 +9,7 @@ patterns = []
 def regex_sink(message):
     for pattern, response in patterns:
         if pattern.search(message.message):
-            return response
+            return response.replace('{nick}', message.nick)
 
 
 @command('re')
