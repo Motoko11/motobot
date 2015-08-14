@@ -1,4 +1,4 @@
-from desubot import bot
+from motobot import IRCBot
 from requests import get
 import traceback
 
@@ -31,8 +31,8 @@ def silly_response(arg):
         return mapping[arg]
 
 
-@bot.command('w')
-@bot.command('weather')
+@IRCBot.command('w')
+@IRCBot.command('weather')
 def desu_command(message):
     response = silly_response(message.message.split(' ')[1])
     if response is not None:

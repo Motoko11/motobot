@@ -1,8 +1,7 @@
-from desubot import bot
-from desubot import IRCLevel
+from motobot import IRCBot, IRCLevel
 
 """
-@bot.match(r'(?:youtube\..*?\?.*?v=|youtu\.be/)([-_a-zA-Z0-9]+)', IRCLevel.op)
+@IRCBot.match(r'(?:youtube\..*?\?.*?v=|youtu\.be/)([-_a-zA-Z0-9]+)', IRCLevel.op)
 def youtube_match(message):
     title = 'test'
     duration = 'test'
