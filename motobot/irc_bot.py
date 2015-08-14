@@ -259,6 +259,7 @@ def match(pattern, level=IRCLevel.user):
 
 
 def action(message):
+    """ Make the message an action. """
     return '\u0001ACTION {}\u0001'.format(message)
 
 
@@ -287,6 +288,7 @@ def ctcp_response(message):
 
 
 def strip_control_codes(input):
+    """ Strip the control codes from the input. """
     pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F')
     output = pattern.sub('', input)
     return output
