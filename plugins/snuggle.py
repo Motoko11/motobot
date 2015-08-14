@@ -28,3 +28,15 @@ def pat_command(message):
         response = 'pat pats ' + message.nick
     
     return action(response)
+
+
+@command('pet')
+def pet_command(message):
+    response = ''
+    args = message.message.split(' ')
+    if len(args) > 1:
+        response = 'pets ' + args[1]
+    else:
+        response = 'pets ' + message.nick
+    
+    return action(response)
