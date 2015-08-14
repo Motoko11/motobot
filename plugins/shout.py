@@ -1,6 +1,6 @@
-from motobot import IRCBot
+from motobot import command
 
 
-@IRCBot.command('shout')
+@command('shout')
 def shout_command(message):
     return ' '.join(message.message.split(' ')[1:]).upper()

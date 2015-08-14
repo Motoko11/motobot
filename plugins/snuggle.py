@@ -1,11 +1,11 @@
-from motobot import IRCBot
+from motobot import command
 
 
 def action(message):
     return '\u0001ACTION {}\u0001'.format(message)
 
 
-@IRCBot.command('snuggle')
+@command('snuggle')
 def snuggle_command(message):
     response = ''
     args = message.message.split(' ')
@@ -17,12 +17,12 @@ def snuggle_command(message):
     return action(response)
 
 
-@IRCBot.command('unsnuggle')
+@command('unsnuggle')
 def unsnuggle_command(message):
     return "Go ahead and call the cops... You can't be unsnuggled!"
 
 
-@IRCBot.command('pat')
+@command('pat')
 def pat_command(message):
     response = ''
     args = message.message.split(' ')
