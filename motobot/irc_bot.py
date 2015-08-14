@@ -138,26 +138,23 @@ class IRCBot:
         """
         print(message)
 
-        if self.__ignored(message.sender):
-            print("Ignored!")
-            return
-
-        mapping = {
-            'PING': IRCBot.__handle_ping,
-            'PRIVMSG': IRCBot.__handle_privmsg,
-            'NOTICE': IRCBot.__handle_notice,
-            'INVITE': IRCBot.__handle_invite,
-            'JOIN': IRCBot.__handle_join,
-            'PART': IRCBot.__handle_leave,
-            'QUIT': IRCBot.__handle_leave,
-            '353': IRCBot.__handle_names,
-            'MODE': IRCBot.__handle_mode,
-            'ERROR': IRCBot.__handle_error
-        }
-        if message.command.upper() in mapping:
-            self.send(mapping[message.command.upper()](self, message))
-        else:
-            print("Unknown command: {}".format(message.command))
+        if not self.__ignored(message.sender):
+            mapping = {
+                'PING': IRCBot.__handle_ping,
+                'PRIVMSG': IRCBot.__handle_privmsg,
+                'NOTICE': IRCBot.__handle_notice,
+                'INVITE': IRCBot.__handle_invite,
+                'JOIN': IRCBot.__handle_join,
+                'PART': IRCBot.__handle_leave,
+                'QUIT': IRCBot.__handle_leave,
+                '353': IRCBot.__handle_names,
+                'MODE': IRCBot.__handle_mode,
+                'ERROR': IRCBot.__handle_error
+            }
+            if message.command.upper() in mapping:
+                self.send(mapping[message.command.upper()](self, message))
+            else:
+                print("Unknown command: {}".format(message.command))
 
     def __handle_ping(self, message):
         """ Handle the server's pings. """
