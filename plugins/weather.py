@@ -23,6 +23,7 @@ def silly_response(arg):
         'aereon': "aereon being cold and callus as always! >:D",
         'aere0n': "aere0n being cold and callus as always! >:D",
         'chintzygore65': "ChintzyGore65 being cold and callus as always! >:D",
+        'awkwardapples': "AwkwardApples is #anime-planet.com's prettiful pet! <3",
         'animu': "The weather doesn't matter... We do not go outside."
     }
 
@@ -33,7 +34,7 @@ def silly_response(arg):
 
 @command('w')
 @command('weather')
-def desu_command(message):
+def weather_command(message):
     response = silly_response(message.message.split(' ')[1])
     if response is not None:
         return message.nick + ': ' + response
