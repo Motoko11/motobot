@@ -31,8 +31,8 @@ def regex_command(message):
 
 def add_regex(string):
     parse_pattern = re.compile(r'^(.*?)(?: ?)<=>(?: ?)(.*)')
-    test = parse_pattern.match(string).groups()
-    print(test)
+    pattern, response = parse_pattern.match(string).groups()
+    patterns.append((re.compile(pattern, re.IGNORECASE), response))
 
 
 def rem_regex(string):
