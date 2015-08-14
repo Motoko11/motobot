@@ -177,7 +177,7 @@ class IRCBot:
 
         if message.message.startswith(self.command_prefix):
             command = message.message.split(' ')[0][len(self.command_prefix):]
-            response = IRCBot.commands[command](message)
+            response = IRCBot.commands[command](self, message)
             if response is not None:
                 response = 'PRIVMSG {} :{}'.format(target, response)
 
@@ -189,7 +189,7 @@ class IRCBot:
         else:
             for pattern, func in IRCBot.patterns:
                 if pattern.search(message.message):
-                    response = func(message)
+                    response = func(self, message)
                     if response is not None:
                         response = 'PRIVMSG {} :{}'.format(target, response)
 
@@ -233,7 +233,11 @@ class IRCBot:
 
 
 def userlevel_wrapper(func, level):
-    return func
+    """ Modify a plugin to only take users above a certain userlevel. """
+    def wrapped(bot, message):
+        if bot.userlevels[(message.nick, message.channel)] >= level:
+            return func(message)
+    return wrapped
 
 
 def command(name, level=IRCLevel.user):
