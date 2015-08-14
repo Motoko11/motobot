@@ -14,6 +14,7 @@ def format_windspeed(speed):
 
 
 def silly_response(arg):
+    arg = arg.lstrip('#@!&')
     mapping = {
         'betholas': "betholas is HAWT HAWT HAWT!",
         'beth': "beth is HAWT HAWT HAWT!",
