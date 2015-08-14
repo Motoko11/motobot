@@ -7,7 +7,7 @@ def worker():
     desubot.bot.run()
 
 def main():
-    desubot.bot.load_plugins('plugins')
+    IRCBot.load_plugins('plugins')
     desubot.bot.join('#Moto-chan')
     
     thread = threading.Thread(target=worker)
@@ -18,7 +18,7 @@ def main():
         try:
             msg = input()
             if msg.startswith(':'):
-                desubot.bot.load_plugins('plugins')
+                IRCBot.load_plugins('plugins')
             else:
                 desubot.bot.send(msg)
         except KeyboardInterrupt:
