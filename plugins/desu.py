@@ -1,4 +1,4 @@
-from motobot import command, IRCLevel
+from motobot import command, match, IRCLevel
 from random import uniform, normalvariate
 
 
