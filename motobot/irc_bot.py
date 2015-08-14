@@ -105,22 +105,6 @@ class IRCBot:
         else:
             return False
 
-    @staticmethod
-    def command(name, level=IRCLevel.user):
-        """ Decorator to add a command to the bot. """
-        def register_command(func):
-            IRCBot.commands[name] = func
-            return func
-        return register_command
-
-    @staticmethod
-    def match(pattern, level=IRCLevel.user):
-        """ Decorator to add a regex pattern to the bot. """
-        def register_pattern(func):
-            IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), func))
-            return func
-        return register_pattern
-
     def __connect(self):
         """ Connect the socket. """
         self.socket = create_connection((self.server, self.port))
@@ -249,6 +233,23 @@ class IRCBot:
     def __handle_error(self, message):
         """ Handle an error message from the server. """
         self.connected = self.identified = False
+
+
+def command(name, level=IRCLevel.user):
+    """ Decorator to add a command to the bot. """
+    def register_command(func):
+        IRCBot.commands[name] = func
+        return func
+    return register_command
+
+
+def match(pattern, level=IRCLevel.user):
+        """ Decorator to add a regex pattern to the bot. """
+        def register_pattern(func):
+            IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), func))
+            return func
+        return register_pattern
+
 
 
 def is_channel(name):
