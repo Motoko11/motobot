@@ -21,7 +21,7 @@ def regex_command(message):
         add_regex(' '.join(args[2:]))
         response = "Pattern added successfully."
     elif arg == 'del':
-        del_regex(' '.join(args[2:]))
+        rem_regex(' '.join(args[2:]))
         response = "The pattern matching this string has been removed."
     else:
         response = "Unrecognised argument."
@@ -36,6 +36,9 @@ def add_regex(string):
 
 
 def rem_regex(string):
+    removed = False
     for pattern, response in patterns:
-        if pattern.search(message.message):
-            patterns.pop((pattern, response))
+        if pattern.search(string):
+            patterns.remove((pattern, response))
+            return "Pattern matching the string have been removed."
+    return "No patterns matched the string."
