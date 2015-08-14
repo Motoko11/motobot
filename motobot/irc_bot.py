@@ -195,7 +195,6 @@ class IRCBot:
                         response = 'PRIVMSG {} :{}'.format(target, response)
 
             if response is None:
-                print(IRCBot.sinks)
                 for sink in IRCBot.sinks:
                     response = sink(message)
                     if response is not None:
