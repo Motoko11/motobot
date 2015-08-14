@@ -12,6 +12,7 @@ class IRCBot:
     plugins = {}
     commands = {}
     patterns = []
+    sinks = []
 
     def __init__(self, nick, server, port=6667, command_prefix='.'):
         """ Create a new instance of IRCBot. """
@@ -193,6 +194,12 @@ class IRCBot:
                     if response is not None:
                         response = 'PRIVMSG {} :{}'.format(target, response)
 
+            if response is None:
+                for sink in IRCBot.sinks:
+                    reponse = sink(message)
+                    if response is not None:
+                        response = 'PRIVMSG {} :{}'.format(target, response)
+
         return response
 
     def __handle_notice(self, message):
@@ -256,6 +263,12 @@ def match(pattern, level=IRCLevel.user):
         IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), wrapped))
         return func
     return register_pattern
+
+
+def sink(func):
+    """ Decorator to add sink to the bot. """
+    IRCBot.sinks.append(func)
+    return func
 
 
 def action(message):
