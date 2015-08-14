@@ -53,6 +53,7 @@ class IRCBot:
         """ Load or reload plugins from folder. """
         IRCBot.commands = {}
         IRCBot.patterns = []
+        IRCBot.sinks = []
 
         for file in listdir(folder):
             if file.endswith('.py'):
@@ -68,6 +69,10 @@ class IRCBot:
     @staticmethod
     def reload_plugins():
         """ Reloads all loaded plugins. """
+        IRCBot.commands = {}
+        IRCBot.patterns = []
+        IRCBot.sinks = []
+
         for module_name, module in IRCBot.plugins.items():
             print("Reloading {}".format(module_name))
             reload(module)
