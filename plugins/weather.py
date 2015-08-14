@@ -24,6 +24,7 @@ def silly_response(arg):
         'aere0n': "aere0n being cold and callus as always! >:D",
         'chintzygore65': "ChintzyGore65 being cold and callus as always! >:D",
         'awkwardapples': "AwkwardApples is #anime-planet.com's prettiful pet! <3",
+        'hell': "Hell is freezing over!",
         'animu': "The weather doesn't matter... We do not go outside."
     }
 
