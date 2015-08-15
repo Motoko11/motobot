@@ -4,7 +4,7 @@ from .database import Database
 from socket import create_connection
 from importlib import import_module, reload
 from os import listdir
-from time import strftime, localtime
+from time import strftime, localtime, sleep
 import re
 import traceback
 
@@ -207,6 +207,7 @@ class IRCBot:
         if not self.identified:
             self.send('USER MotoBot localhost localhost MotoBot')
             self.send('NICK ' + self.nick)
+            sleep(1)
             for channel in self.channels:
                 self.send('JOIN ' + channel)
             self.identified = True
