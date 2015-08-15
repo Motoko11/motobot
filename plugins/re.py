@@ -1,4 +1,5 @@
 from motobot import command, sink
+from random import choice
 import re
 
 
@@ -9,7 +10,7 @@ patterns = []
 def regex_sink(message):
     for pattern, response in patterns:
         if pattern.search(message.message):
-            return response.replace('{nick}', message.nick)
+            return parse_response(response, message)
 
 
 @command('re')
@@ -21,8 +22,7 @@ def regex_command(message):
         add_regex(' '.join(args[2:]))
         response = "Pattern added successfully."
     elif arg == 'del':
-        rem_regex(' '.join(args[2:]))
-        response = "The pattern matching this string has been removed."
+        response = rem_regex(' '.join(args[2:]))
     else:
         response = "Unrecognised argument."
 
@@ -42,3 +42,8 @@ def rem_regex(string):
             patterns.remove((pattern, response))
             return "Pattern matching the string have been removed."
     return "No patterns matched the string."
+
+
+def parse_response(response, message):
+    response = choice(response.split('|'))
+    return response.replace('{nick}', message.nick)
