@@ -1,5 +1,6 @@
 from .irc_message import IRCMessage
 from .irc_level import IRCLevel, get_userlevels
+from .database import Database
 from socket import create_connection
 from importlib import import_module, reload
 from os import listdir
@@ -29,6 +30,8 @@ class IRCBot:
         self.channels = []
         self.ignore_list = []
         self.userlevels = {}
+
+        self.database = Database()
 
     def run(self):
         """ Run the bot.
@@ -77,17 +80,8 @@ class IRCBot:
             print("Reloading {}".format(module_name))
             reload(module)
 
-    def load_database(self, database_path):
-        """ Load the database. """
-        pass
-
-    def set_val(self, name, val):
-        """ Set a value in the database. """
-        pass
-
-    def get_val(self, name, default=None):
-        """ Get a value from the database, return default if non-existent. """
-        pass
+    def load_database(self, path):
+        self.database = Database(path)
 
     def join(self, channel):
         """ Join a channel. """
