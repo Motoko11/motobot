@@ -14,7 +14,7 @@ class Database:
                 f = open(self.database_path, 'r')
                 self.data = load(f)
             except:
-                pass
+                open(self.database_path, 'a').close()
 
     def get_val(self, name, default=None):
         return self.data.get(name, default)
@@ -23,9 +23,9 @@ class Database:
         self.data[name] = val
 
         if self.database_path is not None:
-            temp_name = self.database_path + '.temp',
+            temp_name = self.database_path + '.temp'
             f = open(temp_name, 'w')
-            dump(f, self.data, indent=2)
+            dump(self.data, f, indent=2)
             f.close()
             remove(self.database_path)
             rename(temp_name, self.database_path)
