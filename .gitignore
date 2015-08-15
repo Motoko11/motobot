@@ -57,3 +57,4 @@ docs/_build/
 target/
 *.sh
 desubot.json
+desutest.json
