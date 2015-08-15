@@ -35,23 +35,31 @@ def nyan_match(message, database):
 @command('desu')
 @command('desustats')
 def desu_command(message, database):
-    nick = None
     args = message.message.split(' ')
     if len(args) <= 1:
-        nick = message.nick
+        stats = database.get_val(desu_key, {})
+        scores = sorted(
+            [(x[0], x[1][1]) for x in stats.items()],
+            key=lambda item: item[1],
+            reverse=True
+        )
+
+        response = "Users with most desus: "
+        for nick, score in scores[0:5]:
+            response += "{} ({}); ".format(nick, score)
+        return response
+
     else:
         nick = ' '.join(args[1:]).rstrip()
-
-    stats = database.get_val(desu_key, {}).get(nick)
-
-    if stats == None:
-        return "I have no desu stats for {}.".format(nick)
-    else:
-        return "{} has desu'd {} times and gotten {} desus, " \
-               "with an average of {} desus. " \
-               "They have been undesu'd {} times.".format(
-                    nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
-                )
+        stats = database.get_val(desu_key, {}).get(nick)
+        if stats == None:
+            return "I have no desu stats for {}.".format(nick)
+        else:
+            return "{} has desu'd {} times and gotten {} desus, " \
+                   "with an average of {} desus. " \
+                   "They have been undesu'd {} times.".format(
+                        nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
+                    )
 
 
 def update_stats(database, nick, un, number):
