@@ -23,6 +23,8 @@ def main():
             msg = input()
             if msg.startswith(':'):
                 this.bot.load_plugins('plugins')
+            elif msg.startswith('?'):
+                this.bot.load_database('desubot.json')
             else:
                 this.bot.send(msg)
         except KeyboardInterrupt:
