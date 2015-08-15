@@ -7,14 +7,14 @@ patterns = []
 
 
 @sink
-def regex_sink(message):
+def regex_sink(message, database):
     for pattern, response in patterns:
         if pattern.search(message.message):
             return parse_response(response, message)
 
 
 @command('re')
-def regex_command(message):
+def regex_command(message, database):
     args = message.message.split(' ')
 
     arg = args[1].lower()

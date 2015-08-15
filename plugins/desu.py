@@ -11,24 +11,24 @@ def generate_spam(str):
 
 
 @match(r'^desu( *)$')
-def desu_match(message):
+def desu_match(message, database):
     un, number, string = generate_spam('desu')
     return string
 
 
 @match(r'^baka( *)$', IRCLevel.op)
-def baka_match(message):
+def baka_match(message, database):
     un, number, string = generate_spam('baka')
     return string
 
 
 @match(r'^nya(a+)?n*?(\W|$)')
-def nyan_match(message):
+def nyan_match(message, database):
     num = int(round(normalvariate(15, 3)))
     return 'Ny' + 'a' * num + '~'
 
 
 @command('desu')
 @command('desustats')
-def desu_command(message):
+def desu_command(message, database):
     return "Provisional command for desu stats."
