@@ -8,6 +8,7 @@ def worker():
 
 def main():
     IRCBot.load_plugins('plugins')
+    this.bot.load_database('desubot.json')
     this.bot.join('#Moto-chan')
     
     thread = threading.Thread(target=worker)
