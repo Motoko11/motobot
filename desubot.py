@@ -1,16 +1,18 @@
 from motobot import IRCBot, IRCLevel
-import desubot
+import desubot as this
 import threading
 import traceback
 
 def worker():
-    desubot.bot.run()
+    this.bot.run()
 
 def main():
-    desubot.bot.load_plugins('plugins')
-    desubot.bot.join('#Moto-chan')
-    desubot.bot.join('#animu')
-    desubot.bot.join('#anime-planet.com')
+    this.bot.load_plugins('plugins')
+    this.bot.load_database('desubot.json')
+    this.bot.join('#Moto-chan')
+    this.bot.join('#animu')
+    this.bot.join('#anime-planet.com')
+    this.bot.join('#bakalibre')
     
     thread = threading.Thread(target=worker)
     thread.start()
@@ -20,12 +22,12 @@ def main():
         try:
             msg = input()
             if msg.startswith(':'):
-                desubot.bot.load_plugins('plugins')
+                this.bot.load_plugins('plugins')
             else:
-                desubot.bot.send(msg)
+                this.bot.send(msg)
         except KeyboardInterrupt:
             running = False
-            desubot.bot.disconnect()
+            this.bot.disconnect()
         except:
             traceback.print_exc()
 
