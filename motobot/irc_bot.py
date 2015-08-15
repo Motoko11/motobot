@@ -177,7 +177,7 @@ class IRCBot:
 
         if message.message.startswith(self.command_prefix):
             command = message.message.split(' ')[0][len(self.command_prefix):]
-            response = IRCBot.commands[command](self, message)
+            response = IRCBot.commands[command](self, message, self.database)
             if response is not None:
                 response = 'PRIVMSG {} :{}'.format(target, response)
 
@@ -189,13 +189,13 @@ class IRCBot:
         else:
             for pattern, func in IRCBot.patterns:
                 if pattern.search(message.message):
-                    response = func(self, message)
+                    response = func(self, message, self.database)
                     if response is not None:
                         response = 'PRIVMSG {} :{}'.format(target, response)
 
             if response is None:
                 for sink in IRCBot.sinks:
-                    response = sink(message)
+                    response = sink(message, self.database)
                     if response is not None:
                         response = 'PRIVMSG {} :{}'.format(target, response)
                         break
