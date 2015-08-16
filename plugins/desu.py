@@ -8,7 +8,7 @@ desu_time_guard = {}
 
 
 def can_desu(nick):
-    last_desus = desu_time_guard.get(nick, [0, 0, 0, 0, 0,])
+    last_desus = desu_time_guard.get(nick, [0, 0, 0, 0, 0])
     current_time = time()
 
     ret = not all(current_time - x <= 5 * 60 for x in last_desus)
