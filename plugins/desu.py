@@ -1,5 +1,5 @@
 from motobot import command, match, IRCLevel
-from random import uniform, randint, normalvariate
+from random import uniform, randint, normalvariate, choice
 from time import time
 
 
@@ -19,18 +19,23 @@ def can_desu(nick):
     return ret
 
 
-def generate_spam(str):
-    """ The needless variables are for later, when stats are added. """
-    un = uniform(0, 1) < 0.01
-    number = randint(1, 30)
-    string = 'un' + str if un else str * number
-    return un, number, string
-
-
 @match(r'^desu( *)$')
 def desu_match(message, database):
     if can_desu(message.nick):
-        un, number, string = generate_spam('desu')
+        chance = uniform(0, 1)
+        number = randint(1, 30)
+        string = ''
+        un = chance <= 0.01
+
+        if un:
+            if chance <= 0.005:
+                special_desus = ['omgdesu', 'dechu']
+                string = choice(special_desus)
+            else:
+                string = 'undesu'
+        else:
+            string = 'desu' * number
+
         update_stats(database, message.nick, un, number)
         return string
     else:
