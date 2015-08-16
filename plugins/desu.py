@@ -1,5 +1,5 @@
 from motobot import command, match, IRCLevel
-from random import uniform, randint
+from random import uniform, randint, normalvariate
 from time import time
 
 
