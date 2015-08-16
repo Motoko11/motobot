@@ -39,8 +39,7 @@ def desu_match(message, database):
 
 @match(r'^baka( *)$', IRCLevel.op)
 def baka_match(message, database):
-    un, number, string = generate_spam('baka')
-    return string
+    return 'baka' * randint(1, 30)
 
 
 @match(r'^nya(a+)?n*?(\W|$)')
@@ -96,7 +95,7 @@ def desu_command(message, database):
         return "I have no desu stats for {}.".format(nick)
     else:
         return "{} has desu'd {} times and gotten {} desus, " \
-               "with an average of {} desus. " \
+               "with an average of {:.2f} desus. " \
                "They have been undesu'd {} times.".format(
                     nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
                 )
