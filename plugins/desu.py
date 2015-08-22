@@ -91,9 +91,9 @@ def desu_command(message, database):
     args = message.message.split(' ')
     nick = ''
     if len(args) <= 1:
-        nick = message.nick.lower()
+        nick = message.nick
     else:
-        nick = ' '.join(args[1:]).rstrip().lower()
+        nick = ' '.join(args[1:]).rstrip()
     
     stats = database.get_val(desu_key, {}).get(nick)
     if stats == None:
@@ -108,7 +108,7 @@ def desu_command(message, database):
 
 def update_stats(database, nick, un, number):
     stats = database.get_val(desu_key, {})
-    userstats = stats.get(nick.lower(), [0, 0, 0])
+    userstats = stats.get(nick, [0, 0, 0])
 
     userstats[0] += 1
     if un:
