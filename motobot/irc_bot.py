@@ -243,7 +243,7 @@ class IRCBot:
 def userlevel_wrapper(func, level):
     """ Modify a plugin to only take users above a certain userlevel. """
     def wrapped(bot, message, *args, **kwargs):
-        if max(bot.userlevels[(message.nick, message.channel)]) >= level:
+        if max(bot.userlevels.get((message.nick, message.channel), [IRCLevel.user])) >= level:
             return func(message, *args, **kwargs)
     return wrapped
 
