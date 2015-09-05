@@ -1,7 +1,7 @@
 from motobot import match
 from random import choice
 
-@match(r'desubot(.*)\?')
+@match(r'^desubot(.*)\?')
 def question_match(message, database):
     responses = ['Yes', 'No', 'Hell yea!', 'Are you crazy!?', 'Never',
         'Of course!','It is certain', 'It is decidedly so', 'Without a doubt',
