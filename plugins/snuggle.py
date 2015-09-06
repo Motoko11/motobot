@@ -6,7 +6,7 @@ def snuggle_command(message, database):
     response = ''
     args = message.message.split(' ')
     if len(args) > 1:
-        response = 'snuggles ' + args[1]
+        response = 'snuggles ' + ' '.join(args[1:])
     else:
         response = 'snuggles ' + message.nick
     
@@ -23,7 +23,7 @@ def pat_command(message, database):
     response = ''
     args = message.message.split(' ')
     if len(args) > 1:
-        response = 'pat pats ' + args[1]
+        response = 'pat pats ' + ' '.join(args[1:])
     else:
         response = 'pat pats ' + message.nick
     
@@ -35,7 +35,7 @@ def pet_command(message, database):
     response = ''
     args = message.message.split(' ')
     if len(args) > 1:
-        response = 'pets ' + args[1]
+        response = 'pets ' + ' '.join(args[1:])
     else:
         response = 'pets ' + message.nick
     
