@@ -9,7 +9,7 @@ def worker():
 def main():
     this.bot.load_plugins('plugins')
     this.bot.load_database('desubot.json')
-    this.bot.join('#Moto-chan')
+    this.bot.join('#MotoChan')
     this.bot.join('#animu')
     this.bot.join('#anime-planet.com')
     this.bot.join('#bakalibre')
@@ -37,4 +37,4 @@ if __name__ == '__main__':
     main()
 
 else:
-    bot = IRCBot('desubot', 'irc.rizon.net', command_prefix='!')
+    bot = IRCBot('desubot', 'irc.rizon.net', command_prefix='!', nickserv_password='36witefo')

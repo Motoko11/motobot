@@ -9,7 +9,7 @@ def worker():
 def main():
     IRCBot.load_plugins('plugins')
     this.bot.load_database('desutest.json')
-    this.bot.join('#Moto-chan')
+    this.bot.join('#MotoChan')
     
     thread = threading.Thread(target=worker)
     thread.start()
