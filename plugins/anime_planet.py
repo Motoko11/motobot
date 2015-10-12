@@ -5,7 +5,14 @@ from bs4 import BeautifulSoup
 
 @command('rr')
 def rr_command(message, database):
-    return "If you are looking for anime/manga recommendations we have a database created specifically for that! Just visit www.anime-planet.com and let us do the hard work for you! For channel rules, please go to http://bit.ly/1aRaMhh"
+    response = "If you are looking for anime/manga recommendations we have a database created specifically for that! Just visit www.anime-planet.com and let us do the hard work for you! For channel rules, please go to http://bit.ly/1aRaMhh"
+
+    args = message.message.split(' ')
+
+    if len(args) > 1:
+        response = "{}: {}".format(' '.join(args[1:]).strip(), response)
+
+    return response
 
 
 #@command('anime')
