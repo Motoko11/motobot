@@ -15,12 +15,13 @@ class IRCBot:
     patterns = []
     sinks = []
 
-    def __init__(self, nick, server, port=6667, command_prefix='.'):
+    def __init__(self, nick, server, port=6667, command_prefix='.', nickserv_password=None):
         """ Create a new instance of IRCBot. """
         self.nick = nick
         self.server = server
         self.port = port
         self.command_prefix = command_prefix
+        self.nickserv_password = nickserv_password
 
         self.socket = None
         self.running = self.connected = self.identified = False
@@ -208,6 +209,10 @@ class IRCBot:
             self.send('USER MotoBot localhost localhost MotoBot')
             self.send('NICK ' + self.nick)
             sleep(1)
+
+            if self.nickserv_password is not None:
+                self.send('PRIVMSG nickserv :identify ' + self.nickserv_password)
+                sleep(1)
             for channel in self.channels:
                 self.send('JOIN ' + channel)
             self.identified = True
