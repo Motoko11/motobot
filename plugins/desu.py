@@ -1,5 +1,5 @@
 from motobot import command, match, IRCLevel
-from random import uniform, randint, normalvariate, choice
+from random import uniform, randint, choice
 from time import time
 
 
@@ -47,46 +47,29 @@ def baka_match(message, database):
     return 'baka' * randint(1, 30)
 
 
-@match(r'^nya(a+)?n*?(\W|$)')
+@match(r'^n(a+)?(y+)(a+)(n+)?(\W|$)')
 def nyan_match(message, database):
-    num = int(round(normalvariate(15, 3)))
+    num = randint(5, 50)
     return 'Ny' + 'a' * num + '~'
 
 
-"""
-@command('desu')
+
 @command('desustats')
 def desu_command(message, database):
-    args = message.message.split(' ')
-    if len(args) <= 1:
-        stats = database.get_val(desu_key, {})
-        scores = sorted(
-            [(x[0], x[1][1]) for x in stats.items()],
-            key=lambda item: item[1],
-            reverse=True
-        )
+    stats = database.get_val(desu_key, {})
+    scores = sorted(
+        [(x[0], x[1][1]) for x in stats.items()],
+        key=lambda item: item[1],
+        reverse=True
+    )
 
-        response = "Users with most desus: "
-        for nick, score in scores[0:5]:
-            response += "{} ({}); ".format(nick, score)
-        return response
-
-    else:
-        nick = ' '.join(args[1:]).rstrip()
-        stats = database.get_val(desu_key, {}).get(nick)
-        if stats == None:
-            return "I have no desu stats for {}.".format(nick)
-        else:
-            return "{} has desu'd {} times and gotten {} desus, " \
-                   "with an average of {} desus. " \
-                   "They have been undesu'd {} times.".format(
-                        nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
-                    )
-"""
+    response = "Users with most desus: "
+    for nick, score in scores[0:10]:
+        response += "{} ({}); ".format(nick, score)
+    return response
 
 
 @command('desu')
-@command('desustats')
 def desu_command(message, database):
     args = message.message.split(' ')
     nick = ''
