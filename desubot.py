@@ -13,6 +13,7 @@ def main():
     this.bot.join('#animu')
     this.bot.join('#anime-planet.com')
     this.bot.join('#bakalibre')
+    this.bot.join('#ap-marathon')
     
     thread = threading.Thread(target=worker)
     thread.start()

@@ -95,6 +95,15 @@ class IRCBot:
         pattern = re.compile(hostmask.replace('*', '.*'), re.IGNORECASE)
         self.ignore_list.append(pattern)
 
+    def unignore(self, host):
+        """ Unignore all masks which match given nick. """
+        removed = False
+        for pattern in self.ignore_list:
+            if pattern.match(host):
+                self.ignore_list.remove(pattern)
+                removed = True
+        return removed
+
     def __ignored(self, host):
         """ Test if a given user is ignored or not. """
         if host is None:
@@ -196,7 +205,7 @@ class IRCBot:
 
             if response is None:
                 for sink in IRCBot.sinks:
-                    response = sink(message, self.database)
+                    response = sink(self, message, self.database)
                     if response is not None:
                         response = 'PRIVMSG {} :{}'.format(target, response)
                         break
@@ -249,7 +258,7 @@ def userlevel_wrapper(func, level):
     """ Modify a plugin to only take users above a certain userlevel. """
     def wrapped(bot, message, *args, **kwargs):
         if max(bot.userlevels.get((message.nick, message.channel), [IRCLevel.user])) >= level:
-            return func(message, *args, **kwargs)
+            return func(bot, message, *args, **kwargs)
     return wrapped
 
 

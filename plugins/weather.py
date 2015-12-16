@@ -25,7 +25,9 @@ def silly_response(arg):
         'chintzygore65': "ChintzyGore65 being cold and callus as always! >:D",
         'awkwardapples': "AwkwardApples is #anime-planet.com's prettiful pet! <3",
         'hell': "Hell is freezing over!",
-        'animu': "The weather doesn't matter... We do not go outside."
+        'animu': "The weather doesn't matter... We do not go outside.",
+        'nubmer6': "It's always sunny in the Village.",
+        'number6': "It's always sunny in the Village."
     }
 
     arg = arg.lstrip('#@!&').lower()
@@ -35,13 +37,15 @@ def silly_response(arg):
 
 @command('w')
 @command('weather')
-def weather_command(message, database):
+def weather_command(bot, message, database):
     response = silly_response(message.message.split(' ')[1])
     if response is not None:
         return message.nick + ': ' + response
     try:
         arguments = '%20'.join(message.message.split(' ')[1:])
-        url = 'http://api.openweathermap.org/data/2.5/weather?q=' + arguments
+        url = 'http://api.openweathermap.org/data/2.5/weather?q={}&appid={}'.format(
+            arguments, '3706fd03388bce9f7340aa1999c3eb1e'
+        )
         weather = get(url).json()
         
         response = "{}: Weather in {}, {}: {}; Temperature: {}; Pressure: {}mb; Humidity: {}%; Wind: {};".format(

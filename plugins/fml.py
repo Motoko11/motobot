@@ -21,5 +21,5 @@ def get_fml():
 
 
 @command('fml')
-def fml_command(message, database):
+def fml_command(bot, message, database):
     return get_fml()
