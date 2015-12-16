@@ -2,7 +2,7 @@ from motobot import command, action
 
 
 @command('snuggle')
-def snuggle_command(message, database):
+def snuggle_command(bot, message, database):
     response = ''
     args = message.message.split(' ')
     if len(args) > 1:
@@ -14,12 +14,12 @@ def snuggle_command(message, database):
 
 
 @command('unsnuggle')
-def unsnuggle_command(message, database):
+def unsnuggle_command(bot, message, database):
     return "Go ahead and call the cops... You can't be unsnuggled!"
 
 
 @command('pat')
-def pat_command(message, database):
+def pat_command(bot, message, database):
     response = ''
     args = message.message.split(' ')
     if len(args) > 1:
@@ -31,7 +31,7 @@ def pat_command(message, database):
 
 
 @command('pet')
-def pet_command(message, database):
+def pet_command(bot, message, database):
     response = ''
     args = message.message.split(' ')
     if len(args) > 1:

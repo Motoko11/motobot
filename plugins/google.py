@@ -18,7 +18,7 @@ def google_search(term):
 
 #@command('g')
 #@command('google')
-def google_command(message, database):
+def google_command(bot, message, database):
     args = message.message.split(' ')
 
     if len(args) <= 1:

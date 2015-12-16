@@ -35,7 +35,7 @@ def silly_response(arg):
 
 @command('w')
 @command('weather')
-def weather_command(message, database):
+def weather_command(bot, message, database):
     response = silly_response(message.message.split(' ')[1])
     if response is not None:
         return message.nick + ': ' + response
