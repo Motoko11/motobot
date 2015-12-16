@@ -95,6 +95,15 @@ class IRCBot:
         pattern = re.compile(hostmask.replace('*', '.*'), re.IGNORECASE)
         self.ignore_list.append(pattern)
 
+    def unignore(self, host):
+        """ Unignore all masks which match given nick. """
+        removed = False
+        for pattern in self.ignore_list:
+            if pattern.match(host):
+                self.ignore_list.remove(pattern)
+                removed = True
+        return removed
+
     def __ignored(self, host):
         """ Test if a given user is ignored or not. """
         if host is None:
