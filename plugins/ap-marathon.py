@@ -13,7 +13,7 @@ marathon_cache = {
 
 
 @command('marathon')
-def marathon_command(message, database):
+def marathon_command(bot, message, database):
     title, link, note = get_current_marathon()
     return "Today's marathon is {} ({}) {}".format(title, link, note)
 

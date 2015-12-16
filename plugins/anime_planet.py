@@ -4,13 +4,13 @@ from bs4 import BeautifulSoup
 
 
 @command('stats')
-def stats_command(message, database):
+def stats_command(bot, message, database):
     stats_url = 'https://www.chalamius.se/stats/ap.html'
     return "Channel Stats: {}".format(stats_url)
 
 
 @command('rr')
-def rr_command(message, database):
+def rr_command(bot, message, database):
     response = "If you are looking for anime/manga recommendations we have a database created specifically for that! Just visit www.anime-planet.com and let us do the hard work for you! For channel rules, please go to http://bit.ly/1aRaMhh"
 
     args = message.message.split(' ')
@@ -23,7 +23,7 @@ def rr_command(message, database):
     
 @command('a')
 @command('anime')
-def anime_search_command(message, database):
+def anime_search_command(bot, message, database):
     args = message.message.split(' ')
 
     if len(args) > 1:
@@ -35,7 +35,7 @@ def anime_search_command(message, database):
 
 @command('m')
 @command('manga')
-def manga_search_command(message, database):
+def manga_search_command(bot, message, database):
     args = message.message.split(' ')
 
     if len(args) > 1:
@@ -47,7 +47,7 @@ def manga_search_command(message, database):
 
 @command('u')
 @command('user')
-def user_search_command(message, database):
+def user_search_command(bot, message, database):
     args = message.message.split(' ')
     format_str = "Search Results: {}"
 
@@ -59,7 +59,7 @@ def user_search_command(message, database):
 
 @command('rec')
 @command('arec')
-def anime_recommendations_search_command(message, database):
+def anime_recommendations_search_command(bot, message, database):
     args = message.message.split(' ')
 
     if len(args) > 1:
@@ -70,7 +70,7 @@ def anime_recommendations_search_command(message, database):
 
 
 @command('mrec')
-def manga_recommendations_search_command(message, database):
+def manga_recommendations_search_command(bot, message, database):
     args = message.message.split(' ')
 
     if len(args) > 1:
@@ -81,7 +81,7 @@ def manga_recommendations_search_command(message, database):
 
 
 @command('top')
-def top_anime_command(message, database):
+def top_anime_command(bot, message, database):
     args = message.message.split(' ')
     format_str = "Top Anime: {}/lists"
 

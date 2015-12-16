@@ -29,5 +29,5 @@ def google_command(bot, message, database):
 
 
 @command('calc')
-def calc_command(message, database):
+def calc_command(bot, message, database):
     return "Does not compute!"
