@@ -7,7 +7,7 @@ def worker():
     this.bot.run()
 
 def main():
-    IRCBot.load_plugins('plugins')
+    this.bot.load_plugins('plugins')
     this.bot.load_database('desutest.json')
     this.bot.join('#MotoChan')
     
@@ -19,7 +19,7 @@ def main():
         try:
             msg = input()
             if msg.startswith(':'):
-                IRCBot.load_plugins('plugins')
+                this.bot.load_plugins('plugins')
             else:
                 this.bot.send(msg)
         except KeyboardInterrupt:
