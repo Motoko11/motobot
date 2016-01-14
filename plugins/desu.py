@@ -28,7 +28,7 @@ def desu_match(bot, message, database):
         un = chance <= 0.01
 
         if un:
-            if chance <= 0.005:
+            if chance <= 0.01:
                 special_desus = ['omgdesu', 'dechu']
                 string = choice(special_desus)
             else:
