@@ -11,7 +11,7 @@ import traceback
 
 class IRCBot:
 
-    """ IRCBot Class, plug in and go! """
+    """ IRCBot class, plug in and go! """
 
     def __init__(self, nick, server, port=6667, command_prefix='.', nickserv_password=None):
         """ Create a new instance of IRCBot. """
