@@ -4,7 +4,7 @@ from .database import Database
 from socket import create_connection
 from importlib import import_module, reload
 from os import listdir
-from time import strftime, localtime, sleep
+from time import strftime, localtime, sleep, time
 import re
 import traceback
 
@@ -26,6 +26,7 @@ class IRCBot:
         self.socket = None
         self.running = self.connected = self.identified = False
         self.read_buffer = ''
+        self.flood_protection = {}
 
         self.database = None
         self.channels = []
@@ -49,6 +50,9 @@ class IRCBot:
                     for msg in self.__recv():
                         message = IRCMessage(msg)
                         self.__handle_message(message)
+                except ConnectionResetError:
+                    self.connected = False
+                    sleep(5)
                 except:
                     traceback.print_exc()
 
@@ -140,6 +144,21 @@ class IRCBot:
             self.socket.send(bytes(msg + '\r\n', 'UTF-8'))
             print("Sent: {}".format(msg))
 
+    def __flood_protect(self, message):
+        default = (0, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        message_times = self.flood_protection.get(message.sender, default)
+        current_time = time()
+
+        if message_times[0] >= current_time or \
+           all(x <= current_time + 60 for x in message_times[1]):
+            self.flood_protection[message.sender] = (current_time + 5 * 60, message_times[1])
+            return False
+        else:
+            message_times[1].pop(0)
+            message_times[1].append(current_time)
+            self.flood_protection[message.sender] = message_times
+            return True
+
     def __handle_message(self, message):
         """ Handle an IRCMessage object with the appropriate handler.
 
@@ -181,6 +200,10 @@ class IRCBot:
         """
         response = None
 
+        if self.__flood_protect(message):
+            print("Flood protected")
+            return None
+
         target = message.channel \
             if is_channel(message.channel) \
             else message.nick
@@ -217,11 +240,11 @@ class IRCBot:
         if not self.identified:
             self.send('USER MotoBot localhost localhost MotoBot')
             self.send('NICK ' + self.nick)
-            sleep(1)
+            sleep(2)
 
             if self.nickserv_password is not None:
                 self.send('PRIVMSG nickserv :identify ' + self.nickserv_password)
-                sleep(1)
+                sleep(2)
             for channel in self.channels:
                 self.send('JOIN ' + channel)
             self.identified = True
