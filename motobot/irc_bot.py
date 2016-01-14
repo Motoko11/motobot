@@ -10,10 +10,8 @@ import traceback
 
 
 class IRCBot:
-    plugins = {}
-    commands = {}
-    patterns = []
-    sinks = []
+
+    """ IRCBot Class, plug in and go! """
 
     def __init__(self, nick, server, port=6667, command_prefix='.', nickserv_password=None):
         """ Create a new instance of IRCBot. """
@@ -28,7 +26,11 @@ class IRCBot:
         self.read_buffer = ''
         self.flood_protection = {}
 
-        self.database = None
+        self.plugins = {}
+        self.commands = {}
+        self.patterns = []
+        self.sinks = []
+
         self.channels = []
         self.ignore_list = []
         self.userlevels = {}
@@ -56,34 +58,55 @@ class IRCBot:
                 except:
                     traceback.print_exc()
 
-    @staticmethod
-    def load_plugins(folder):
+    def load_plugins(self, folder):
         """ Load or reload plugins from folder. """
-        IRCBot.commands = {}
-        IRCBot.patterns = []
-        IRCBot.sinks = []
+        self.commands = {}
+        self.patterns = []
+        self.sinks = []
 
         for file in listdir(folder):
             if file.endswith('.py'):
                 module_name = folder + '.' + file[:-3]
-                if module_name not in IRCBot.plugins:
-                    print("Loading {}".format(module_name))
-                    module = import_module(module_name)
-                    IRCBot.plugins[module_name] = module
-                else:
-                    print("Reloading {}".format(module_name))
-                    reload(IRCBot.plugins[module_name])
+                self.__load_module(module_name)
 
-    @staticmethod
-    def reload_plugins():
-        """ Reloads all loaded plugins. """
-        IRCBot.commands = {}
-        IRCBot.patterns = []
-        IRCBot.sinks = []
+    def reload_plugins(self):
+        """ Reload all loaded plugins. """
+        self.commands = {}
+        self.patterns = []
+        self.sinks = []
 
-        for module_name, module in IRCBot.plugins.items():
-            print("Reloading {}".format(module_name))
-            reload(module)
+        for module_name in self.plugins.keys():
+            self.__load_module(module_name)
+
+    def __load_module(self, module_name):
+        """ Load or reload a module. """
+        if module_name in self.plugins:
+            reload(self.plugins[module_name])
+            print("Module: {} reloaded".format(module_name))
+        else:
+            self.plugins[module_name] = import_module(module_name)
+            print("Module: {} loaded".format(module_name))
+
+        module = self.plugins[module_name]
+        for func in [getattr(module, attrib) for attrib in dir(module)]:
+            self.__add_command(func)
+            self.__add_pattern(func)
+            self.__add_sink(func)
+
+    def __add_command(self, func):
+        if hasattr(func, 'motobot_command'):
+            for command, level in func.motobot_command:
+                self.commands[command] = userlevel_wrapper(func, level)
+
+    def __add_pattern(self, func):
+        if hasattr(func, 'motobot_pattern'):
+            for pattern, level in func.motobot_pattern:
+                regex = re.compile(pattern, re.IGNORECASE)
+                self.patterns.append((regex, userlevel_wrapper(func, level)))
+
+    def __add_sink(self, func):
+        if hasattr(func, 'motobot_sink'):
+            self.sinks.append(func)
 
     def load_database(self, path):
         self.database = Database(path)
@@ -210,7 +233,7 @@ class IRCBot:
 
         if message.message.startswith(self.command_prefix):
             command = message.message.split(' ')[0][len(self.command_prefix):]
-            response = IRCBot.commands[command](self, message, self.database)
+            response = self.commands[command](self, message, self.database)
             if response is not None:
                 response = 'PRIVMSG {} :{}'.format(target, response)
 
@@ -220,14 +243,14 @@ class IRCBot:
                 response = 'NOTICE {} :\u0001{}\u0001'.format(target, response)
 
         else:
-            for pattern, func in IRCBot.patterns:
+            for pattern, func in self.patterns:
                 if pattern.search(message.message):
                     response = func(self, message, self.database)
                     if response is not None:
                         response = 'PRIVMSG {} :{}'.format(target, response)
 
             if response is None:
-                for sink in IRCBot.sinks:
+                for sink in self.sinks:
                     response = sink(self, message, self.database)
                     if response is not None:
                         response = 'PRIVMSG {} :{}'.format(target, response)
@@ -288,8 +311,9 @@ def userlevel_wrapper(func, level):
 def command(name, level=IRCLevel.user):
     """ Decorator to add a command to the bot. """
     def register_command(func):
-        wrapped = userlevel_wrapper(func, level)
-        IRCBot.commands[name] = wrapped
+        if not hasattr(func, 'motobot_command'):
+            func.motobot_command = []
+        func.motobot_command.append((name, level))
         return func
     return register_command
 
@@ -297,15 +321,16 @@ def command(name, level=IRCLevel.user):
 def match(pattern, level=IRCLevel.user):
     """ Decorator to add a regex pattern to the bot. """
     def register_pattern(func):
-        wrapped = userlevel_wrapper(func, level)
-        IRCBot.patterns.append((re.compile(pattern, re.IGNORECASE), wrapped))
+        if not hasattr(func, 'motobot_pattern'):
+            func.motobot_pattern = []
+        func.motobot_pattern.append((pattern, level))
         return func
     return register_pattern
 
 
 def sink(func):
     """ Decorator to add sink to the bot. """
-    IRCBot.sinks.append(func)
+    func.motobot_sink = True
     return func
 
 
