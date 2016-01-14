@@ -5,6 +5,9 @@ from time import time
 from re import sub
 
 
+url = 'https://marathon.chalamius.se/'
+
+
 marathon_cache = {
     'time': 0,
     'title': '',
@@ -12,6 +15,11 @@ marathon_cache = {
     'link': '',
     'note': ''
 }
+
+
+@command('marathonlist')
+def marathonlist_command(bot, message, database):
+    return "The marathon list can be found at {}.".format(url)
 
 
 @command('marathon')
@@ -26,7 +34,6 @@ def get_current_marathon():
     global marathon_cache
 
     if marathon_cache['time'] < time():
-        url = 'https://marathon.chalamius.se/'
         bs = BeautifulSoup(get(url).text)
 
         entries = bs.find_all('tr', recursive=True)
