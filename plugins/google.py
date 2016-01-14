@@ -16,8 +16,8 @@ def google_search(term):
     return title, url
 
 
-#@command('g')
-#@command('google')
+@command('g')
+@command('google')
 def google_command(bot, message, database):
     args = message.message.split(' ')
 
