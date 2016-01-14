@@ -3,6 +3,9 @@ from requests import get
 from bs4 import BeautifulSoup
 
 
+results_cache = []
+
+
 @command('stats')
 def stats_command(bot, message, database):
     stats_url = 'https://www.chalamius.se/stats/ap.html'
@@ -63,8 +66,8 @@ def anime_recommendations_search_command(bot, message, database):
     args = message.message.split(' ')
 
     if len(args) > 1:
-        return "Recommendations: {}/recommendations".format(
-            search_media(' '.join(args[1:]), 'anime'))
+        return "Recommendations: {}".format(
+            search_media(' '.join(args[1:]), 'anime', '/recommendations'))
     else:
         return "Please supply a search term."
 
@@ -74,8 +77,8 @@ def manga_recommendations_search_command(bot, message, database):
     args = message.message.split(' ')
 
     if len(args) > 1:
-        return "Recommendations: {}/recommendations".format(
-            search_media(' '.join(args[1:]), 'manga'))
+        return "Recommendations: {}".format(
+            search_media(' '.join(args[1:]), 'manga', '/recommendations'))
     else:
         return "Please supply a search term."
 
@@ -91,22 +94,35 @@ def top_anime_command(bot, message, database):
         return format_str.format(search_users(message.nick))
 
 
-def search_media(term, type):
+@command('more')
+def more_command(bot, message, database):
+    try:
+        return "More results: {}".format(results_cache.pop(0))
+    except IndexError:
+        return "There are no more results."
+
+
+def search_media(term, type, append=''):
+    global results_cache
     base_url = 'http://www.anime-planet.com'
     url = base_url + '/' + type + '/all?name=' + term.replace(' ', '%20')
 
     response = get(url)
 
     if response.url != url:
+        results_cache = []
         return response.url
     else:
         bs = BeautifulSoup(response.text)
 
         if bs.find('div', {'class': 'error'}, recursive=True):
+            results_cache = []
             return "No results found."
         else:
-            result = bs.find('li', {'class': 'card'}, recursive=True)
-            return base_url + result.find('a')['href']
+            results = bs.find_all('li', {'class': 'card'}, recursive=True)
+            results_cache = [base_url + result.find('a')['href'] + append \
+                for result in results]
+            return results_cache.pop(0)
 
 
 def search_users(user):
