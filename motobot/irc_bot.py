@@ -63,7 +63,7 @@ class IRCBot:
                     traceback.print_exc()
 
     def load_plugins(self, package):
-        """ Add a folder to plugin folders and load the plugins. """
+        """ Add a package to the package list and load the plugins. """
         if package not in self.packages:
             self.packages.append(package)
             path = import_module(package).__path__._path
@@ -71,7 +71,7 @@ class IRCBot:
                 self.__load_module(module_name)
 
     def reload_plugins(self):
-        """ Reload all plugins from folders. """
+        """ Reload all plugins from packages. """
         self.hooks = {}
         self.commands = {}
         self.patterns = []
