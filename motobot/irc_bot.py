@@ -39,6 +39,7 @@ class IRCBot:
         self.userlevels = {}
 
         self.database = Database()
+        self.load_plugins('motobot.hooks')
 
     def run(self):
         """ Run the bot.
