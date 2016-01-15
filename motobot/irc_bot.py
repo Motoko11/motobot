@@ -65,10 +65,9 @@ class IRCBot:
         """ Add a folder to plugin folders and load the plugins. """
         if folder not in self.plugin_folders:
             self.plugin_folders.append(folder)
-            for file in listdir(folder):
-                if file.endswith('.py'):
-                    module_name = folder + '.' + file[:-3]
-                    self.__load_module(module_name)
+            path = getcwd() + '/' + folder
+            for _, module_name, _ in iter_modules([path], folder + '.'):
+                self.__load_module(module_name)
 
     def reload_plugins(self):
         """ Reload all plugins from folders. """
@@ -78,10 +77,10 @@ class IRCBot:
         self.sinks = []
 
         for folder in self.plugin_folders:
-            for file in listdir(folder):
-                if file.endswith('.py'):
-                    module_name = folder + '.' + file[:-3]
-                    self.__load_module(module_name)
+            path = getcwd() + '/' + folder
+            for _, module_name, _ in iter_modules([path], folder + '.'):
+                module_name = folder + '.' + file[:-3]
+                self.__load_module(module_name)
 
     def __load_module(self, module_name):
         """ Load or reload a module. """
