@@ -27,7 +27,7 @@ class IRCBot:
         self.read_buffer = ''
         self.flood_protection = {}
 
-        self.plugin_folders = []
+        self.packages = []
         self.plugins = {}
         self.hooks = {}
         self.commands = {}
@@ -62,12 +62,12 @@ class IRCBot:
                 except:
                     traceback.print_exc()
 
-    def load_plugins(self, folder):
+    def load_plugins(self, package):
         """ Add a folder to plugin folders and load the plugins. """
-        if folder not in self.plugin_folders:
-            self.plugin_folders.append(folder)
-            path = getcwd() + '/' + folder
-            for _, module_name, _ in iter_modules([path], folder + '.'):
+        if package not in self.packages:
+            self.packages.append(package)
+            path = import_module(package).__path__._path
+            for _, module_name, _ in iter_modules(path, package + '.'):
                 self.__load_module(module_name)
 
     def reload_plugins(self):
@@ -77,10 +77,9 @@ class IRCBot:
         self.patterns = []
         self.sinks = []
 
-        for folder in self.plugin_folders:
-            path = getcwd() + '/' + folder
-            for _, module_name, _ in iter_modules([path], folder + '.'):
-                module_name = folder + '.' + file[:-3]
+        for package in self.packages:
+            path = import_module(package).__path__._path
+            for _, module_name, _ in iter_modules(path, package + '.'):
                 self.__load_module(module_name)
 
     def __load_module(self, module_name):
