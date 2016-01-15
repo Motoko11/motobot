@@ -19,7 +19,7 @@ def main():
         try:
             msg = input()
             if msg.startswith(':'):
-                this.bot.load_plugins('plugins')
+                this.bot.reload_plugins()
             else:
                 this.bot.send(msg)
         except KeyboardInterrupt:

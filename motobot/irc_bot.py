@@ -26,6 +26,7 @@ class IRCBot:
         self.read_buffer = ''
         self.flood_protection = {}
 
+        self.plugin_folders = []
         self.plugins = {}
         self.commands = {}
         self.patterns = []
@@ -60,14 +61,12 @@ class IRCBot:
 
     def load_plugins(self, folder):
         """ Load or reload plugins from folder. """
-        self.commands = {}
-        self.patterns = []
-        self.sinks = []
-
-        for file in listdir(folder):
-            if file.endswith('.py'):
-                module_name = folder + '.' + file[:-3]
-                self.__load_module(module_name)
+        if folder in self.plugin_folders:
+            self.plugin_folders.append(folder)
+            for file in listdir(folder):
+                if file.endswith('.py'):
+                    module_name = folder + '.' + file[:-3]
+                    self.__load_module(module_name)
 
     def reload_plugins(self):
         """ Reload all loaded plugins. """
@@ -75,8 +74,11 @@ class IRCBot:
         self.patterns = []
         self.sinks = []
 
-        for module_name in self.plugins.keys():
-            self.__load_module(module_name)
+        for folder in self.plugin_folders:
+            for file in listdir(folder):
+                if file.endswith('.py'):
+                    module_name = folder + '.' + file[:-3]
+                    self.__load_module(module_name)
 
     def __load_module(self, module_name):
         """ Load or reload a module. """

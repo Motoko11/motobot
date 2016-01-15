@@ -23,7 +23,7 @@ def main():
         try:
             msg = input()
             if msg.startswith(':'):
-                this.bot.load_plugins('plugins')
+                this.bot.reload_plugins()
             elif msg.startswith('?'):
                 this.bot.load_database('desubot.json')
             else:
