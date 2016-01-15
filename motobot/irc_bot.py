@@ -28,6 +28,7 @@ class IRCBot:
 
         self.plugin_folders = []
         self.plugins = {}
+        self.hooks = {}
         self.commands = {}
         self.patterns = []
         self.sinks = []
@@ -308,6 +309,16 @@ def userlevel_wrapper(func, level):
         if max(bot.userlevels.get((message.nick, message.channel), [IRCLevel.user])) >= level:
             return func(bot, message, *args, **kwargs)
     return wrapped
+
+
+def hook(command):
+    """ Decorator to add a hook to the bot. """
+    def register_hook(func):
+        if not hasattr(func, 'motobot_hook'):
+            func.motobot_hook = []
+        func.motobot_hook.append(command)
+        return func
+    return register_hook
 
 
 def command(name, level=IRCLevel.user):
