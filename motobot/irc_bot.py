@@ -61,8 +61,8 @@ class IRCBot:
                     traceback.print_exc()
 
     def load_plugins(self, folder):
-        """ Load or reload plugins from folder. """
-        if folder in self.plugin_folders:
+        """ Add a folder to plugin folders and load the plugins. """
+        if folder not in self.plugin_folders:
             self.plugin_folders.append(folder)
             for file in listdir(folder):
                 if file.endswith('.py'):
@@ -70,7 +70,7 @@ class IRCBot:
                     self.__load_module(module_name)
 
     def reload_plugins(self):
-        """ Reload all loaded plugins. """
+        """ Reload all plugins from folders. """
         self.commands = {}
         self.patterns = []
         self.sinks = []
