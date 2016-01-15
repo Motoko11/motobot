@@ -3,7 +3,8 @@ from .irc_level import IRCLevel, get_userlevels
 from .database import Database
 from socket import create_connection
 from importlib import import_module, reload
-from os import listdir
+from os import getcwd
+from pkgutil import iter_modules
 from time import strftime, localtime, sleep, time
 import re
 import traceback
@@ -71,6 +72,7 @@ class IRCBot:
 
     def reload_plugins(self):
         """ Reload all plugins from folders. """
+        self.hooks = {}
         self.commands = {}
         self.patterns = []
         self.sinks = []
@@ -92,9 +94,15 @@ class IRCBot:
 
         module = self.plugins[module_name]
         for func in [getattr(module, attrib) for attrib in dir(module)]:
+            self.__add_hook(func)
             self.__add_command(func)
             self.__add_pattern(func)
             self.__add_sink(func)
+
+    def __add_hook(self, func):
+        if hasattr(func, 'motobot_hook'):
+            for hook in func.motobot_hook:
+                self.hooks[hook] = func
 
     def __add_command(self, func):
         if hasattr(func, 'motobot_command'):
