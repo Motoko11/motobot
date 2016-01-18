@@ -13,40 +13,13 @@ def __handle_privmsg(bot, message):
     and the matches are checked.
 
     """
-    response = None
+    nick = get_nick(message.sender)
+    channel = message.params[0]
+    message = strip_control_codes(message.params[-1])
 
-    message.message = strip_control_codes(message.message)
+    print("PRIVMSG: {} {} {}".format(nick, channel, message))
 
-    target = message.channel \
-        if is_channel(message.channel) \
-        else message.nick
-
-    if message.message.startswith(bot.command_prefix):
-        command = message.message.split(' ')[0][len(bot.command_prefix):]
-        response = bot.commands[command](bot, message, bot.database)
-        if response is not None:
-            response = 'PRIVMSG {} :{}'.format(target, response)
-
-    elif is_ctcp(message):
-        response = ctcp_response(message.message[1:-1])
-        if response is not None:
-            response = 'NOTICE {} :\u0001{}\u0001'.format(target, response)
-
-    else:
-        for pattern, func in bot.patterns:
-            if pattern.search(message.message):
-                response = func(bot, message, bot.database)
-                if response is not None:
-                    response = 'PRIVMSG {} :{}'.format(target, response)
-
-        if response is None:
-            for sink in bot.sinks:
-                response = sink(bot, message, bot.database)
-                if response is not None:
-                    response = 'PRIVMSG {} :{}'.format(target, response)
-                    break
-
-    return response
+    
 
 
 def strip_control_codes(input):
@@ -69,9 +42,9 @@ def is_channel(name):
 
 
 def is_ctcp(message):
-    """ Check if a message object is a ctcp message or not. """
-    return message.message.startswith('\u0001') and \
-        message.message.endswith('\u0001')
+    """ Check if a message is a ctcp message or not. """
+    char_1 = '\u0001'
+    return message[0] == char_1 and message[-1] == char_1
 
 
 def ctcp_response(message):
