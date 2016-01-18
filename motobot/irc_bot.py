@@ -13,13 +13,9 @@ class IRCBot:
 
     """ IRCBot class, plug in and go! """
 
-    def __init__(self, nick, server, port=6667, command_prefix='.', nickserv_password=None):
+    def __init__(self, config):
         """ Create a new instance of IRCBot. """
-        self.nick = nick
-        self.server = server
-        self.port = port
-        self.command_prefix = command_prefix
-        self.nickserv_password = nickserv_password
+        self.load_config(config)
 
         self.socket = None
         self.running = self.connected = self.identified = False
@@ -38,6 +34,16 @@ class IRCBot:
 
         self.database = Database()
         self.load_plugins('motobot.hooks')
+
+    def load_config(self, config):
+        self.nick = ''
+        self.server = ''
+        self.port = 6667
+        self.command_prefix = '.'
+        self.nickserv_password = None
+
+        for key, val in config.items():
+            setattr(self, key, val)
 
     def run(self):
         """ Run the bot.

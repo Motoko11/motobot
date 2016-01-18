@@ -32,4 +32,10 @@ if __name__ == '__main__':
     main()
 
 else:
-    bot = IRCBot('desutest', 'irc.rizon.net', command_prefix='!')
+    config = {
+        'nick': 'desutest',
+        'server': 'irc.rizon.net',
+        'port': 6667,
+        'command_prefix': '!'
+    }
+    bot = IRCBot(config)
