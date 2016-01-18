@@ -7,14 +7,12 @@ class IRCMessage:
         self.sender = None
         self.command = None
         self.params = []
-        self.nick = None
 
         self.__parse_msg(msg)
 
     def __parse_msg(self, msg):
         if msg[0] == ':':
             self.sender, msg = msg[1:].split(' ', 1)
-            self.nick = get_nick(self.sender)
         self.command, msg = msg.split(' ', 1)
 
         if ' :' in msg:
