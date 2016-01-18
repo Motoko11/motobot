@@ -33,7 +33,7 @@ class IRCBot:
         self.userlevels = {}
 
         self.database = Database()
-        self.load_plugins('motobot.hooks')
+        self.load_plugins('motobot.core_plugins')
 
     def load_config(self, config):
         self.nick = ''
