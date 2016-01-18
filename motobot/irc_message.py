@@ -20,12 +20,12 @@ class IRCMessage:
             self.params = msg.split(' ')
             self.params.append(trailing)
         else:
-            self.params = s.split(' ')
+            self.params = msg.split(' ')
 
     def __repr__(self):
         """ Print the IRCMessage all nice 'n' pretty. """
-        return "Sender: {};\nNick: {}\nCommand: {};\nParams: {};\n".format(
-            self.sender, self.nick, self.command, self.params)
+        return "Sender: {};\nCommand: {};\nParams: {};\n".format(
+            self.sender, self.command, self.params)
 
 
 def get_nick(host):
