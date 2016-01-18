@@ -1,37 +1,13 @@
 from motobot import IRCBot, IRCLevel
-import desutest as this
 import threading
 import traceback
 
-def worker():
-    this.bot.run()
+def thread_func(bot):
+    def worker():
+        bot.run()
+    return worker
 
 def main():
-    this.bot.load_plugins('plugins')
-    this.bot.load_database('desutest.json')
-    this.bot.join('#MotoChan')
-    
-    thread = threading.Thread(target=worker)
-    thread.start()
-
-    running = True
-    while running:
-        try:
-            msg = input()
-            if msg.startswith(':'):
-                this.bot.reload_plugins()
-            else:
-                this.bot.send(msg)
-        except KeyboardInterrupt:
-            running = False
-            this.bot.disconnect()
-        except:
-            traceback.print_exc()
-
-if __name__ == '__main__':
-    main()
-
-else:
     config = {
         'nick': 'desutest',
         'server': 'irc.rizon.net',
@@ -39,3 +15,27 @@ else:
         'command_prefix': '!'
     }
     bot = IRCBot(config)
+
+    bot.load_plugins('plugins')
+    bot.load_database('desutest.json')
+    bot.join('#MotoChan')
+
+    thread = threading.Thread(target=thread_func(bot))
+    thread.start()
+
+    running = True
+    while running:
+        try:
+            msg = input()
+            if msg.startswith(':'):
+                bot.reload_plugins()
+            else:
+                bot.send(msg)
+        except KeyboardInterrupt:
+            running = False
+            bot.disconnect()
+        except:
+            traceback.print_exc()
+
+if __name__ == '__main__':
+    main()
