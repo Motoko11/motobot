@@ -3,6 +3,7 @@ from requests import get
 from bs4 import BeautifulSoup
 
 
+base_url = 'http://www.anime-planet.com'
 results_cache = []
 
 
@@ -60,6 +61,19 @@ def user_search_command(bot, message, database):
         return format_str.format(search_users(message.nick))
 
 
+@command('c')
+@command('char')
+@command('character')
+def character_search_command(bot, message, database):
+    args = message.message.split(' ')
+
+    if len(args) > 1:
+        return "Search result: {}".format(
+            search_characters(' '.join(args[1:])))
+    else:
+        return "Please supply a search term."
+
+
 @command('rec')
 @command('arec')
 def anime_recommendations_search_command(bot, message, database):
@@ -104,7 +118,6 @@ def more_command(bot, message, database):
 
 def search_media(term, type, append=''):
     global results_cache
-    base_url = 'http://www.anime-planet.com'
     url = base_url + '/' + type + '/all?name=' + term.replace(' ', '%20')
 
     response = get(url)
@@ -126,7 +139,6 @@ def search_media(term, type, append=''):
 
 
 def search_users(user):
-    base_url = 'http://www.anime-planet.com'
     user = user.rstrip()
     url = base_url + '/users/' + user.lower()
 
@@ -136,3 +148,31 @@ def search_users(user):
         return "No users found with name '{}'.".format(user)
     else:
         return response.url
+
+
+def search_characters(character):
+    global results_cache
+    url = base_url + '/characters/all?name=' + character.replace(' ', '%20')
+
+    response = get(url)
+
+    if response.url != url:
+        results_cache = []
+        return response.url
+    else:
+        bs = BeautifulSoup(response.text)
+
+        if bs.find('div', {'class': 'error'}, recursive=True):
+            results_cache = []
+            return "No results found."
+        else:
+            results = bs.find_all('td', {'class': 'tableCharInfo'}, recursive=True)
+            results_cache = [base_url + result.find('a')['href'] \
+                for result in results]
+            return results_cache.pop(0)
+
+
+@command('worstcharacterofalltime')
+def sothis_wishes(bot, message, database):
+    url = 'http://www.anime-planet.com/characters/makoto-itou'
+    return "Behold, the worst anime character of all time, Makoto Itou! {}".format(url)
