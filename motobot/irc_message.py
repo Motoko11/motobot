@@ -1,30 +1,38 @@
-import re
-
-
 class IRCMessage:
 
     """ Class to store and parse an IRC Message. """
 
-    parse_pattern = re.compile(
-        r'^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$'
-    )
-
     def __init__(self, msg):
         """ Parse a raw IRC message to IRCMessage. """
-        match = IRCMessage.parse_pattern.match(msg)
-        self.sender, self.command, self.channel, self.message = match.groups()
-        self.nick = get_nick(self.sender)
+        self.sender = None
+        self.command = None
+        self.params = []
+        self.nick = None
+
+        self.__parse_msg(msg)
+
+    def __parse_msg(self, msg):
+        if msg[0] == ':':
+            self.sender, msg = msg[1:].split(' ', 1)
+            self.nick = get_nick(self.sender)
+        self.command, msg = msg.split(' ', 1)
+
+        if ' :' in msg:
+            msg, trailing = msg.split(' :', 1)
+            self.params = msg.split(' ')
+            self.params.append(trailing)
+        else:
+            self.params = s.split(' ')
 
     def __repr__(self):
         """ Print the IRCMessage all nice 'n' pretty. """
-        return "Sender: {};\nCommand: {};\nChannel: {};\nMessage: {};".format(
-            self.sender, self.command, self.channel, self.message)
+        return "Sender: {};\nNick: {}\nCommand: {};\nParams: {};\n".format(
+            self.sender, self.nick, self.command, self.params)
 
 
 def get_nick(host):
     """ Get the user's nick from a host. """
-    if host is not None:
-        return host.split('!')[0]
+    return host.split('!')[0]
 
 
 def action(message):
