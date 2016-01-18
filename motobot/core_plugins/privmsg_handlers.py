@@ -1,5 +1,6 @@
 from motobot import hook
 from time import strftime, localtime
+import re
 
 
 @hook('PRIVMSG')
