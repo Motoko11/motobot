@@ -13,7 +13,6 @@ class IRCMessage:
     def __parse_msg(self, msg):
         if msg[0] == ':':
             self.sender, msg = msg[1:].split(' ', 1)
-        self.command, msg = msg.split(' ', 1)
 
         if ' :' in msg:
             msg, trailing = msg.split(' :', 1)
@@ -21,6 +20,7 @@ class IRCMessage:
             self.params.append(trailing)
         else:
             self.params = msg.split(' ')
+        self.command = self.params.pop(0)
 
     def __repr__(self):
         """ Print the IRCMessage all nice 'n' pretty. """
