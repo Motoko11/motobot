@@ -18,12 +18,12 @@ marathon_cache = {
 
 
 @command('marathonlist')
-def marathonlist_command(bot, message, database):
+def marathonlist_command(bot, nick, channel, message, args):
     return "The marathon list can be found at {}.".format(url)
 
 
 @command('marathon')
-def marathon_command(bot, message, database):
+def marathon_command(bot, nick, channel, message, args):
     title, date, link, note = get_current_marathon()
     return "Today's marathon ({}) is {} ({}) {}".format(
         date, title, link, note
@@ -60,7 +60,7 @@ def chala_protection(string):
 @command('pantsu')
 @command('pants')
 @command('panties')
-def pants_command(bot, message, database):
+def pants_command(bot, nick, channel, message, args):
     url = 'https://www.youtube.com/watch?v=T_tAoo787q4'
     title = 'Sora no Otoshimono #2 Creditless ED'
     return 'Panties! {} - {}'.format(title, url)

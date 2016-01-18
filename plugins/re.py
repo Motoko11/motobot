@@ -7,8 +7,8 @@ patterns_key = "re_patterns"
 
 
 @sink
-def regex_sink(bot, message, database):
-    for pattern, response in get_patterns(database):
+def regex_sink(bot, nick, channel, message):
+    for pattern, response in get_patterns(bot.database):
         if pattern.search(message.message):
             return parse_response(response, message)
 
@@ -19,23 +19,23 @@ def parse_response(response, message):
 
 
 @command('re')
-def regex_command(bot, message, database):
-    args = message.message.split(' ')
-
+def regex_command(bot, nick, channel, message, args):
     arg = args[1].lower()
     if arg == 'add':
-        add_regex(' '.join(args[2:]), database)
+        add_regex(' '.join(args[2:]), bot.database)
         response = "Pattern added successfully."
     elif arg == 'del':
-        response = rem_regex(' '.join(args[2:]), database)
+        response = rem_regex(' '.join(args[2:]), bot.database)
     else:
         response = "Unrecognised argument."
 
     return response
 
 
+parse_pattern = re.compile(r'^(.*?)(?: ?)<=>(?: ?)(.*)')
+
+
 def add_regex(string, database):
-    parse_pattern = re.compile(r'^(.*?)(?: ?)<=>(?: ?)(.*)')
     pattern, response = parse_pattern.match(string).groups()
 
     patterns = get_patterns(database)

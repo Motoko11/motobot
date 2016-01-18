@@ -37,19 +37,19 @@ def silly_response(arg):
 
 @command('w')
 @command('weather')
-def weather_command(bot, message, database):
-    response = silly_response(message.message.split(' ')[1])
+def weather_command(bot, nick, channel, message, args):
+    response = silly_response(args[1])
     if response is not None:
-        return message.nick + ': ' + response
+        return nick + ': ' + response
     try:
-        arguments = '%20'.join(message.message.split(' ')[1:])
+        arguments = '%20'.join(args[1:])
         url = 'http://api.openweathermap.org/data/2.5/weather?q={}&appid={}'.format(
             arguments, '3706fd03388bce9f7340aa1999c3eb1e'
         )
         weather = get(url).json()
         
         response = "{}: Weather in {}, {}: {}; Temperature: {}; Pressure: {}mb; Humidity: {}%; Wind: {};".format(
-            message.nick, weather['name'], weather['sys']['country'],
+            nick, weather['name'], weather['sys']['country'],
             weather['weather'][0]['description'],
             format_temp(weather['main']['temp']), weather['main']['pressure'],
             weather['main']['humidity'], format_windspeed(weather['wind']['speed'])
