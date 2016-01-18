@@ -58,6 +58,7 @@ class IRCBot:
             while self.connected:
                 try:
                     for msg in self.__recv():
+                        print(msg)
                         message = IRCMessage(msg)
                         self.__handle_message(message)
                 except ConnectionResetError:
@@ -190,7 +191,7 @@ class IRCBot:
 
         if not self.__ignored(message.sender):
             if message.command in self.hooks:
-                self.send(self.hooks[message.command](self, message))
+                self.hooks[message.command](self, message)
             else:
                 print("Unknown command: {}".format(message.command))
 
