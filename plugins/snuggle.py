@@ -7,7 +7,7 @@ def snuggle_command(bot, nick, channel, message, args):
     if len(args) > 1:
         response = 'snuggles ' + ' '.join(args[1:])
     else:
-        response = 'snuggles ' + message.nick
+        response = 'snuggles ' + nick
 
     return action(response)
 
@@ -23,7 +23,7 @@ def pat_command(bot, nick, channel, message, args):
     if len(args) > 1:
         response = 'pat pats ' + ' '.join(args[1:])
     else:
-        response = 'pat pats ' + message.nick
+        response = 'pat pats ' + nick
     
     return action(response)
 
@@ -34,6 +34,6 @@ def pet_command(bot, nick, channel, message, args):
     if len(args) > 1:
         response = 'pets ' + ' '.join(args[1:])
     else:
-        response = 'pets ' + message.nick
+        response = 'pets ' + nick
     
     return action(response)

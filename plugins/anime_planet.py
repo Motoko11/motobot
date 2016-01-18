@@ -51,7 +51,7 @@ def user_search_command(bot, nick, channel, message, args):
     if len(args) > 1:
         return format_str.format(search_users(' '.join(args[1:])))
     else:
-        return format_str.format(search_users(message.nick))
+        return format_str.format(search_users(nick))
 
 
 @command('c')
@@ -91,7 +91,7 @@ def top_anime_command(bot, nick, channel, message, args):
     if len(args) > 1:
         return format_str.format(search_users(' '.join(args[1:])))
     else:
-        return format_str.format(search_users(message.nick))
+        return format_str.format(search_users(nick))
 
 
 @command('more')

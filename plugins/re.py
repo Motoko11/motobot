@@ -9,13 +9,13 @@ patterns_key = "re_patterns"
 @sink
 def regex_sink(bot, nick, channel, message):
     for pattern, response in get_patterns(bot.database):
-        if pattern.search(message.message):
+        if pattern.search(message):
             return parse_response(response, message)
 
 
 def parse_response(response, message):
     response = choice(response.split('|'))
-    return response.replace('{nick}', message.nick)
+    return response.replace('{nick}', nick)
 
 
 @command('re')

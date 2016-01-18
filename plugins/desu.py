@@ -21,7 +21,7 @@ def can_desu(nick):
 
 @match(r'^desu( *)$')
 def desu_match(bot, nick, channel, message, match):
-    if can_desu(message.nick):
+    if can_desu(nick):
         chance = uniform(0, 1)
         number = randint(1, 30)
         string = ''
@@ -36,7 +36,7 @@ def desu_match(bot, nick, channel, message, match):
         else:
             string = 'desu' * number
 
-        update_stats(bot.database, message.nick, un, number)
+        update_stats(bot.database, nick, un, number)
         return string
     else:
         return "You've desu'd too recently to desu again."

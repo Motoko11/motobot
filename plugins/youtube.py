@@ -41,11 +41,11 @@ def youtube_match(bot, nick, channel, message, match):
     }
     response = get('https://www.googleapis.com/youtube/v3/videos', params=params)
     if response.status_code == 400:
-        return "{}: invalid id".format(message.nick)
+        return "{}: invalid id".format(nick)
     video = response.json()['items'][0]
     title = video['snippet']['title']
     duration = format_duration(video['contentDetails']['duration'])
     channel = video['snippet']['channelTitle']
     return "{}'s video: {} - {}".format(
-        message.nick, title, duration
+        nick, title, duration
     )
