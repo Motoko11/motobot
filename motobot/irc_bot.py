@@ -170,7 +170,6 @@ class IRCBot:
     def __recv(self):
         """ Receive messages from the socket. """
         self.read_buffer += str(self.socket.recv(512), 'UTF-8', 'ignore')
-        self.read_buffer = strip_control_codes(self.read_buffer)
         msgs = self.read_buffer.split('\r\n')
         self.read_buffer = msgs.pop()
         return msgs
@@ -238,10 +237,3 @@ def sink(func):
     """ Decorator to add sink to the bot. """
     func.motobot_sink = True
     return func
-
-
-def strip_control_codes(input):
-    """ Strip the control codes from the input. """
-    pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F')
-    output = pattern.sub('', input)
-    return output

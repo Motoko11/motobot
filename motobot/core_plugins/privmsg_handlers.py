@@ -14,6 +14,8 @@ def __handle_privmsg(bot, message):
     """
     response = None
 
+    message.message = strip_control_codes(message.message)
+
     target = message.channel \
         if is_channel(message.channel) \
         else message.nick
@@ -44,6 +46,13 @@ def __handle_privmsg(bot, message):
                     break
 
     return response
+
+
+def strip_control_codes(input):
+    """ Strip the control codes from the input. """
+    pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F')
+    output = pattern.sub('', input)
+    return output
 
 
 def is_channel(name):
