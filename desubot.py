@@ -1,4 +1,5 @@
 from motobot import IRCBot, IRCLevel
+from json import load
 import desubot as this
 import threading
 import traceback
@@ -38,11 +39,7 @@ if __name__ == '__main__':
     main()
 
 else:
-    config = {
-        'nick': 'desutest',
-        'server': 'irc.rizon.net',
-        'port': 6667,
-        'command_prefix': '!',
-        'nickserv_password': '36witefo'
-    }
+    config_filename = 'desubot_config.json'
+    config_file = open(config_filename, 'r')
+    config = load(config_file)
     bot = IRCBot(config)
