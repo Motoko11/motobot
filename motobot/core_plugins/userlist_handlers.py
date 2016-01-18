@@ -5,16 +5,13 @@ from ..irc_level import get_userlevels
 @hook('353')
 def __handle_names(bot, message):
     """ Parse the name command and record the userlevels of users. """
-    channel = message.channel.split(' ')[-1]
-    for nick in message.message.split(' '):
-        bot.userlevels[(nick.lstrip('+%@&~'), channel)] = \
-            get_userlevels(nick)
+    pass
 
 
 @hook('JOIN')
 def __handle_join(bot, message):
     """ Handle the join of a user. """
-    bot.userlevels[(message.nick, message.message)] = [0]
+    pass
 
 
 @hook('MODE')

@@ -5,7 +5,7 @@ from time import sleep
 @hook('PING')
 def __handle_ping(bot, message):
     """ Handle the server's pings. """
-    bot.send('PONG :' + message.message)
+    bot.send('PONG :' + message.params[-1])
 
 
 @hook('NOTICE')
@@ -27,7 +27,7 @@ def __handle_notice(bot, message):
 @hook('INVITE')
 def __handle_invite(bot, message):
     """ Join a channel when invited. """
-    bot.join(message.message)
+    bot.join(message.params[-1])
 
 
 @hook('ERROR')
