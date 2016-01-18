@@ -1,30 +1,70 @@
-from motobot import hook
+from motobot import IRCBot, hook, Priority
 from time import strftime, localtime
 import re
 
 
 @hook('PRIVMSG')
-def __handle_privmsg(bot, message):
+def handle_privmsg(bot, message):
     """ Handle the privmsg commands.
 
-    Will send the reply back to the channel the command was sent from, 
-    or back to the user whom sent it in the case of a private message.
-    Commands (prefixed with command_prefix) are executed, CTCP is handled,
-    and the matches are checked.
+    Will send messages to each plugin accounting for priority and level.
 
     """
     nick = get_nick(message.sender)
     channel = message.params[0]
     message = strip_control_codes(message.params[-1])
 
-    print("PRIVMSG: {} {} {}".format(nick, channel, message))
+    break_priority = Priority.min
+    for plugin in bot.plugins:
+        if break_priority > plugin[2]:
+            break
+        else:
+            responses = handle_plugin(bot, plugin, nick, channel, message)
+            handle_responses(bot, nick, channel, responses)
 
-    
+
+def handle_plugin(bot, plugin, nick, channel, message):
+    # TODO: Manage userlevels
+    responses = None
+
+    if plugin[1] == IRCBot.command_plugin:
+        responses = handle_command(plugin, bot, nick, channel, message)
+    elif plugin[1] == IRCBot.match_plugin:
+        responses = handle_match(plugin, bot, nick, channel, message)
+    elif plugin[1] == IRCBot.sink_plugin:
+        responses = handle_sink(plugin, bot, nick, channel, message)
+
+    return responses
+
+
+def handle_command(plugin, bot, nick, channel, message):
+    if message.startswith(bot.command_prefix + plugin[4]):
+        args = message[len(bot.command_prefix):].split(' ')
+        return plugin[0](bot, nick, channel, message, args)
+
+
+def handle_match(plugin, bot, nick, channel, message):
+    match = plugin[4].search(message)
+    if match is not None:
+        return plugin[0](bot, nick, channel, message, match)
+
+
+def handle_sink(plugin, bot, nick, channel, message):
+    return plugin[0](bot, nick, channel, message)
+
+
+def handle_responses(bot, nick, channel, responses):
+    # TODO: This is temporary
+    if responses is not None:
+        target = channel if channel != bot.nick else nick
+        bot.send('PRIVMSG {} :{}'.format(target, responses))
+
+
+pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
 
 
 def strip_control_codes(input):
     """ Strip the control codes from the input. """
-    pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F')
     output = pattern.sub('', input)
     return output
 
