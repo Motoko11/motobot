@@ -42,8 +42,6 @@ def handle_command(plugin, bot, nick, channel, message):
     test = message.split(' ', 1)[0]
     
     if trigger == test:
-        print("M1: "+bot.command_prefix + plugin[4])
-        print("M2: "+message)
         args = message[len(bot.command_prefix):].split(' ')
         return plugin[0](bot, nick, channel, message, args)
 
