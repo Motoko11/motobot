@@ -56,6 +56,11 @@ def strip_control_codes(input):
     return output
 
 
+def get_nick(host):
+    """ Get the user's nick from a host. """
+    return host.split('!')[0]
+
+
 def is_channel(name):
     """ Check if a name is a valid channel name or not. """
     valid = ['&', '#', '+', '!']
