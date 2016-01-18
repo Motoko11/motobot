@@ -1,4 +1,4 @@
-from motobot import command
+from motobot import command, action
 
 
 @command('say')
@@ -23,4 +23,6 @@ def say_command(bot, message, database):
         else:
             channel = args[0]
             message = ' '.join(args[1:])
+            if message.startswith('/me '):
+                message = action(message[4:])
             bot.send('PRIVMSG {} :{}'.format(channel, message))

@@ -1,21 +1,28 @@
 from motobot import IRCBot, IRCLevel
-import desubot as this
+from json import load
 import threading
 import traceback
 
-def worker():
-    this.bot.run()
+def thread_func(bot):
+    def worker():
+        bot.run()
+    return worker
 
 def main():
-    this.bot.load_plugins('plugins')
-    this.bot.load_database('desubot.json')
-    this.bot.join('#MotoChan')
-    this.bot.join('#animu')
-    this.bot.join('#anime-planet.com')
-    this.bot.join('#bakalibre')
-    this.bot.join('#ap-marathon')
+    config_filename = 'desubot_config.json'
+    config_file = open(config_filename, 'r')
+    config = load(config_file)
+    bot = IRCBot(config)
+
+    bot.load_plugins('plugins')
+    bot.load_database('desubot.json')
+    bot.join('#MotoChan')
+    bot.join('#animu')
+    bot.join('#anime-planet.com')
+    bot.join('#bakalibre')
+    bot.join('#ap-marathon')
     
-    thread = threading.Thread(target=worker)
+    thread = threading.Thread(target=thread_func(bot))
     thread.start()
 
     running = True
@@ -23,19 +30,16 @@ def main():
         try:
             msg = input()
             if msg.startswith(':'):
-                this.bot.load_plugins('plugins')
+                bot.reload_plugins()
             elif msg.startswith('?'):
-                this.bot.load_database('desubot.json')
+                bot.load_database('desubot.json')
             else:
-                this.bot.send(msg)
+                bot.send(msg)
         except KeyboardInterrupt:
             running = False
-            this.bot.disconnect()
+            bot.disconnect()
         except:
             traceback.print_exc()
 
 if __name__ == '__main__':
     main()
-
-else:
-    bot = IRCBot('desubot', 'irc.rizon.net', command_prefix='!', nickserv_password='36witefo')

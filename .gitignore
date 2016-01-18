@@ -58,3 +58,4 @@ target/
 *.sh
 desubot.json
 desutest.json
+desubot_config.json

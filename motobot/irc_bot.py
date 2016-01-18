@@ -1,32 +1,29 @@
 from .irc_message import IRCMessage
-from .irc_level import IRCLevel, get_userlevels
+from .irc_level import IRCLevel
 from .database import Database
 from socket import create_connection
 from importlib import import_module, reload
-from os import listdir
-from time import strftime, localtime, sleep, time
+from pkgutil import iter_modules
+from time import sleep
 import re
 import traceback
 
 
 class IRCBot:
 
-    """ IRCBot Class, plug in and go! """
+    """ IRCBot class, plug in and go! """
 
-    def __init__(self, nick, server, port=6667, command_prefix='.', nickserv_password=None):
+    def __init__(self, config):
         """ Create a new instance of IRCBot. """
-        self.nick = nick
-        self.server = server
-        self.port = port
-        self.command_prefix = command_prefix
-        self.nickserv_password = nickserv_password
+        self.load_config(config)
 
         self.socket = None
         self.running = self.connected = self.identified = False
         self.read_buffer = ''
-        self.flood_protection = {}
 
+        self.packages = []
         self.plugins = {}
+        self.hooks = {}
         self.commands = {}
         self.patterns = []
         self.sinks = []
@@ -36,6 +33,17 @@ class IRCBot:
         self.userlevels = {}
 
         self.database = Database()
+        self.load_plugins('motobot.hooks')
+
+    def load_config(self, config):
+        self.nick = ''
+        self.server = ''
+        self.port = 6667
+        self.command_prefix = '.'
+        self.nickserv_password = None
+
+        for key, val in config.items():
+            setattr(self, key, val)
 
     def run(self):
         """ Run the bot.
@@ -58,25 +66,25 @@ class IRCBot:
                 except:
                     traceback.print_exc()
 
-    def load_plugins(self, folder):
-        """ Load or reload plugins from folder. """
-        self.commands = {}
-        self.patterns = []
-        self.sinks = []
-
-        for file in listdir(folder):
-            if file.endswith('.py'):
-                module_name = folder + '.' + file[:-3]
+    def load_plugins(self, package):
+        """ Add a package to the package list and load the plugins. """
+        if package not in self.packages:
+            self.packages.append(package)
+            path = import_module(package).__path__._path
+            for _, module_name, _ in iter_modules(path, package + '.'):
                 self.__load_module(module_name)
 
     def reload_plugins(self):
-        """ Reload all loaded plugins. """
+        """ Reload all plugins from packages. """
+        self.hooks = {}
         self.commands = {}
         self.patterns = []
         self.sinks = []
 
-        for module_name in self.plugins.keys():
-            self.__load_module(module_name)
+        for package in self.packages:
+            path = import_module(package).__path__._path
+            for _, module_name, _ in iter_modules(path, package + '.'):
+                self.__load_module(module_name)
 
     def __load_module(self, module_name):
         """ Load or reload a module. """
@@ -89,9 +97,15 @@ class IRCBot:
 
         module = self.plugins[module_name]
         for func in [getattr(module, attrib) for attrib in dir(module)]:
+            self.__add_hook(func)
             self.__add_command(func)
             self.__add_pattern(func)
             self.__add_sink(func)
+
+    def __add_hook(self, func):
+        if hasattr(func, 'motobot_hook'):
+            for hook in func.motobot_hook:
+                self.hooks[hook] = func
 
     def __add_command(self, func):
         if hasattr(func, 'motobot_command'):
@@ -167,21 +181,6 @@ class IRCBot:
             self.socket.send(bytes(msg + '\r\n', 'UTF-8'))
             print("Sent: {}".format(msg))
 
-    def __flood_protect(self, message):
-        default = (0, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-        message_times = self.flood_protection.get(message.sender, default)
-        current_time = time()
-
-        if message_times[0] >= current_time or \
-           all(x <= current_time + 60 for x in message_times[1]):
-            self.flood_protection[message.sender] = (current_time + 5 * 60, message_times[1])
-            return False
-        else:
-            message_times[1].pop(0)
-            message_times[1].append(current_time)
-            self.flood_protection[message.sender] = message_times
-            return True
-
     def __handle_message(self, message):
         """ Handle an IRCMessage object with the appropriate handler.
 
@@ -191,113 +190,10 @@ class IRCBot:
         print(message)
 
         if not self.__ignored(message.sender):
-            mapping = {
-                'PING': IRCBot.__handle_ping,
-                'PRIVMSG': IRCBot.__handle_privmsg,
-                'NOTICE': IRCBot.__handle_notice,
-                'INVITE': IRCBot.__handle_invite,
-                'JOIN': IRCBot.__handle_join,
-                'PART': IRCBot.__handle_leave,
-                'QUIT': IRCBot.__handle_leave,
-                '353': IRCBot.__handle_names,
-                'MODE': IRCBot.__handle_mode,
-                'ERROR': IRCBot.__handle_error
-            }
-            if message.command.upper() in mapping:
-                self.send(mapping[message.command.upper()](self, message))
+            if message.command in self.hooks:
+                self.send(self.hooks[message.command](self, message))
             else:
                 print("Unknown command: {}".format(message.command))
-
-    def __handle_ping(self, message):
-        """ Handle the server's pings. """
-        self.send('PONG :' + message.message)
-
-    def __handle_privmsg(self, message):
-        """ Handle the privmsg commands.
-
-        Will send the reply back to the channel the command was sent from, 
-        or back to the user whom sent it in the case of a private message.
-        Commands (prefixed with command_prefix) are executed, CTCP is handled,
-        and the matches are checked.
-
-        """
-        response = None
-
-        if self.__flood_protect(message):
-            print("Flood protected")
-            return None
-
-        target = message.channel \
-            if is_channel(message.channel) \
-            else message.nick
-
-        if message.message.startswith(self.command_prefix):
-            command = message.message.split(' ')[0][len(self.command_prefix):]
-            response = self.commands[command](self, message, self.database)
-            if response is not None:
-                response = 'PRIVMSG {} :{}'.format(target, response)
-
-        elif is_ctcp(message):
-            response = ctcp_response(message.message[1:-1])
-            if response is not None:
-                response = 'NOTICE {} :\u0001{}\u0001'.format(target, response)
-
-        else:
-            for pattern, func in self.patterns:
-                if pattern.search(message.message):
-                    response = func(self, message, self.database)
-                    if response is not None:
-                        response = 'PRIVMSG {} :{}'.format(target, response)
-
-            if response is None:
-                for sink in self.sinks:
-                    response = sink(self, message, self.database)
-                    if response is not None:
-                        response = 'PRIVMSG {} :{}'.format(target, response)
-                        break
-
-        return response
-
-    def __handle_notice(self, message):
-        """ Use the notice message to identify and register to the server. """
-        if not self.identified:
-            self.send('USER MotoBot localhost localhost MotoBot')
-            self.send('NICK ' + self.nick)
-            sleep(2)
-
-            if self.nickserv_password is not None:
-                self.send('PRIVMSG nickserv :identify ' + self.nickserv_password)
-                sleep(2)
-            for channel in self.channels:
-                self.send('JOIN ' + channel)
-            self.identified = True
-
-    def __handle_invite(self, message):
-        """ Join a channel when invited. """
-        self.join(message.message)
-
-    def __handle_names(self, message):
-        """ Parse the name command and record the userlevels of users. """
-        channel = message.channel.split(' ')[-1]
-        for nick in message.message.split(' '):
-            self.userlevels[(nick.lstrip('+%@&~'), channel)] = \
-                get_userlevels(nick)
-
-    def __handle_join(self, message):
-        """ Handle the join of a user. """
-        self.userlevels[(message.nick, message.message)] = [0]
-
-    def __handle_leave(self, message):
-        """ Handle the part or quit of a user. """
-        pass
-
-    def __handle_mode(self, message):
-        """ Handle the mode command and update userlevels accordingly. """
-        pass
-
-    def __handle_error(self, message):
-        """ Handle an error message from the server. """
-        self.connected = self.identified = False
 
 
 def userlevel_wrapper(func, level):
@@ -306,6 +202,16 @@ def userlevel_wrapper(func, level):
         if max(bot.userlevels.get((message.nick, message.channel), [IRCLevel.user])) >= level:
             return func(bot, message, *args, **kwargs)
     return wrapped
+
+
+def hook(command):
+    """ Decorator to add a hook to the bot. """
+    def register_hook(func):
+        if not hasattr(func, 'motobot_hook'):
+            func.motobot_hook = []
+        func.motobot_hook.append(command)
+        return func
+    return register_hook
 
 
 def command(name, level=IRCLevel.user):
@@ -332,35 +238,6 @@ def sink(func):
     """ Decorator to add sink to the bot. """
     func.motobot_sink = True
     return func
-
-
-def action(message):
-    """ Make the message an action. """
-    return '\u0001ACTION {}\u0001'.format(message)
-
-
-def is_channel(name):
-    """ Check if a name is a valid channel name or not. """
-    valid = ['&', '#', '+', '!']
-    invalid = [' ', ',', '\u0007']
-    return (name[0] in valid) and all(c not in invalid for c in name)
-
-
-def is_ctcp(message):
-    """ Check if a message object is a ctcp message or not. """
-    return message.message.startswith('\u0001') and \
-        message.message.endswith('\u0001')
-
-
-def ctcp_response(message):
-    """ Return the appropriate response to a CTCP request. """
-    mapping = {
-        'VERSION': 'MotoBot Version 2.0',
-        'FINGER': 'Oh you dirty man!',
-        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
-        'PING': message
-    }
-    return mapping.get(message.split(' ')[0].upper(), None)
 
 
 def strip_control_codes(input):

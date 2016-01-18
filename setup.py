@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='motobot',
     version='0.2',
-    packages=['motobot'],
+    packages=['motobot', 'motobot.hooks'],
     classifiers=[
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3'

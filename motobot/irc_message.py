@@ -25,3 +25,8 @@ def get_nick(host):
     """ Get the user's nick from a host. """
     if host is not None:
         return host.split('!')[0]
+
+
+def action(message):
+    """ Make the message an action. """
+    return '\u0001ACTION {}\u0001'.format(message)
