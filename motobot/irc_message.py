@@ -37,4 +37,4 @@ def action(message):
 
 def get_nick(host):
     """ Get the user's nick from a host. """
-    return host.split('!')[0]
+    return host.split('!', 1)[0]
