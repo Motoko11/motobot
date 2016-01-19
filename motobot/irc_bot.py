@@ -36,6 +36,7 @@ class IRCBot:
         self.channels = []
         self.ignore_list = []
         self.userlevels = {}
+        self.masters = []
 
         self.database = Database()
         self.load_plugins('motobot.core_plugins')
@@ -147,6 +148,21 @@ class IRCBot:
                 return True
         else:
             return False
+
+    def add_master(self, nick):
+        self.masters.append(nick)
+
+    def is_master(self, nick):
+        return any(x.lower() == nick.lower() for x in self.masters)
+
+    def get_userlevel(self, channel, nick):
+        """ Return the userlevel of a user in a channel. """
+        if self.is_master(nick):
+            return IRCLevel.master
+        elif channel == self.nick:
+            return IRCLevel.owner
+        else:
+            return max(self.userlevels[(channel, nick)])
 
     def __connect(self):
         """ Connect the socket. """
