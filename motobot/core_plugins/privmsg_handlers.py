@@ -77,19 +77,6 @@ def get_nick(host):
     return host.split('!')[0]
 
 
-def is_channel(name):
-    """ Check if a name is a valid channel name or not. """
-    valid = ['&', '#', '+', '!']
-    invalid = [' ', ',', '\u0007']
-    return (name[0] in valid) and all(c not in invalid for c in name)
-
-
-def is_ctcp(message):
-    """ Check if a message is a ctcp message or not. """
-    char_1 = '\u0001'
-    return message[0] == char_1 and message[-1] == char_1
-
-
 def ctcp_response(message):
     """ Return the appropriate response to a CTCP request. """
     mapping = {
