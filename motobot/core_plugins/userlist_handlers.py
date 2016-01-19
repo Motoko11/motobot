@@ -10,9 +10,10 @@ def levelprobe_command(bot, nick, channel, message, args):
             IRCLevel.hop: 'has a half-op',
             IRCLevel.aop: 'has an ops',
             IRCLevel.sop: 'has a protected ops',
-            IRCLevel.owner: 'is the owner'
+            IRCLevel.owner: 'is the owner',
+            IRCLevel.master: 'is a muthafuckin\' master'
         }
-        return "{} {} in this channel.".format(args[1], mapping[max(bot.userlevels[(channel, args[1])])])
+        return "{} {} in this channel.".format(args[1], mapping[bot.get_userlevel(channel, args[1])])
     except IndexError:
         return "Please supply a valid user to probe."
     except KeyError:
