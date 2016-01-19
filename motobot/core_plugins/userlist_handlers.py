@@ -115,6 +115,9 @@ def handle_kick(bot, message):
 @hook('QUIT')
 def handle_quit(bot, message):
     """ Handle the quit of a user. """
+    remove = []
     for channel, nick in bot.userlevels:
         if nick == message.nick:
-            bot.userlevels.pop((channel, nick))
+            remove.append((channel, nick))
+    for pair in remove:
+        bot.userlevels.pop(pair)
