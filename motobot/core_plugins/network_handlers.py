@@ -8,7 +8,7 @@ def handle_ping(bot, message):
     bot.send('PONG :' + message.params[-1])
 
 
-@hook('NOTICE')
+@hook('439')
 def handle_notice(bot, message):
     """ Use the notice message to identify and register to the server. """
     if not bot.identified:
