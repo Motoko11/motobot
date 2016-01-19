@@ -1,5 +1,4 @@
 from motobot import hook, IRCLevel, command
-from .privmsg_handlers import get_nick
 
 
 @command('levelprobe')
@@ -56,15 +55,14 @@ def get_userlevels(name):
 @hook('JOIN')
 def handle_join(bot, message):
     """ Handle the join of a user. """
-    nick = get_nick(message.sender)
     channel = message.params[0]
-    bot.userlevels[(channel, nick)] = [IRCLevel.user]
+    bot.userlevels[(channel, message.nick)] = [IRCLevel.user]
 
 
 @hook('NICK')
 def handle_nick(bot, message):
     """ Handle the nick change of a user. """
-    old_nick = get_nick(message.sender)
+    old_nick = message.nick
     new_nick = message.params[0]
 
     for channel, nick in bot.userlevels:
@@ -102,9 +100,8 @@ def handle_mode(bot, message):
 @hook('PART')
 def handle_part(bot, message):
     """ Handle the part of a user. """
-    nick = get_nick(message.sender)
     channel = message.params[0]
-    bot.userlevels.pop((channel, nick))
+    bot.userlevels.pop((channel, message.nick))
 
 
 @hook('KICK')
@@ -118,8 +115,6 @@ def handle_kick(bot, message):
 @hook('QUIT')
 def handle_quit(bot, message):
     """ Handle the quit of a user. """
-    quitting_nick = get_nick(message.sender)
-
     for channel, nick in bot.userlevels:
-        if nick == quitting_nick:
+        if nick == message.nick:
             bot.userlevels.pop((channel, nick))

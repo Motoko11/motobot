@@ -10,7 +10,7 @@ def handle_privmsg(bot, message):
     Will send messages to each plugin accounting for priority and level.
 
     """
-    nick = get_nick(message.sender)
+    nick = message.nick
     channel = message.params[0]
     message = strip_control_codes(message.params[-1])
 
@@ -70,11 +70,6 @@ def strip_control_codes(input):
     """ Strip the control codes from the input. """
     output = pattern.sub('', input)
     return output
-
-
-def get_nick(host):
-    """ Get the user's nick from a host. """
-    return host.split('!')[0]
 
 
 def ctcp_response(message):
