@@ -12,13 +12,24 @@ def main():
         'nick': 'desutest',
         'server': 'irc.rizon.net',
         'port': 6667,
-        'command_prefix': '!'
+        'command_prefix': '!',
+        'masters': [
+            "Moto-chan",
+            "Motoko11",
+            "MotoNyan",
+            "Akahige",
+            "betholas",
+            "Baradium",
+            "Cold_slither",
+            "Drahken"
+        ]
     }
     bot = IRCBot(config)
 
     bot.load_plugins('plugins')
     bot.load_database('desutest.json')
     bot.join('#MotoChan')
+    bot.add_master('Moto-chan')
 
     thread = threading.Thread(target=thread_func(bot))
     thread.start()
