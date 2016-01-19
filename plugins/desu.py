@@ -71,20 +71,20 @@ def desu_command(bot, nick, channel, message, args):
 
 @command('desu')
 def desu_command(bot, nick, channel, message, args):
-    nick = ''
+    query_nick = ''
     if len(args) <= 1:
-        nick = nick
+        query_nick = nick
     else:
-        nick = ' '.join(args[1:]).rstrip()
+        query_nick = ' '.join(args[1:]).rstrip()
     
-    stats = bot.database.get_val(desu_key, {}).get(nick)
+    stats = bot.database.get_val(desu_key, {}).get(query_nick)
     if stats == None:
-        return "I have no desu stats for {}.".format(nick)
+        return "I have no desu stats for {}.".format(query_nick)
     else:
         return "{} has desu'd {} times and gotten {} desus, " \
                "with an average of {:.2f} desus. " \
                "They have been undesu'd {} times.".format(
-                    nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
+                    query_nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
                 )
 
 

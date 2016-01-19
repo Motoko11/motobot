@@ -4,9 +4,9 @@ from motobot import command, IRCLevel
 @command('ignore', IRCLevel.op)
 def ignore_command(bot, nick, channel, message, args):
     try:
-        nick = args[1]
-        bot.ignore('{}!*@*'.format(nick))
-        return "I am now ignoring {}.".format(nick)
+        nick_arg = args[1]
+        bot.ignore('{}!*@*'.format(nick_arg))
+        return "I am now ignoring {}.".format(nick_arg)
     except IndexError:
         return "Must supply nick to ignore."
 
@@ -24,10 +24,10 @@ def ignorehost_command(bot, nick, channel, message, args):
 @command('unignore', IRCLevel.op)
 def unignore_command(bot, nick, channel, message, args):
     try:
-        nick = args[1]
-        if bot.unignore('{}!*@*'.format(nick)):
-            return "I am no longer ignoring {}.".format(nick)
+        nick_arg = args[1]
+        if bot.unignore('{}!*@*'.format(nick_arg)):
+            return "I am no longer ignoring {}.".format(nick_arg)
         else:
-            return "I wasn't ignoring {}.".format(nick)
+            return "I wasn't ignoring {}.".format(nick_arg)
     except IndexError:
         return "Must supply nick to unignore."
