@@ -6,6 +6,7 @@ def say_command(bot, message, database):
     masters = [
         "Moto-chan",
         "Motoko11",
+        "MotoNyan",
         "Akahige",
         "betholas",
         "Baradium",
