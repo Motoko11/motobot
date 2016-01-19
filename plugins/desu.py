@@ -20,8 +20,8 @@ def can_desu(nick):
 
 
 @match(r'^desu( *)$')
-def desu_match(bot, message, database):
-    if can_desu(message.nick):
+def desu_match(bot, nick, channel, message, match):
+    if can_desu(nick):
         chance = uniform(0, 1)
         number = randint(1, 30)
         string = ''
@@ -36,27 +36,27 @@ def desu_match(bot, message, database):
         else:
             string = 'desu' * number
 
-        update_stats(database, message.nick, un, number)
+        update_stats(bot.database, nick, un, number)
         return string
     else:
         return "You've desu'd too recently to desu again."
 
 
 @match(r'^baka( *)$', IRCLevel.op)
-def baka_match(bot, message, database):
+def baka_match(bot, nick, channel, message, match):
     return 'baka' * randint(1, 30)
 
 
 @match(r'^n(a+)?(y+)(a+)(n+)?(\W|$)')
-def nyan_match(bot, message, database):
+def nyan_match(bot, nick, channel, message, match):
     num = randint(5, 50)
     return 'Ny' + 'a' * num + '~'
 
 
 
 @command('desustats')
-def desu_command(bot, message, database):
-    stats = database.get_val(desu_key, {})
+def desu_command(bot, nick, channel, message, args):
+    stats = bot.database.get_val(desu_key, {})
     scores = sorted(
         [(x[0], x[1][1]) for x in stats.items()],
         key=lambda item: item[1],
@@ -70,22 +70,21 @@ def desu_command(bot, message, database):
 
 
 @command('desu')
-def desu_command(bot, message, database):
-    args = message.message.split(' ')
-    nick = ''
+def desu_command(bot, nick, channel, message, args):
+    query_nick = ''
     if len(args) <= 1:
-        nick = message.nick
+        query_nick = nick
     else:
-        nick = ' '.join(args[1:]).rstrip()
+        query_nick = ' '.join(args[1:]).rstrip()
     
-    stats = database.get_val(desu_key, {}).get(nick)
+    stats = bot.database.get_val(desu_key, {}).get(query_nick)
     if stats == None:
-        return "I have no desu stats for {}.".format(nick)
+        return "I have no desu stats for {}.".format(query_nick)
     else:
         return "{} has desu'd {} times and gotten {} desus, " \
                "with an average of {:.2f} desus. " \
                "They have been undesu'd {} times.".format(
-                    nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
+                    query_nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
                 )
 
 

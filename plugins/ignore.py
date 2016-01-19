@@ -2,19 +2,19 @@ from motobot import command, IRCLevel
 
 
 @command('ignore', IRCLevel.op)
-def ignore_command(bot, message, database):
+def ignore_command(bot, nick, channel, message, args):
     try:
-        nick = message.message.split(' ')[1]
-        bot.ignore('{}!*@*'.format(nick))
-        return "I am now ignoring {}.".format(nick)
+        nick_arg = args[1]
+        bot.ignore('{}!*@*'.format(nick_arg))
+        return "I am now ignoring {}.".format(nick_arg)
     except IndexError:
         return "Must supply nick to ignore."
 
 
 @command('ignorehost', IRCLevel.op)
-def ignorehost_command(bot, message, database):
+def ignorehost_command(bot, nick, channel, message, args):
     try:
-        mask = message.message.split(' ')[1]
+        mask = args[1]
         bot.ignore(mask)
         return "I am now ignoring the mask '{}'.".format(mask)
     except IndexError:
@@ -22,12 +22,12 @@ def ignorehost_command(bot, message, database):
 
 
 @command('unignore', IRCLevel.op)
-def unignore_command(bot, message, database):
+def unignore_command(bot, nick, channel, message, args):
     try:
-        nick = message.message.split(' ')[1]
-        if bot.unignore('{}!*@*'.format(nick)):
-            return "I am no longer ignoring {}.".format(nick)
+        nick_arg = args[1]
+        if bot.unignore('{}!*@*'.format(nick_arg)):
+            return "I am no longer ignoring {}.".format(nick_arg)
         else:
-            return "I wasn't ignoring {}.".format(nick)
+            return "I wasn't ignoring {}.".format(nick_arg)
     except IndexError:
         return "Must supply nick to unignore."

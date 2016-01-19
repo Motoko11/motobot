@@ -3,13 +3,13 @@ from time import sleep
 
 
 @hook('PING')
-def __handle_ping(bot, message):
+def handle_ping(bot, message):
     """ Handle the server's pings. """
-    bot.send('PONG :' + message.message)
+    bot.send('PONG :' + message.params[-1])
 
 
-@hook('NOTICE')
-def __handle_notice(bot, message):
+@hook('439')
+def handle_notice(bot, message):
     """ Use the notice message to identify and register to the server. """
     if not bot.identified:
         bot.send('USER MotoBot localhost localhost MotoBot')
@@ -25,12 +25,12 @@ def __handle_notice(bot, message):
 
 
 @hook('INVITE')
-def __handle_invite(bot, message):
+def handle_invite(bot, message):
     """ Join a channel when invited. """
-    bot.join(message.message)
+    bot.join(message.params[-1])
 
 
 @hook('ERROR')
-def __handle_error(bot, message):
+def handle_error(bot, message):
     """ Handle an error message from the server. """
     bot.connected = bot.identified = False

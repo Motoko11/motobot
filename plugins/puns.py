@@ -5,13 +5,13 @@ from bs4 import BeautifulSoup
 
 @command('joke')
 @match(r'(tell|give) (me|us) a joke')
-def joke_command(bot, message, database):
+def joke_command(bot, nick, channel, message, *args, **kwargs):
     return get_joke();
 
 
 @command('pun')
 @match(r'(tell|give) (me|us) a pun')
-def pun_command(bot, message, database):
+def pun_command(bot, nick, channel, message, *args, **kwargs):
     return get_pun()
 
 

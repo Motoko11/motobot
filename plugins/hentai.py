@@ -3,7 +3,7 @@ from random import choice
 
 
 #@command('hentai')
-def hentai_command(bot, message, database):
+def hentai_command(bot, nick, channel, message, args):
     # From: http://imgur.com/gallery/l5N4l
     responses = [
         "Your Penis! I like your dick more than games!",
