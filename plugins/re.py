@@ -56,6 +56,7 @@ def rem_regex(string, database):
 
 patterns_cache = None
 
+
 def get_patterns(database):
     global patterns_cache
     if patterns_cache is None:
