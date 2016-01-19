@@ -9,7 +9,13 @@ def handle_ping(bot, message):
 
 
 @hook('439')
-def handle_notice(bot, message):
+def handle_wait(bot, message):
+    bot.identified = False
+    sleep(1)
+
+
+@hook('NOTICE')
+def handle_identification(bot, message):
     """ Use the notice message to identify and register to the server. """
     if not bot.identified:
         bot.send('USER MotoBot localhost localhost MotoBot')
