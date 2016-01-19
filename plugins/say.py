@@ -1,19 +1,8 @@
-from motobot import command, action
+from motobot import command, action, IRCLevel
 
 
-@command('say')
+@command('say', level=IRCLevel.master)
 def say_command(bot, nick, channel, message, args):
-    masters = [
-        "Moto-chan",
-        "Motoko11",
-        "MotoNyan",
-        "Akahige",
-        "betholas",
-        "Baradium",
-        "Cold_slither",
-        "Drahken"
-    ]
-    
     if nick.lower() not in [x.lower() for x in masters]:
         return "Check your privilege!"
     else:
