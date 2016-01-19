@@ -24,15 +24,15 @@ def handle_privmsg(bot, message):
 
 
 def handle_plugin(bot, plugin, nick, channel, message):
-    # TODO: Manage userlevels
     responses = None
 
-    if plugin[1] == IRCBot.command_plugin:
-        responses = handle_command(plugin, bot, nick, channel, message)
-    elif plugin[1] == IRCBot.match_plugin:
-        responses = handle_match(plugin, bot, nick, channel, message)
-    elif plugin[1] == IRCBot.sink_plugin:
-        responses = handle_sink(plugin, bot, nick, channel, message)
+    if max(bot.userlevels[(channel, nick)]) >= plugin[3]:
+        if plugin[1] == IRCBot.command_plugin:
+            responses = handle_command(plugin, bot, nick, channel, message)
+        elif plugin[1] == IRCBot.match_plugin:
+            responses = handle_match(plugin, bot, nick, channel, message)
+        elif plugin[1] == IRCBot.sink_plugin:
+            responses = handle_sink(plugin, bot, nick, channel, message)
 
     return responses
 
