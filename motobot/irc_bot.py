@@ -63,7 +63,6 @@ class IRCBot:
             while self.connected:
                 try:
                     for msg in self.__recv():
-                        print(msg)
                         message = IRCMessage(msg)
                         self.__handle_message(message)
                 except ConnectionResetError:
