@@ -26,7 +26,7 @@ def handle_privmsg(bot, message):
 def handle_plugin(bot, plugin, nick, channel, message):
     responses = None
 
-    if max(bot.userlevels[(channel, nick)]) >= plugin[3]:
+    if bot.get_userlevel(channel, nick) >= plugin[3]:
         if plugin[1] == IRCBot.command_plugin:
             responses = handle_command(plugin, bot, nick, channel, message)
         elif plugin[1] == IRCBot.match_plugin:
