@@ -118,18 +118,17 @@ def more_command(bot, message, database):
 
 def search_media(term, type, append=''):
     global results_cache
+    results_cache = []
     url = base_url + '/' + type + '/all?name=' + term.replace(' ', '%20')
 
     response = get(url)
 
     if response.url != url:
-        results_cache = []
         return response.url
     else:
         bs = BeautifulSoup(response.text)
 
         if bs.find('div', {'class': 'error'}, recursive=True):
-            results_cache = []
             return "No results found."
         else:
             results = bs.find_all('li', {'class': 'card'}, recursive=True)
@@ -152,18 +151,17 @@ def search_users(user):
 
 def search_characters(character):
     global results_cache
+    results_cache = []
     url = base_url + '/characters/all?name=' + character.replace(' ', '%20')
 
     response = get(url)
 
     if response.url != url:
-        results_cache = []
         return response.url
     else:
         bs = BeautifulSoup(response.text)
 
         if bs.find('div', {'class': 'error'}, recursive=True):
-            results_cache = []
             return "No results found."
         else:
             results = bs.find_all('td', {'class': 'tableCharInfo'}, recursive=True)
