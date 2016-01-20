@@ -46,6 +46,7 @@ class IRCBot:
         self.port = 6667
         self.command_prefix = '.'
         self.nickserv_password = None
+        self.masters = []
 
         for key, val in config.items():
             setattr(self, key, val)
@@ -147,6 +148,21 @@ class IRCBot:
                 return True
         else:
             return False
+
+    def add_master(self, nick):
+        self.masters.append(nick)
+
+    def is_master(self, nick):
+        return any(x.lower() == nick.lower() for x in self.masters)
+
+    def get_userlevel(self, channel, nick):
+        """ Return the userlevel of a user in a channel. """
+        if self.is_master(nick):
+            return IRCLevel.master
+        elif channel == self.nick:
+            return IRCLevel.owner
+        else:
+            return max(self.userlevels[(channel, nick)])
 
     def __connect(self):
         """ Connect the socket. """
