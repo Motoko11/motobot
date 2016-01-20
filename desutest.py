@@ -1,5 +1,5 @@
 from motobot import IRCBot, IRCLevel
-import threading
+from threading import Thread
 import traceback
 
 def thread_func(bot):
@@ -30,7 +30,7 @@ def main():
     bot.load_database('desutest.json')
     bot.join('#MotoChan')
 
-    thread = threading.Thread(target=thread_func(bot))
+    thread = Thread(target=thread_func(bot))
     thread.start()
 
     running = True

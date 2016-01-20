@@ -1,6 +1,6 @@
 from motobot import IRCBot, IRCLevel
 from json import load
-import threading
+from threading import Thread
 import traceback
 
 def thread_func(bot):
@@ -22,7 +22,7 @@ def main():
     bot.join('#bakalibre')
     bot.join('#ap-marathon')
     
-    thread = threading.Thread(target=thread_func(bot))
+    thread = Thread(target=thread_func(bot))
     thread.start()
 
     running = True
