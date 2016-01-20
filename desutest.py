@@ -29,7 +29,6 @@ def main():
     bot.load_plugins('plugins')
     bot.load_database('desutest.json')
     bot.join('#MotoChan')
-    bot.add_master('Moto-chan')
 
     thread = threading.Thread(target=thread_func(bot))
     thread.start()

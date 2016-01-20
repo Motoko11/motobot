@@ -149,9 +149,6 @@ class IRCBot:
         else:
             return False
 
-    def add_master(self, nick):
-        self.masters.append(nick)
-
     def is_master(self, nick):
         return any(x.lower() == nick.lower() for x in self.masters)
 
