@@ -36,7 +36,6 @@ class IRCBot:
         self.channels = []
         self.ignore_list = []
         self.userlevels = {}
-        self.masters = []
 
         self.database = Database()
         self.load_plugins('motobot.core_plugins')
@@ -47,6 +46,7 @@ class IRCBot:
         self.port = 6667
         self.command_prefix = '.'
         self.nickserv_password = None
+        self.masters = []
 
         for key, val in config.items():
             setattr(self, key, val)
