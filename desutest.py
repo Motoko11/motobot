@@ -1,4 +1,5 @@
 from motobot import IRCBot, IRCLevel
+from json import load
 from threading import Thread
 import traceback
 
@@ -8,25 +9,9 @@ def thread_func(bot):
     return worker
 
 def main():
-    config = {
-        "nick": "desutest",
-        "server": "irc.rizon.net",
-        "port": 6667,
-        "command_prefix": "!",
-        "masters": [
-            "Moto-chan",
-            "Motoko11",
-            "MotoNyan",
-            "Akahige",
-            "betholas",
-            "Baradium",
-            "Cold_slither",
-            "Drahken"
-        ],
-        "channels": [
-            "#MotoChan"
-        ]
-    }
+    config_filename = 'desutest_config.json'
+    config_file = open(config_filename, 'r')
+    config = load(config_file)
     bot = IRCBot(config)
 
     bot.load_plugins('plugins')
@@ -41,6 +26,8 @@ def main():
             msg = input()
             if msg.startswith(':'):
                 bot.reload_plugins()
+            elif msg.startswith('?'):
+                bot.load_database('desubot.json')
             else:
                 bot.send(msg)
         except KeyboardInterrupt:
