@@ -33,7 +33,6 @@ class IRCBot:
         self.hooks = {}
         self.plugins = []
 
-        self.channels = []
         self.ignore_list = []
         self.userlevels = {}
 
@@ -46,6 +45,7 @@ class IRCBot:
         self.port = 6667
         self.command_prefix = '.'
         self.nickserv_password = None
+        self.channels = []
         self.masters = []
 
         for key, val in config.items():
@@ -118,12 +118,6 @@ class IRCBot:
     def load_database(self, path):
         self.database = Database(path)
 
-    def join(self, channel):
-        """ Join a channel. """
-        if self.connected:
-            self.send('JOIN ' + channel)
-        self.channels.append(channel)
-
     def ignore(self, hostmask):
         """ Ignore a user with the given hostmask. """
         pattern = re.compile(hostmask.replace('*', '.*'), re.IGNORECASE)
@@ -148,9 +142,6 @@ class IRCBot:
                 return True
         else:
             return False
-
-    def add_master(self, nick):
-        self.masters.append(nick)
 
     def is_master(self, nick):
         return any(x.lower() == nick.lower() for x in self.masters)
