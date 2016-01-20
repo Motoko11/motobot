@@ -6,14 +6,14 @@ import re
 patterns_key = "re_patterns"
 
 
-@sink
+@sink()
 def regex_sink(bot, nick, channel, message):
     for pattern, response in get_patterns(bot.database):
         if pattern.search(message):
-            return parse_response(response, message)
+            return parse_response(response, nick)
 
 
-def parse_response(response, message):
+def parse_response(response, nick):
     response = choice(response.split('|'))
     return response.replace('{nick}', nick)
 
@@ -26,6 +26,8 @@ def regex_command(bot, nick, channel, message, args):
         response = "Pattern added successfully."
     elif arg == 'del':
         response = rem_regex(' '.join(args[2:]), bot.database)
+    elif arg == 'show':
+        response = show_patterns(bot.database)
     else:
         response = "Unrecognised argument."
 
@@ -54,6 +56,16 @@ def rem_regex(string, database):
     return "No patterns matched the string."
 
 
+def show_patterns(database):
+    patterns = get_patterns(database)
+    string = ''
+
+    for pattern, response in patterns:
+        app = "{}: {};".format(pattern.pattern, response)
+        string += app
+    return string
+
+
 patterns_cache = None
 
 
@@ -63,7 +75,7 @@ def get_patterns(database):
         patterns_cache = [(re.compile(x, re.I), y) \
             for x, y in database.get_val(patterns_key, [])]
     return patterns_cache
-    
+
 
 def save_patterns(database, patterns):
     global patterns_cache
