@@ -16,11 +16,6 @@ def main():
 
     bot.load_plugins('plugins')
     bot.load_database('desubot.json')
-    bot.join('#MotoChan')
-    bot.join('#animu')
-    bot.join('#anime-planet.com')
-    bot.join('#bakalibre')
-    bot.join('#ap-marathon')
     
     thread = Thread(target=thread_func(bot))
     thread.start()

@@ -9,11 +9,11 @@ def thread_func(bot):
 
 def main():
     config = {
-        'nick': 'desutest',
-        'server': 'irc.rizon.net',
-        'port': 6667,
-        'command_prefix': '!',
-        'masters': [
+        "nick": "desutest",
+        "server": "irc.rizon.net",
+        "port": 6667,
+        "command_prefix": "!",
+        "masters": [
             "Moto-chan",
             "Motoko11",
             "MotoNyan",
@@ -22,13 +22,15 @@ def main():
             "Baradium",
             "Cold_slither",
             "Drahken"
+        ],
+        "channels": [
+            "#MotoChan"
         ]
     }
     bot = IRCBot(config)
 
     bot.load_plugins('plugins')
     bot.load_database('desutest.json')
-    bot.join('#MotoChan')
 
     thread = Thread(target=thread_func(bot))
     thread.start()
