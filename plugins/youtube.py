@@ -3,8 +3,7 @@ from requests import get
 from re import compile
 
 
-pattern_string = r'((youtube\.com\/watch\?\S*v=)|(youtu\.be/))([a-zA-Z0-9-_]+)'
-pattern = compile(pattern_string)
+pattern = r'((youtube\.com\/watch\?\S*v=)|(youtu\.be/))([a-zA-Z0-9-_]+)'
 
 
 def format_duration(duration):
@@ -28,7 +27,7 @@ def format_duration(duration):
     return time + "{:02d}:{:02d}".format(m, s)
 
 
-@match(pattern_string)
+@match(pattern)
 def youtube_match(bot, nick, channel, message, match):
     invalid_channels = ['#animu', '#bakalibre']
     if channel in invalid_channels:

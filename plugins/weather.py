@@ -47,7 +47,7 @@ def weather_command(bot, nick, channel, message, args):
             arguments, '3706fd03388bce9f7340aa1999c3eb1e'
         )
         weather = get(url).json()
-        
+
         response = "{}: Weather in {}, {}: {}; Temperature: {}; Pressure: {}mb; Humidity: {}%; Wind: {};".format(
             nick, weather['name'], weather['sys']['country'],
             weather['weather'][0]['description'],

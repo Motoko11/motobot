@@ -24,7 +24,7 @@ def pat_command(bot, nick, channel, message, args):
         response = 'pat pats ' + ' '.join(args[1:])
     else:
         response = 'pat pats ' + nick
-    
+
     return action(response)
 
 
@@ -35,5 +35,5 @@ def pet_command(bot, nick, channel, message, args):
         response = 'pets ' + ' '.join(args[1:])
     else:
         response = 'pets ' + nick
-    
+
     return action(response)
