@@ -7,8 +7,8 @@ def say_command(bot, nick, channel, message, args):
         target = Target(args[1])
         msg = ' '.join(args[2:])
 
-        if message.startswith('/me '):
-            return msg, target, Action
+        if msg.startswith('/me '):
+            return msg[4:], target, Action
         else:
             return msg, target
 
