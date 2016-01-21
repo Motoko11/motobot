@@ -79,6 +79,7 @@ class IRCBot:
             path = import_module(package).__path__._path
             for _, module_name, _ in iter_modules(path, package + '.'):
                 self.__load_module(module_name)
+        self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x[2])
 
     def reload_plugins(self):
         """ Reload all plugins from packages. """
@@ -89,6 +90,7 @@ class IRCBot:
             path = import_module(package).__path__._path
             for _, module_name, _ in iter_modules(path, package + '.'):
                 self.__load_module(module_name)
+        self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x[2])
 
     def __load_module(self, module_name):
         """ Load or reload a module. """
@@ -103,7 +105,6 @@ class IRCBot:
         for func in [getattr(module, attrib) for attrib in dir(module)]:
             self.__add_hook(func)
             self.__add_plugin(func)
-        sorted(self.plugins, key=lambda plugin: plugin[2])
 
     def __add_hook(self, func):
         """ Add a hook to the bot. """
