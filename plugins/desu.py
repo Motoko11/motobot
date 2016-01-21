@@ -53,7 +53,6 @@ def nyan_match(bot, nick, channel, message, match):
     return 'Ny' + 'a' * num + '~'
 
 
-
 @command('desustats')
 def desu_command(bot, nick, channel, message, args):
     stats = bot.database.get_val(desu_key, {})
@@ -76,7 +75,7 @@ def desu_command(bot, nick, channel, message, args):
         query_nick = nick
     else:
         query_nick = ' '.join(args[1:]).rstrip()
-    
+
     stats = bot.database.get_val(desu_key, {}).get(query_nick)
     if stats == None:
         return "I have no desu stats for {}.".format(query_nick)
