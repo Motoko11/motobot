@@ -1,4 +1,4 @@
-from .modifer import Modifier
+from .modifier import Modifier
 
 
 class ActionModifier(Modifier):
