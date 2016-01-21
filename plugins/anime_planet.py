@@ -9,8 +9,9 @@ results_cache = []
 
 @command('stats')
 def stats_command(bot, nick, channel, message, args):
-    stats_url = 'https://www.chalamius.se/stats/ap.html'
-    return "Channel Stats: {}".format(stats_url)
+    if channel == '#anime-planet.com':
+        stats_url = 'https://www.chalamius.se/stats/ap.html'
+        return "Channel Stats: {}".format(stats_url)
 
 
 @command('rr')
