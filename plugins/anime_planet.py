@@ -110,7 +110,7 @@ def search_media(term, type, append=''):
     response = get(url)
 
     if response.url != url:
-        return response.url
+        return response.url + append
     else:
         bs = BeautifulSoup(response.text)
 
