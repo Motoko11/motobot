@@ -1,6 +1,5 @@
 from motobot import command
 from requests import get
-import traceback
 
 
 def format_temp(temp):
@@ -56,9 +55,7 @@ def weather_command(bot, nick, channel, message, args):
         )
     except KeyError:
         response = "Error: Unable to find specified location."
-        traceback.print_exc()
     except:
         response = "Fuck knows what went wrong. Probably connection issues."
-        traceback.print_exc()
 
     return response

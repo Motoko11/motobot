@@ -30,11 +30,6 @@ class IRCMessage:
             self.sender, self.command, self.params)
 
 
-def action(message):
-    """ Make the message an action. """
-    return '\u0001ACTION {}\u0001'.format(message)
-
-
 def get_nick(host):
     """ Get the user's nick from a host. """
     return host.split('!', 1)[0]
