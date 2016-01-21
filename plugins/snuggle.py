@@ -1,4 +1,4 @@
-from motobot import command, action
+from motobot import command, Action
 
 
 @command('snuggle')
@@ -9,7 +9,7 @@ def snuggle_command(bot, nick, channel, message, args):
     else:
         response = 'snuggles ' + nick
 
-    return action(response)
+    return response, Action
 
 
 @command('unsnuggle')
@@ -25,7 +25,7 @@ def pat_command(bot, nick, channel, message, args):
     else:
         response = 'pat pats ' + nick
 
-    return action(response)
+    return response, Action
 
 
 @command('pet')
@@ -36,4 +36,4 @@ def pet_command(bot, nick, channel, message, args):
     else:
         response = 'pets ' + nick
 
-    return action(response)
+    return response, Action
