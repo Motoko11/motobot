@@ -1,4 +1,4 @@
-from motobot import IRCBot, hook, Priority, Modifier
+from motobot import IRCBot, hook, Priority, Modifier, EatModifier
 from time import strftime, localtime
 import re
 
@@ -20,7 +20,10 @@ def handle_privmsg(bot, message):
             break
         else:
             responses = handle_plugin(bot, plugin, nick, channel, message)
-            handle_responses(bot, nick, channel, responses)
+            eat = handle_responses(bot, nick, channel, responses)
+
+            if eat is True:
+                break_priority = plugin[2]
 
 
 def handle_plugin(bot, plugin, nick, channel, message):
@@ -57,7 +60,7 @@ def handle_sink(plugin, bot, nick, channel, message):
 
 
 def handle_responses(bot, nick, channel, responses):
-    # TODO: This is temporary
+    eat = False
     if responses is not None:
         if not isinstance(responses, list):
             responses = [responses]
@@ -65,18 +68,20 @@ def handle_responses(bot, nick, channel, responses):
         for response in responses:
             command = 'PRIVMSG'
             params = [channel if channel != bot.nick else nick]
-            trailing, modifiers = extract_response(response)
+            trailing, modifiers, eat = extract_response(response)
 
             for modifier in modifiers:
                 command, params, trailing = modifier(command, params, trailing)
 
             message = form_message(command, params, trailing)
             bot.send(message)
+    return eat
 
 
 def extract_response(response):
     trailing = ''
     modifiers = []
+    eat = False
 
     if not isinstance(response, tuple):
         response = (response,)
@@ -86,8 +91,10 @@ def extract_response(response):
             trailing += x
         elif isinstance(x, Modifier):
             modifiers.append(x)
+        elif isinstance(x, EatModifier):
+            eat = True
 
-    return trailing, modifiers
+    return trailing, modifiers, eat
 
 
 pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')

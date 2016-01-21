@@ -4,3 +4,4 @@ from .irc_bot import IRCBot, hook, command, match, sink
 from .priority import Priority
 from .modifiers.modifier import Modifier
 from .modifiers.plugin_modifiers import Action, Target, Command
+from .modifiers.eat import EatModifier, Eat
