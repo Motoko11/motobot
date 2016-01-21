@@ -4,10 +4,11 @@ from bs4 import BeautifulSoup
 from time import time
 from re import sub
 
+base = 'https://marathon.chalamius.se/'
 
 @command('marathonlist')
 def marathonlist_command(bot, nick, channel, message, args):
-    return "The marathon list can be found at {}.".format(url)
+    return "The marathon list can be found at {}.".format(base)
 
 
 @command('marathon')
@@ -19,7 +20,7 @@ def marathon_command(bot, nick, channel, message, args):
 
 
 def get_current_marathon():
-    url = 'https://marathon.chalamius.se/calendar.json'
+    url = base + 'calendar.json'
     entries = get(url).json()['items']
     entry = entries[-1]
     return entry['name'], entry['date'], entry['url'], entry['note']
