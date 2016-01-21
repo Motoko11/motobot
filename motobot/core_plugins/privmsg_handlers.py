@@ -1,4 +1,4 @@
-from motobot import IRCBot, hook, Priority
+from motobot import IRCBot, hook, Priority, Modifier
 from time import strftime, localtime
 import re
 
@@ -59,8 +59,35 @@ def handle_sink(plugin, bot, nick, channel, message):
 def handle_responses(bot, nick, channel, responses):
     # TODO: This is temporary
     if responses is not None:
-        target = channel if channel != bot.nick else nick
-        bot.send('PRIVMSG {} :{}'.format(target, responses))
+        if not isinstance(responses, list):
+            responses = [responses]
+
+        for response in responses:
+            command = 'PRIVMSG'
+            params = [channel if channel != bot.nick else nick]
+            trailing, modifiers = extract_response(response)
+
+            for modifier in modifiers:
+                command, params, trailing = modifier(command, params, trailing)
+
+            message = form_message(command, params, trailing)
+            bot.send(message)
+
+
+def extract_response(response):
+    trailing = ''
+    modifiers = []
+
+    if not isinstance(response, tuple):
+        response = (response,)
+
+    for x in response:
+        if isinstance(x, str):
+            trailing += x
+        elif isinstance(x, Modifier):
+            modifiers.append(x)
+
+    return trailing, modifiers
 
 
 pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
@@ -70,6 +97,13 @@ def strip_control_codes(input):
     """ Strip the control codes from the input. """
     output = pattern.sub('', input)
     return output
+
+
+def form_message(command, params, trailing):
+    message = command
+    message += '' if params == [] else ' ' + ' '.join(params)
+    message += '' if trailing == '' else ' :' + trailing
+    return message.replace('\n', '').replace('\r', '')
 
 
 def ctcp_response(message):
