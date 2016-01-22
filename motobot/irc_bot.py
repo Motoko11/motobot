@@ -35,6 +35,7 @@ class IRCBot:
 
         self.ignore_list = []
         self.userlevels = {}
+        self.verified_masters = []
 
         self.database = Database()
         self.load_plugins('motobot.core_plugins')
@@ -146,8 +147,16 @@ class IRCBot:
         else:
             return False
 
-    def is_master(self, nick):
-        return any(x.lower() == nick.lower() for x in self.masters)
+    def is_master(self, nick, verified=True):
+        """ Check if a user is on the master list.
+
+        The verified parameter specifies whether you want to check verified
+        masters, or non-verified ones. It's set to verified by default.
+        """
+        return any(
+            x.lower() == nick.lower()
+            for x in (self.verified_masters if verified else self.masters)
+        )
 
     def get_userlevel(self, channel, nick):
         """ Return the userlevel of a user in a channel. """
