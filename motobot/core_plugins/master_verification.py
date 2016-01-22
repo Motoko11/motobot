@@ -1,10 +1,4 @@
-from motobot import hook, sink, Priority, command
-
-
-@command('masterprobe')
-def probe(bot, nick, channel, message, args):
-    print(bot.masters)
-    print(bot.verified_masters)
+from motobot import hook, sink, Priority
 
 
 def check(bot, nick):
