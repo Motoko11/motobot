@@ -9,14 +9,16 @@ def check(bot, nick):
 
 def verify(bot, nick):
     """ Mark a master as verified in the bot. """
-    index = [master.lower() for master in bot.masters].index(nick.lower())
-    bot.verified_masters.append(bot.masters.pop(index))
+    if bot.is_master(nick, False):
+        index = [master.lower() for master in bot.masters].index(nick.lower())
+        bot.verified_masters.append(bot.masters.pop(index))
 
 
 def unverify(bot, nick):
     """ Unmark a user as verified in the bot. """
-    index = [master.lower() for master in bot.verified_masters].index(nick.lower())
-    bot.masters.append(bot.verified_masters.pop(index))
+    if bot.is_master(nick):
+        index = [master.lower() for master in bot.verified_masters].index(nick.lower())
+        bot.masters.append(bot.verified_masters.pop(index))
 
 
 @hook('307')
