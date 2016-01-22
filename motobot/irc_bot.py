@@ -148,6 +148,11 @@ class IRCBot:
             return False
 
     def is_master(self, nick, verified=True):
+        """ Check if a user is on the master list.
+
+        The verified parameter specifies whether you want to check verified
+        masters, or non-verified ones. It's set to verified by default.
+        """
         return any(
             x.lower() == nick.lower()
             for x in (self.verified_masters if verified else self.masters)
