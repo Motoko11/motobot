@@ -10,6 +10,7 @@ def handle_ping(bot, message):
 
 @hook('439')
 def handle_wait(bot, message):
+    """ Handles too fast for server message and waits 1 second. """
     bot.identified = False
     sleep(1)
 
@@ -20,14 +21,16 @@ def handle_identification(bot, message):
     if not bot.identified:
         bot.send('USER MotoBot localhost localhost MotoBot')
         bot.send('NICK ' + bot.nick)
-        sleep(2)
-
-        if bot.nickserv_password is not None:
-            bot.send('PRIVMSG nickserv :identify ' + bot.nickserv_password)
-            sleep(2)
-        for channel in bot.channels:
-            bot.send('JOIN ' + channel)
         bot.identified = True
+
+
+@hook('004')
+def handle_nickserv_identification(bot, message):
+    """ At server welcome message 004 identify to nickserv and join channels. """
+    if bot.nickserv_password is not None:
+        bot.send('PRIVMSG nickserv :identify ' + bot.nickserv_password)
+    for channel in bot.channels:
+        bot.send('JOIN ' + channel)
 
 
 @hook('INVITE')
