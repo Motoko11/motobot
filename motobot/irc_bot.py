@@ -109,7 +109,9 @@ class IRCBot:
     def __add_hook(self, func):
         """ Add a hook to the bot. """
         for hook in getattr(func, IRCBot.hook, []):
-            self.hooks[hook] = func
+            funcs = self.hooks.get(hook, [])
+            funcs.append(func)
+            self.hooks[hook] = funcs
 
     def __add_plugin(self, func):
         """ Add a plugin to the bot. """
@@ -190,7 +192,8 @@ class IRCBot:
 
         if not self.__ignored(message.sender):
             if message.command in self.hooks:
-                self.hooks[message.command](self, message)
+                for func in self.hooks[message.command]:
+                    func(self, message)
             else:
                 print("Unknown command: {}".format(message.command))
 
