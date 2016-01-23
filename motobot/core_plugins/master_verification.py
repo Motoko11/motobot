@@ -51,7 +51,7 @@ def handle_join(bot, message):
 @hook('NICK')
 def handle_nick(bot, message):
     """ Unmark a user as verified in the bot and check new nick. """
-    unverify(message.nick)
+    unverify(bot, message.nick)
     check(bot, message.params[0])
 
 
