@@ -33,12 +33,6 @@ def handle_nickserv_identification(bot, message):
         bot.send('JOIN ' + channel)
 
 
-@hook('INVITE')
-def handle_invite(bot, message):
-    """ Join a channel when invited. """
-    bot.join(message.params[-1])
-
-
 @hook('ERROR')
 def handle_error(bot, message):
     """ Handle an error message from the server. """
