@@ -6,6 +6,7 @@ from socket import create_connection
 from importlib import import_module, reload
 from pkgutil import iter_modules
 from time import sleep
+from collections import namedtuple
 import re
 import traceback
 
@@ -116,8 +117,8 @@ class IRCBot:
 
     def __add_plugin(self, func):
         """ Add a plugin to the bot. """
-        for plugin_data in getattr(func, IRCBot.plugin, []):
-            self.plugins.append((func,) + plugin_data)
+        for plugin in getattr(func, IRCBot.plugin, []):
+            self.plugins.append(plugin)
 
     def load_database(self, path):
         self.database = Database(path)
@@ -207,6 +208,9 @@ class IRCBot:
                 print("Unknown command: {}".format(message.command))
 
 
+Plugin = namedtuple('Plugin', ['func', 'type', 'priority', 'level', 'arg'])
+
+
 def hook(command):
     """ Decorator to add a hook to the bot. """
     def register_hook(func):
@@ -221,7 +225,8 @@ def command(name, level=IRCLevel.user, priority=Priority.medium):
     """ Decorator to add a command to the bot. """
     def register_command(func):
         attr = getattr(func, IRCBot.plugin, [])
-        attr.append((IRCBot.command_plugin, priority, level, name))
+        plugin = Plugin(func, IRCBot.command_plugin, priority, level, name)
+        attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
     return register_command
@@ -232,7 +237,8 @@ def match(pattern, level=IRCLevel.user, priority=Priority.medium):
     def register_pattern(func):
         attr = getattr(func, IRCBot.plugin, [])
         compiled = re.compile(pattern, re.IGNORECASE)
-        attr.append((IRCBot.match_plugin, priority, level, compiled))
+        plugin = Plugin(func, IRCBot.match_plugin, priority, level, compiled)
+        attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
     return register_pattern
@@ -242,7 +248,8 @@ def sink(level=IRCLevel.user, priority=Priority.medium):
     """ Decorator to add sink to the bot. """
     def register_sink(func):
         attr = getattr(func, IRCBot.plugin, [])
-        attr.append((IRCBot.sink_plugin, priority, level))
+        plugin = Plugin(func, IRCBot.sink_plugin, priority, level, None)
+        attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
     return register_sink

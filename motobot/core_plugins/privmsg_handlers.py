@@ -16,47 +16,47 @@ def handle_privmsg(bot, message):
 
     break_priority = Priority.min
     for plugin in bot.plugins:
-        if break_priority > plugin[2]:
+        if break_priority > plugin.priority:
             break
         else:
             responses = handle_plugin(bot, plugin, nick, channel, message)
             eat = handle_responses(bot, nick, channel, responses)
 
             if eat is True:
-                break_priority = plugin[2]
+                break_priority = plugin.priority
 
 
 def handle_plugin(bot, plugin, nick, channel, message):
     responses = None
 
-    if bot.get_userlevel(channel, nick) >= plugin[3]:
-        if plugin[1] == IRCBot.command_plugin:
+    if bot.get_userlevel(channel, nick) >= plugin.level:
+        if plugin.type == IRCBot.command_plugin:
             responses = handle_command(plugin, bot, nick, channel, message)
-        elif plugin[1] == IRCBot.match_plugin:
+        elif plugin.type == IRCBot.match_plugin:
             responses = handle_match(plugin, bot, nick, channel, message)
-        elif plugin[1] == IRCBot.sink_plugin:
+        elif plugin.type == IRCBot.sink_plugin:
             responses = handle_sink(plugin, bot, nick, channel, message)
 
     return responses
 
 
 def handle_command(plugin, bot, nick, channel, message):
-    trigger = bot.command_prefix + plugin[4]
+    trigger = bot.command_prefix + plugin.arg
     test = message.split(' ', 1)[0]
 
     if trigger == test:
         args = message[len(bot.command_prefix):].split(' ')
-        return plugin[0](bot, nick, channel, message, args)
+        return plugin.func(bot, nick, channel, message, args)
 
 
 def handle_match(plugin, bot, nick, channel, message):
-    match = plugin[4].search(message)
+    match = plugin.arg.search(message)
     if match is not None:
-        return plugin[0](bot, nick, channel, message, match)
+        return plugin.func(bot, nick, channel, message, match)
 
 
 def handle_sink(plugin, bot, nick, channel, message):
-    return plugin[0](bot, nick, channel, message)
+    return plugin.func(bot, nick, channel, message)
 
 
 def handle_responses(bot, nick, channel, responses):
