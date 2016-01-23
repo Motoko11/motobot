@@ -34,6 +34,6 @@ class Command(Modifier):
         self.params = params
 
     def modify(self, command, params, trailing):
-        command = command
+        command = self.command
         params = params if self.params is None else self.params
         return command, params, trailing
