@@ -49,6 +49,7 @@ class IRCBot:
         self.nickserv_password = None
         self.channels = []
         self.masters = []
+        self.error_log = None
 
         for key, val in config.items():
             setattr(self, key, val)
@@ -73,6 +74,9 @@ class IRCBot:
                     sleep(5)
                 except:
                     traceback.print_exc()
+                    if self.error_log is not None:
+                        log = open(self.error_log, 'a')
+                        traceback.print_exc(file=log)
 
     def load_plugins(self, package):
         """ Add a package to the package list and load the plugins. """
