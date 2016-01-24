@@ -1,4 +1,4 @@
-from motobot import command, sink
+from motobot import command, sink, Command
 from random import choice
 import re
 
@@ -27,7 +27,7 @@ def regex_command(bot, nick, channel, message, args):
     elif arg == 'del':
         response = rem_regex(' '.join(args[2:]), bot.database)
     elif arg == 'show':
-        response = show_patterns(bot.database)
+        response = show_patterns(bot.database, nick)
     else:
         response = "Unrecognised argument."
 
@@ -56,14 +56,15 @@ def rem_regex(string, database):
     return "No patterns matched the string."
 
 
-def show_patterns(database):
+def show_patterns(database, nick):
     patterns = get_patterns(database)
-    string = ''
+    responses = []
+    modifier = Command('NOTICE', [nick])
 
     for pattern, response in patterns:
         app = "{}: {};".format(pattern.pattern, response)
-        string += app
-    return string
+        responses.append((app, modifier))
+    return responses
 
 
 patterns_cache = None
