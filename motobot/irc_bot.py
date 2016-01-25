@@ -179,7 +179,7 @@ class IRCBot:
             func(self, message)
 
 
-Plugin = namedtuple('Plugin', ['func', 'type', 'priority', 'level', 'arg'])
+Plugin = namedtuple('Plugin', ['func', 'alt', 'type', 'priority', 'level', 'arg'])
 
 
 def hook(command):
@@ -192,34 +192,34 @@ def hook(command):
     return register_hook
 
 
-def command(name, level=IRCLevel.user, priority=Priority.medium):
+def command(name, *, level=IRCLevel.user, priority=Priority.medium, alt=None):
     """ Decorator to add a command to the bot. """
     def register_command(func):
         attr = getattr(func, IRCBot.plugin, [])
-        plugin = Plugin(func, IRCBot.command_plugin, priority, level, name)
+        plugin = Plugin(func, alt, IRCBot.command_plugin, priority, level, name)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
     return register_command
 
 
-def match(pattern, level=IRCLevel.user, priority=Priority.medium):
+def match(pattern, *, level=IRCLevel.user, priority=Priority.medium, alt=None):
     """ Decorator to add a regex pattern to the bot. """
     def register_pattern(func):
         attr = getattr(func, IRCBot.plugin, [])
         compiled = compile(pattern, IGNORECASE)
-        plugin = Plugin(func, IRCBot.match_plugin, priority, level, compiled)
+        plugin = Plugin(func, alt, IRCBot.match_plugin, priority, level, compiled)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
     return register_pattern
 
 
-def sink(level=IRCLevel.user, priority=Priority.medium):
+def sink(*, level=IRCLevel.user, priority=Priority.medium, alt=None):
     """ Decorator to add sink to the bot. """
     def register_sink(func):
         attr = getattr(func, IRCBot.plugin, [])
-        plugin = Plugin(func, IRCBot.sink_plugin, priority, level, None)
+        plugin = Plugin(func, alt, IRCBot.sink_plugin, priority, level, None)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
