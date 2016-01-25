@@ -1,4 +1,4 @@
-from motobot import command, match, IRCLevel
+from motobot import command, match, IRCLevel, Command
 from random import uniform, randint, choice
 from time import time
 
@@ -54,30 +54,62 @@ def nyan_match(bot, database, nick, channel, message, match):
 
 @command('desu')
 def desu_command(bot, database, nick, channel, message, args):
-    query_nick = ''
-    if len(args) <= 1:
-        query_nick = nick
-    else:
-        query_nick = ' '.join(args[1:]).rstrip()
+    try:
+        return user_stats(database, args[1])
+    except IndexError:
+        return user_stats(database, nick)
 
-    stats = database.get_val(query_nick)
-    if stats == None:
-        return "I have no desu stats for {}.".format(query_nick)
+
+def user_stats(database, nick):
+    stats = database.get_val({})
+    userstats = stats.get(nick)
+    if userstats == None:
+        return "I have no desu stats for {}.".format(nick)
     else:
         return "{} has desu'd {} times and gotten {} desus, " \
                "with an average of {:.2f} desus. " \
                "They have been undesu'd {} times.".format(
-                    query_nick, stats[0], stats[1], stats[1]/ stats[0], stats[2]
+                    nick, userstats[0], userstats[1],
+                    userstats[1]/ userstats[0], userstats[2]
                 )
 
 
+@command('topdesu')
+def top_desu_command(bot, database, nick, channel, message, args):
+    keys = {
+        'number': lambda x: x[1][1],
+        'average': lambda x: x[1][1] / x[1][0],
+        'undesus': lambda x: x[1][2]
+    }
+    response = ''
+    modifier = Command('NOTICE', [nick])
+
+    try:
+        stats = database.get_val({})
+        arg = args[1].lower() if len(args) > 1 else 'number'
+        key = keys[arg]
+
+        response = "Users with the highest score desus ({}): ".format(arg)
+        for stats in sorted(stats.items(), reverse=True, key=key)[:10]:
+            response += "{}: {}; ".format(stats[0], key(stats))
+
+    except KeyError:
+        response = "Invalid argument, valid arguments are: "
+        for key in keys:
+            response += key + ', '
+
+    return response, modifier
+
+
 def update_stats(database, nick, un, number):
-    stats = database.get_val(nick, [0, 0, 0])
+    stats = database.get_val({})
+    userstats = stats.get(nick, [0, 0, 0])
 
-    stats[0] += 1
+    userstats[0] += 1
     if un:
-        stats[2] += 1
+        userstats[2] += 1
     else:
-        stats[1] += number
+        userstats[1] += number
 
-    database.set_val(nick, stats)
+    stats[nick] = userstats
+    database.set_val(stats)

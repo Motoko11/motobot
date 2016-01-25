@@ -64,7 +64,6 @@ def show_patterns(database, nick):
     return responses
 
 
-patterns_key = 'patterns'
 patterns_cache = None
 
 
@@ -72,11 +71,11 @@ def get_patterns(database):
     global patterns_cache
     if patterns_cache is None:
         patterns_cache = [(re.compile(x, re.I), y) \
-            for x, y in database.get_val(patterns_key, [])]
+            for x, y in database.get_val([])]
     return patterns_cache
 
 
 def save_patterns(database, patterns):
     global patterns_cache
     patterns_cache = patterns
-    database.set_val(patterns_key, [(x.pattern, y) for x, y in patterns])
+    database.set_val([(x.pattern, y) for x, y in patterns])
