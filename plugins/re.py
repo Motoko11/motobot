@@ -3,12 +3,9 @@ from random import choice
 import re
 
 
-patterns_key = "re_patterns"
-
-
 @sink()
 def regex_sink(bot, database, nick, channel, message):
-    for pattern, response in get_patterns(bot.database):
+    for pattern, response in get_patterns(database):
         if pattern.search(message):
             return parse_response(response, nick)
 
@@ -22,12 +19,12 @@ def parse_response(response, nick):
 def regex_command(bot, database, nick, channel, message, args):
     arg = args[1].lower()
     if arg == 'add':
-        add_regex(' '.join(args[2:]), bot.database)
+        add_regex(' '.join(args[2:]), database)
         response = "Pattern added successfully."
     elif arg == 'del':
-        response = rem_regex(' '.join(args[2:]), bot.database)
+        response = rem_regex(' '.join(args[2:]), database)
     elif arg == 'show':
-        response = show_patterns(bot.database, nick)
+        response = show_patterns(database, nick)
     else:
         response = "Unrecognised argument."
 
@@ -67,6 +64,7 @@ def show_patterns(database, nick):
     return responses
 
 
+patterns_key = 'patterns'
 patterns_cache = None
 
 
