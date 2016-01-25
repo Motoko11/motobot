@@ -27,9 +27,9 @@ def get_userlevels(name):
     }
     userlevels = [IRCLevel.user]
 
-    for i in range(len(name)):
-        if name[i] in mapping:
-            userlevels.append(mapping[name[i]])
+    for i, c in enumerate(name):
+        if c in mapping:
+            userlevels.append(mapping[c])
         else:
             return userlevels, name[i:]
 

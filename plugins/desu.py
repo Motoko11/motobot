@@ -1,4 +1,4 @@
-from motobot import command, match, IRCLevel, Command
+from motobot import command, match, IRCLevel, Command, Eat
 from random import uniform, randint, choice
 from time import time
 
@@ -41,7 +41,7 @@ def desu_match(bot, database, nick, channel, message, match):
         return "You've desu'd too recently to desu again."
 
 
-@match(r'^baka( *)$', IRCLevel.op)
+@match(r'^baka( *)$', level=IRCLevel.op, alt=lambda *x, **xs: Eat)
 def baka_match(bot, database, nick, channel, message, match):
     return 'baka' * randint(1, 30)
 
@@ -82,7 +82,7 @@ def top_desu_command(bot, database, nick, channel, message, args):
         'undesus': lambda x: x[1][2]
     }
     response = ''
-    modifier = Command('NOTICE', [nick])
+    modifier = Command('NOTICE', nick)
 
     try:
         stats = database.get_val({})
@@ -94,9 +94,8 @@ def top_desu_command(bot, database, nick, channel, message, args):
             response += "{}: {}; ".format(stats[0], key(stats))
 
     except KeyError:
-        response = "Invalid argument, valid arguments are: "
-        for key in keys:
-            response += key + ', '
+        response = "Invalid argument, valid arguments are: " + \
+            ", ".join(keys.keys()) + '.'
 
     return response, modifier
 

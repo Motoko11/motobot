@@ -30,39 +30,42 @@ def handle_plugin(bot, plugin, nick, channel, message):
     responses = None
 
     try:
-        if bot.get_userlevel(channel, nick) >= plugin.level:
-            if plugin.type == IRCBot.command_plugin:
-                responses = handle_command(plugin, bot, nick, channel, message)
-            elif plugin.type == IRCBot.match_plugin:
-                responses = handle_match(plugin, bot, nick, channel, message)
-            elif plugin.type == IRCBot.sink_plugin:
-                responses = handle_sink(plugin, bot, nick, channel, message)
+        alt = bot.get_userlevel(channel, nick) < plugin.level
+        if plugin.type == IRCBot.command_plugin:
+            responses = handle_command(plugin, bot, nick, channel, message, alt)
+        elif plugin.type == IRCBot.match_plugin:
+            responses = handle_match(plugin, bot, nick, channel, message, alt)
+        elif plugin.type == IRCBot.sink_plugin:
+            responses = handle_sink(plugin, bot, nick, channel, message, alt)
     finally:
         bot.database.write_database()
 
     return responses
 
 
-def handle_command(plugin, bot, nick, channel, message):
+def handle_command(plugin, bot, nick, channel, message, alt):
     trigger = bot.command_prefix + plugin.arg
     test = message.split(' ', 1)[0]
 
     if trigger == test:
         args = message[len(bot.command_prefix):].split(' ')
         database_entry = bot.database.get_entry(plugin.func.__module__)
-        return plugin.func(bot, database_entry, nick, channel, message, args)
+        func = plugin.func if not alt else plugin.alt
+        return func(bot, database_entry, nick, channel, message, args)
 
 
-def handle_match(plugin, bot, nick, channel, message):
+def handle_match(plugin, bot, nick, channel, message, alt):
     match = plugin.arg.search(message)
     if match is not None:
         database_entry = bot.database.get_entry(plugin.func.__module__)
-        return plugin.func(bot, database_entry, nick, channel, message, match)
+        func = plugin.func if not alt else plugin.alt
+        return func(bot, database_entry, nick, channel, message, match)
 
 
-def handle_sink(plugin, bot, nick, channel, message):
+def handle_sink(plugin, bot, nick, channel, message, alt):
     database_entry = bot.database.get_entry(plugin.func.__module__)
-    return plugin.func(bot, database_entry, nick, channel, message)
+    func = plugin.func if not alt else plugin.alt
+    return func(bot, database_entry, nick, channel, message)
 
 
 def handle_responses(bot, nick, channel, responses):
@@ -74,13 +77,15 @@ def handle_responses(bot, nick, channel, responses):
         for response in responses:
             command = 'PRIVMSG'
             params = [channel if channel != bot.nick else nick]
-            trailing, modifiers, eat = extract_response(response)
+            trailing, modifiers, to_eat = extract_response(response)
+            eat |= to_eat
 
-            for modifier in modifiers:
-                command, params, trailing = modifier(command, params, trailing)
+            if not (modifiers == [] and trailing == ''):
+                for modifier in modifiers:
+                    command, params, trailing = modifier(command, params, trailing)
 
-            message = form_message(command, params, trailing)
-            bot.send(message)
+                message = form_message(command, params, trailing)
+                bot.send(message)
     return eat
 
 

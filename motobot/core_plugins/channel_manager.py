@@ -7,7 +7,7 @@ def join_command(bot, database, nick, channel, message, args):
     try:
         channel = args[1]
         bot.channels.append(channel)
-        return Command('JOIN', [channel])
+        return Command('JOIN', channel)
     except IndexError:
         return "Please provide a channel."
 

@@ -43,7 +43,7 @@ class Command(Modifier):
 
     def __init__(self, command, params=None):
         self.command = command
-        self.params = params
+        self.params = params if not isinstance(params, str) else [params]
 
     def modify(self, command, params, trailing):
         command = self.command

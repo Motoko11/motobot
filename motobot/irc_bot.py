@@ -7,8 +7,8 @@ from importlib import import_module, reload
 from pkgutil import iter_modules
 from time import sleep
 from collections import namedtuple
-import re
-import traceback
+from traceback import print_exc
+from re import compile, IGNORECASE
 
 
 class IRCBot:
@@ -76,10 +76,10 @@ class IRCBot:
                 except UnicodeEncodeError:
                     pass
                 except:
-                    traceback.print_exc()
+                    print_exc()
                     if self.error_log is not None:
                         log = open(self.error_log, 'a')
-                        traceback.print_exc(file=log)
+                        print_exc(file=log)
 
     def load_plugins(self, package):
         """ Add a package to the package list and load the plugins. """
@@ -127,31 +127,6 @@ class IRCBot:
         for plugin in getattr(func, IRCBot.plugin, []):
             self.plugins.append(plugin)
 
-    def ignore(self, hostmask):
-        """ Ignore a user with the given hostmask. """
-        pattern = re.compile(hostmask.replace('*', '.*'), re.IGNORECASE)
-        self.ignore_list.append(pattern)
-
-    def unignore(self, host):
-        """ Unignore all masks which match given nick. """
-        removed = False
-        for pattern in self.ignore_list:
-            if pattern.match(host):
-                self.ignore_list.remove(pattern)
-                removed = True
-        return removed
-
-    def __ignored(self, host):
-        """ Test if a given user is ignored or not. """
-        if host is None:
-            return False
-
-        for pattern in self.ignore_list:
-            if pattern.match(host):
-                return True
-        else:
-            return False
-
     def is_master(self, nick, verified=True):
         """ Check if a user is on the master list.
 
@@ -178,9 +153,9 @@ class IRCBot:
         self.connected = True
         self.identified = False
 
-    def disconnect(self):
+    def disconnect(self, msg=None):
         """ Disconnect the bot. """
-        self.send('QUIT :BAI!')
+        self.send('QUIT' + (': ' + msg if msg is not None else ''))
         self.running = self.connected = self.identified = False
 
     def __recv(self):
@@ -197,20 +172,14 @@ class IRCBot:
             print("Sent: {}".format(msg))
 
     def __handle_message(self, message):
-        """ Handle an IRCMessage object with the appropriate handler.
-
-        Will ignore a user if their mask is on the ignore list.
-
-        """
+        """ Handle an IRCMessage object with the appropriate handler."""
         print(message)
 
-        if not self.__ignored(message.sender):
-            if message.command in self.hooks:
-                for func in self.hooks[message.command]:
-                    func(self, message)
+        for func in self.hooks.get(message.command, []):
+            func(self, message)
 
 
-Plugin = namedtuple('Plugin', ['func', 'type', 'priority', 'level', 'arg'])
+Plugin = namedtuple('Plugin', ['func', 'alt', 'type', 'priority', 'level', 'arg'])
 
 
 def hook(command):
@@ -223,34 +192,34 @@ def hook(command):
     return register_hook
 
 
-def command(name, level=IRCLevel.user, priority=Priority.medium):
+def command(name, *, level=IRCLevel.user, priority=Priority.medium, alt=None):
     """ Decorator to add a command to the bot. """
     def register_command(func):
         attr = getattr(func, IRCBot.plugin, [])
-        plugin = Plugin(func, IRCBot.command_plugin, priority, level, name)
+        plugin = Plugin(func, alt, IRCBot.command_plugin, priority, level, name)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
     return register_command
 
 
-def match(pattern, level=IRCLevel.user, priority=Priority.medium):
+def match(pattern, *, level=IRCLevel.user, priority=Priority.medium, alt=None):
     """ Decorator to add a regex pattern to the bot. """
     def register_pattern(func):
         attr = getattr(func, IRCBot.plugin, [])
-        compiled = re.compile(pattern, re.IGNORECASE)
-        plugin = Plugin(func, IRCBot.match_plugin, priority, level, compiled)
+        compiled = compile(pattern, IGNORECASE)
+        plugin = Plugin(func, alt, IRCBot.match_plugin, priority, level, compiled)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
     return register_pattern
 
 
-def sink(level=IRCLevel.user, priority=Priority.medium):
+def sink(*, level=IRCLevel.user, priority=Priority.medium, alt=None):
     """ Decorator to add sink to the bot. """
     def register_sink(func):
         attr = getattr(func, IRCBot.plugin, [])
-        plugin = Plugin(func, IRCBot.sink_plugin, priority, level, None)
+        plugin = Plugin(func, alt, IRCBot.sink_plugin, priority, level, None)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
