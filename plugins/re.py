@@ -54,11 +54,10 @@ def rem_regex(string, database):
 
 
 def show_patterns(database, nick):
-    patterns = get_patterns(database)
     responses = []
     modifier = Command('NOTICE', [nick])
 
-    for pattern, response in patterns:
+    for pattern, response in get_patterns(database):
         app = "{}: {};".format(pattern.pattern, response)
         responses.append((app, modifier))
     return responses
