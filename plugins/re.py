@@ -19,8 +19,7 @@ def parse_response(response, nick):
 def regex_command(bot, database, nick, channel, message, args):
     arg = args[1].lower()
     if arg == 'add':
-        add_regex(' '.join(args[2:]), database)
-        response = "Pattern added successfully."
+        response = add_regex(' '.join(args[2:]), database)
     elif arg == 'del':
         response = rem_regex(' '.join(args[2:]), database)
     elif arg == 'show':
@@ -28,7 +27,7 @@ def regex_command(bot, database, nick, channel, message, args):
     else:
         response = "Unrecognised argument."
 
-    return response, Eat
+    return response
 
 
 parse_pattern = re.compile(r'^(.*?)(?: ?)<=>(?: ?)(.*)')
@@ -40,6 +39,7 @@ def add_regex(string, database):
     patterns = get_patterns(database)
     patterns.append((re.compile(pattern, re.IGNORECASE), response))
     save_patterns(database, patterns)
+    return ("Pattern added successfully.", Eat)
 
 
 def rem_regex(string, database):
@@ -57,6 +57,7 @@ def show_patterns(database, nick):
     responses = []
     modifier = Command('NOTICE', [nick])
 
+    print(get_patterns(database))
     for pattern, response in get_patterns(database):
         app = "{}: {};".format(pattern.pattern, response)
         responses.append((app, modifier))
