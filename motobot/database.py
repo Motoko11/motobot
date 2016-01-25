@@ -3,9 +3,9 @@ from os import replace
 
 
 class DatabaseEntry:
-    def __init__(self, database, data={}):
+    def __init__(self, database):
         self.__database = database
-        self.__data = data
+        self.__data = {}
 
     def get_val(self, name, default=None):
         return self.__data.get(name, default)
