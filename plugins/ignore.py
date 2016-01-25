@@ -2,7 +2,7 @@ from motobot import command, IRCLevel
 
 
 @command('ignore', IRCLevel.op)
-def ignore_command(bot, nick, channel, message, args):
+def ignore_command(bot, database, nick, channel, message, args):
     try:
         nick_arg = args[1]
         bot.ignore('{}!*@*'.format(nick_arg))
@@ -12,7 +12,7 @@ def ignore_command(bot, nick, channel, message, args):
 
 
 @command('ignorehost', IRCLevel.op)
-def ignorehost_command(bot, nick, channel, message, args):
+def ignorehost_command(bot, database, nick, channel, message, args):
     try:
         mask = args[1]
         bot.ignore(mask)
@@ -22,7 +22,7 @@ def ignorehost_command(bot, nick, channel, message, args):
 
 
 @command('unignore', IRCLevel.op)
-def unignore_command(bot, nick, channel, message, args):
+def unignore_command(bot, database, nick, channel, message, args):
     try:
         nick_arg = args[1]
         if bot.unignore('{}!*@*'.format(nick_arg)):

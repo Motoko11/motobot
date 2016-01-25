@@ -1,14 +1,11 @@
-from motobot import command, sink, Command
+from motobot import command, sink, Command, Priority, Eat
 from random import choice
 import re
 
 
-patterns_key = "re_patterns"
-
-
-@sink()
-def regex_sink(bot, nick, channel, message):
-    for pattern, response in get_patterns(bot.database):
+@sink(priority=Priority.lowest)
+def regex_sink(bot, database, nick, channel, message):
+    for pattern, response in get_patterns(database):
         if pattern.search(message):
             return parse_response(response, nick)
 
@@ -18,16 +15,15 @@ def parse_response(response, nick):
     return response.replace('{nick}', nick)
 
 
-@command('re')
-def regex_command(bot, nick, channel, message, args):
+@command('re', priority=Priority.lower)
+def regex_command(bot, database, nick, channel, message, args):
     arg = args[1].lower()
     if arg == 'add':
-        add_regex(' '.join(args[2:]), bot.database)
-        response = "Pattern added successfully."
+        response = (add_regex(' '.join(args[2:]), database), Eat)
     elif arg == 'del':
-        response = rem_regex(' '.join(args[2:]), bot.database)
+        response = rem_regex(' '.join(args[2:]), database)
     elif arg == 'show':
-        response = show_patterns(bot.database, nick)
+        response = show_patterns(database, nick)
     else:
         response = "Unrecognised argument."
 
@@ -43,6 +39,7 @@ def add_regex(string, database):
     patterns = get_patterns(database)
     patterns.append((re.compile(pattern, re.IGNORECASE), response))
     save_patterns(database, patterns)
+    return "Pattern added successfully."
 
 
 def rem_regex(string, database):
@@ -57,16 +54,17 @@ def rem_regex(string, database):
 
 
 def show_patterns(database, nick):
-    patterns = get_patterns(database)
     responses = []
     modifier = Command('NOTICE', [nick])
 
-    for pattern, response in patterns:
+    print(get_patterns(database))
+    for pattern, response in get_patterns(database):
         app = "{}: {};".format(pattern.pattern, response)
         responses.append((app, modifier))
     return responses
 
 
+patterns_key = 'patterns'
 patterns_cache = None
 
 

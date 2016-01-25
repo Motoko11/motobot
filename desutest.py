@@ -15,7 +15,6 @@ def main():
     bot = IRCBot(config)
 
     bot.load_plugins('plugins')
-    bot.load_database('desutest.json')
 
     thread = Thread(target=thread_func(bot))
     thread.start()

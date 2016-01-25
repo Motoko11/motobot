@@ -2,7 +2,7 @@ from motobot import command, Action, Target, IRCLevel
 
 
 @command('say', level=IRCLevel.master)
-def say_command(bot, nick, channel, message, args):
+def say_command(bot, database, nick, channel, message, args):
     try:
         target = Target(args[1])
         msg = ' '.join(args[2:])
