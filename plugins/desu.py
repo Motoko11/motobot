@@ -1,4 +1,4 @@
-from motobot import command, match, IRCLevel
+from motobot import command, match, IRCLevel, Command
 from random import uniform, randint, choice
 from time import time
 
@@ -54,23 +54,45 @@ def nyan_match(bot, database, nick, channel, message, match):
 
 @command('desu')
 def desu_command(bot, database, nick, channel, message, args):
-    query_nick = ''
-    if len(args) <= 1:
-        query_nick = nick
-    else:
-        query_nick = ' '.join(args[1:]).rstrip()
+    try:
+        return user_stats(database, args[1])
+    except IndexError:
+        return user_stats(database, nick)
 
+
+def user_stats(database, nick):
     stats = database.get_val({})
-    userstats = stats.get(query_nick)
+    userstats = stats.get(nick)
     if userstats == None:
-        return "I have no desu stats for {}.".format(query_nick)
+        return "I have no desu stats for {}.".format(nick)
     else:
         return "{} has desu'd {} times and gotten {} desus, " \
                "with an average of {:.2f} desus. " \
                "They have been undesu'd {} times.".format(
-                    query_nick, userstats[0], userstats[1],
+                    nick, userstats[0], userstats[1],
                     userstats[1]/ userstats[0], userstats[2]
                 )
+
+
+@command('topdesu')
+def top_desu_command(bot, database, nick, channel, message, args):
+    try:
+        stats = database.get_val({})
+        arg = args[1].lower() if len(args) > 1 else 'number'
+        keys = {
+            'number': lambda x: x[1][1],
+            'average': lambda x: x[1][1] / x[1][0],
+            'undesus': lambda x: x[1][2]
+        }
+        key = keys[arg]
+
+        response = "Users with the highest score desus ({}): ".format(arg)
+        for stats in sorted(stats.items(), reverse=True, key=key)[:10]:
+            response += "{}: {}; ".format(stats[0], key(stats))
+
+        return response, Command('NOTICE', [nick])
+    except KeyError:
+        return "Error: Not a valid argument. Valid arguments are: .", Command('NOTICE', [nick])
 
 
 def update_stats(database, nick, un, number):
