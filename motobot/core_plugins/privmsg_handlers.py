@@ -77,13 +77,15 @@ def handle_responses(bot, nick, channel, responses):
         for response in responses:
             command = 'PRIVMSG'
             params = [channel if channel != bot.nick else nick]
-            trailing, modifiers, eat = extract_response(response)
+            trailing, modifiers, to_eat = extract_response(response)
+            eat |= to_eat
 
-            for modifier in modifiers:
-                command, params, trailing = modifier(command, params, trailing)
+            if not (modifiers == [] and trailing == ''):
+                for modifier in modifiers:
+                    command, params, trailing = modifier(command, params, trailing)
 
-            message = form_message(command, params, trailing)
-            bot.send(message)
+                message = form_message(command, params, trailing)
+                bot.send(message)
     return eat
 
 
