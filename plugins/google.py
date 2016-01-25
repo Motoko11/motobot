@@ -18,7 +18,7 @@ def google_search(term):
 
 @command('g')
 @command('google')
-def google_command(bot, nick, channel, message, args):
+def google_command(bot, database, nick, channel, message, args):
     if len(args) <= 1:
         return "No search term specified."
     else:
@@ -27,5 +27,5 @@ def google_command(bot, nick, channel, message, args):
 
 
 @command('calc')
-def calc_command(bot, nick, channel, message, args):
+def calc_command(bot, database, nick, channel, message, args):
     return "Does not compute!"

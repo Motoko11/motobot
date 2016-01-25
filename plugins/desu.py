@@ -20,7 +20,7 @@ def can_desu(nick):
 
 
 @match(r'^desu( *)$')
-def desu_match(bot, nick, channel, message, match):
+def desu_match(bot, database, nick, channel, message, match):
     if can_desu(nick):
         chance = uniform(0, 1)
         number = randint(1, 30)
@@ -43,18 +43,18 @@ def desu_match(bot, nick, channel, message, match):
 
 
 @match(r'^baka( *)$', IRCLevel.op)
-def baka_match(bot, nick, channel, message, match):
+def baka_match(bot, database, nick, channel, message, match):
     return 'baka' * randint(1, 30)
 
 
 @match(r'^n(a+)?(y+)(a+)(n+)?(\W|$)')
-def nyan_match(bot, nick, channel, message, match):
+def nyan_match(bot, database, nick, channel, message, match):
     num = randint(5, 50)
     return 'Ny' + 'a' * num + '~'
 
 
 @command('desustats')
-def desu_command(bot, nick, channel, message, args):
+def desu_command(bot, database, nick, channel, message, args):
     stats = bot.database.get_val(desu_key, {})
     scores = sorted(
         [(x[0], x[1][1]) for x in stats.items()],
@@ -69,7 +69,7 @@ def desu_command(bot, nick, channel, message, args):
 
 
 @command('desu')
-def desu_command(bot, nick, channel, message, args):
+def desu_command(bot, database, nick, channel, message, args):
     query_nick = ''
     if len(args) <= 1:
         query_nick = nick

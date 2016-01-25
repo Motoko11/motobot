@@ -3,7 +3,7 @@ from time import sleep
 
 
 @command('join')
-def join_command(bot, nick, channel, message, args):
+def join_command(bot, database, nick, channel, message, args):
     try:
         channel = args[1]
         bot.channels.append(channel)

@@ -7,7 +7,7 @@ patterns_key = "re_patterns"
 
 
 @sink()
-def regex_sink(bot, nick, channel, message):
+def regex_sink(bot, database, nick, channel, message):
     for pattern, response in get_patterns(bot.database):
         if pattern.search(message):
             return parse_response(response, nick)
@@ -19,7 +19,7 @@ def parse_response(response, nick):
 
 
 @command('re')
-def regex_command(bot, nick, channel, message, args):
+def regex_command(bot, database, nick, channel, message, args):
     arg = args[1].lower()
     if arg == 'add':
         add_regex(' '.join(args[2:]), bot.database)
