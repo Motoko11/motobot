@@ -7,8 +7,8 @@ from importlib import import_module, reload
 from pkgutil import iter_modules
 from time import sleep
 from collections import namedtuple
-import re
-import traceback
+from traceback import print_exc
+from re import compile, IGNORECASE
 
 
 class IRCBot:
@@ -76,10 +76,10 @@ class IRCBot:
                 except UnicodeEncodeError:
                     pass
                 except:
-                    traceback.print_exc()
+                    print_exc()
                     if self.error_log is not None:
                         log = open(self.error_log, 'a')
-                        traceback.print_exc(file=log)
+                        print_exc(file=log)
 
     def load_plugins(self, package):
         """ Add a package to the package list and load the plugins. """
@@ -207,7 +207,7 @@ def match(pattern, level=IRCLevel.user, priority=Priority.medium):
     """ Decorator to add a regex pattern to the bot. """
     def register_pattern(func):
         attr = getattr(func, IRCBot.plugin, [])
-        compiled = re.compile(pattern, re.IGNORECASE)
+        compiled = compile(pattern, IGNORECASE)
         plugin = Plugin(func, IRCBot.match_plugin, priority, level, compiled)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
