@@ -20,7 +20,7 @@ def regex_command(bot, database, nick, channel, message, args):
     arg = args[1].lower()
     if arg == 'add':
         response = (add_regex(' '.join(args[2:]), database), Eat)
-    elif arg == 'del':
+    elif arg == 'del' or arg == 'rem':
         response = rem_regex(' '.join(args[2:]), database)
     elif arg == 'show':
         response = show_patterns(database, nick)
