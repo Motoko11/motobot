@@ -37,7 +37,7 @@ def show_ignores(modifier, database, channel):
     if channel_ignores == set():
         return "I am not ignoring anyone on {}.".format(channel)
     else:
-        return "I am currently ignoring: {} on {}".format(
+        return "I am currently ignoring: {} on {}.".format(
             ", ".join(channel_ignores), channel)
 
 
