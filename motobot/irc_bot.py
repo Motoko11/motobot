@@ -38,7 +38,7 @@ class IRCBot:
         self.userlevels = {}
         self.verified_masters = []
 
-        self.database = Database()
+        self.database = Database(self.database_path)
         self.load_plugins('motobot.core_plugins')
 
     def load_config(self, config):
@@ -49,6 +49,7 @@ class IRCBot:
         self.nickserv_password = None
         self.channels = []
         self.masters = []
+        self.database_path = None
         self.error_log = None
 
         for key, val in config.items():
@@ -125,9 +126,6 @@ class IRCBot:
         """ Add a plugin to the bot. """
         for plugin in getattr(func, IRCBot.plugin, []):
             self.plugins.append(plugin)
-
-    def load_database(self, path):
-        self.database = Database(path)
 
     def ignore(self, hostmask):
         """ Ignore a user with the given hostmask. """
