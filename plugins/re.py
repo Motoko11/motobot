@@ -1,9 +1,9 @@
-from motobot import command, sink, Command
+from motobot import command, sink, Command, Priority, Eat
 from random import choice
 import re
 
 
-@sink()
+@sink(priority=Priority.lowest)
 def regex_sink(bot, database, nick, channel, message):
     for pattern, response in get_patterns(database):
         if pattern.search(message):
@@ -15,7 +15,7 @@ def parse_response(response, nick):
     return response.replace('{nick}', nick)
 
 
-@command('re')
+@command('re', priority=Priority.lower)
 def regex_command(bot, database, nick, channel, message, args):
     arg = args[1].lower()
     if arg == 'add':
@@ -28,7 +28,7 @@ def regex_command(bot, database, nick, channel, message, args):
     else:
         response = "Unrecognised argument."
 
-    return response
+    return response, Eat
 
 
 parse_pattern = re.compile(r'^(.*?)(?: ?)<=>(?: ?)(.*)')
