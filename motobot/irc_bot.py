@@ -72,6 +72,8 @@ class IRCBot:
                 except ConnectionResetError:
                     self.connected = False
                     sleep(5)
+                except UnicodeEncodeError:
+                    pass
                 except:
                     traceback.print_exc()
                     if self.error_log is not None:
