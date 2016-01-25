@@ -5,17 +5,14 @@ from os import replace
 class DatabaseEntry:
     def __init__(self, database):
         self.__database = database
-        self.__data = {}
+        self.__data = None
 
-    def get_val(self, name, default=None):
-        return self.__data.get(name, default)
+    def get_val(self, default=None):
+        return self.__data if self.__data is not None else default
 
-    def set_val(self, name, value):
-        self.__data[name] = value
+    def set_val(self, value):
+        self.__data = value
         self.__database.changed = True
-
-    def is_empty(self):
-        return self.__data == {}
 
 
 class Database:
