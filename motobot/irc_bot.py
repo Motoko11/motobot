@@ -127,31 +127,6 @@ class IRCBot:
         for plugin in getattr(func, IRCBot.plugin, []):
             self.plugins.append(plugin)
 
-    def ignore(self, hostmask):
-        """ Ignore a user with the given hostmask. """
-        pattern = re.compile(hostmask.replace('*', '.*'), re.IGNORECASE)
-        self.ignore_list.append(pattern)
-
-    def unignore(self, host):
-        """ Unignore all masks which match given nick. """
-        removed = False
-        for pattern in self.ignore_list:
-            if pattern.match(host):
-                self.ignore_list.remove(pattern)
-                removed = True
-        return removed
-
-    def __ignored(self, host):
-        """ Test if a given user is ignored or not. """
-        if host is None:
-            return False
-
-        for pattern in self.ignore_list:
-            if pattern.match(host):
-                return True
-        else:
-            return False
-
     def is_master(self, nick, verified=True):
         """ Check if a user is on the master list.
 
@@ -197,17 +172,11 @@ class IRCBot:
             print("Sent: {}".format(msg))
 
     def __handle_message(self, message):
-        """ Handle an IRCMessage object with the appropriate handler.
-
-        Will ignore a user if their mask is on the ignore list.
-
-        """
+        """ Handle an IRCMessage object with the appropriate handler."""
         print(message)
 
-        if not self.__ignored(message.sender):
-            if message.command in self.hooks:
-                for func in self.hooks[message.command]:
-                    func(self, message)
+        for func in self.hooks.get(message.command, []):
+            func(self, message)
 
 
 Plugin = namedtuple('Plugin', ['func', 'type', 'priority', 'level', 'arg'])
