@@ -82,7 +82,7 @@ def top_desu_command(bot, database, nick, channel, message, args):
         'undesus': lambda x: x[1][2]
     }
     response = ''
-    modifier = Command('NOTICE', [nick])
+    modifier = Command('NOTICE', nick)
 
     try:
         stats = database.get_val({})

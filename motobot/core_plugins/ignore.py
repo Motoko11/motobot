@@ -44,7 +44,7 @@ def show_ignores(modifier, database, channel):
 @command('ignore', priority=Priority.max, level=IRCLevel.hop)
 def ignore_command(bot, database, nick, channel, message, args):
     response = ''
-    modifier = Command('NOTICE', [nick])
+    modifier = Command('NOTICE', nick)
 
     try:
         arg = args[1].lower()

@@ -55,7 +55,7 @@ def rem_regex(string, database):
 
 def show_patterns(database, nick):
     responses = []
-    modifier = Command('NOTICE', [nick])
+    modifier = Command('NOTICE', nick)
 
     print(get_patterns(database))
     for pattern, response in get_patterns(database):
