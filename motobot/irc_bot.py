@@ -208,8 +208,6 @@ class IRCBot:
             if message.command in self.hooks:
                 for func in self.hooks[message.command]:
                     func(self, message)
-            else:
-                print("Unknown command: {}".format(message.command))
 
 
 Plugin = namedtuple('Plugin', ['func', 'type', 'priority', 'level', 'arg'])
