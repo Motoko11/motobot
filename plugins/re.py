@@ -19,7 +19,7 @@ def parse_response(response, nick):
 def regex_command(bot, database, nick, channel, message, args):
     arg = args[1].lower()
     if arg == 'add':
-        response = add_regex(' '.join(args[2:]), database)
+        response = (add_regex(' '.join(args[2:]), database), Eat)
     elif arg == 'del':
         response = rem_regex(' '.join(args[2:]), database)
     elif arg == 'show':
@@ -39,7 +39,7 @@ def add_regex(string, database):
     patterns = get_patterns(database)
     patterns.append((re.compile(pattern, re.IGNORECASE), response))
     save_patterns(database, patterns)
-    return ("Pattern added successfully.", Eat)
+    return "Pattern added successfully."
 
 
 def rem_regex(string, database):
