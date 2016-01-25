@@ -29,13 +29,16 @@ def handle_privmsg(bot, message):
 def handle_plugin(bot, plugin, nick, channel, message):
     responses = None
 
-    if bot.get_userlevel(channel, nick) >= plugin.level:
-        if plugin.type == IRCBot.command_plugin:
-            responses = handle_command(plugin, bot, nick, channel, message)
-        elif plugin.type == IRCBot.match_plugin:
-            responses = handle_match(plugin, bot, nick, channel, message)
-        elif plugin.type == IRCBot.sink_plugin:
-            responses = handle_sink(plugin, bot, nick, channel, message)
+    try:
+        if bot.get_userlevel(channel, nick) >= plugin.level:
+            if plugin.type == IRCBot.command_plugin:
+                responses = handle_command(plugin, bot, nick, channel, message)
+            elif plugin.type == IRCBot.match_plugin:
+                responses = handle_match(plugin, bot, nick, channel, message)
+            elif plugin.type == IRCBot.sink_plugin:
+                responses = handle_sink(plugin, bot, nick, channel, message)
+    finally:
+        bot.database.write_database()
 
     return responses
 
@@ -46,17 +49,20 @@ def handle_command(plugin, bot, nick, channel, message):
 
     if trigger == test:
         args = message[len(bot.command_prefix):].split(' ')
-        return plugin.func(bot, nick, channel, message, args)
+        database_entry = bot.database.get_entry(plugin.func.__module__)
+        return plugin.func(bot, database_entry, nick, channel, message, args)
 
 
 def handle_match(plugin, bot, nick, channel, message):
     match = plugin.arg.search(message)
     if match is not None:
-        return plugin.func(bot, nick, channel, message, match)
+        database_entry = bot.database.get_entry(plugin.func.__module__)
+        return plugin.func(bot, database_entry, nick, channel, message, match)
 
 
 def handle_sink(plugin, bot, nick, channel, message):
-    return plugin.func(bot, nick, channel, message)
+    database_entry = bot.database.get_entry(plugin.func.__module__)
+    return plugin.func(bot, database_entry, nick, channel, message)
 
 
 def handle_responses(bot, nick, channel, responses):
