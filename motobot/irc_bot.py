@@ -153,9 +153,9 @@ class IRCBot:
         self.connected = True
         self.identified = False
 
-    def disconnect(self):
+    def disconnect(self, msg=None):
         """ Disconnect the bot. """
-        self.send('QUIT :BAI!')
+        self.send('QUIT' + (': ' + msg if msg is not None else ''))
         self.running = self.connected = self.identified = False
 
     def __recv(self):
