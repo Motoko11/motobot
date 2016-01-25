@@ -2,7 +2,7 @@ from pickle import load, dump, HIGHEST_PROTOCOL
 from os import replace
 
 
-class Entry:
+class DatabaseEntry:
     def __init__(self, database, data={}):
         self.__database = database
         self.__data = data
@@ -45,5 +45,5 @@ class Database:
 
     def get_entry(self, name):
         if name not in self.data:
-            self.data[name] = Entry(self)
+            self.data[name] = DatabaseEntry(self)
         return self.data[name]
