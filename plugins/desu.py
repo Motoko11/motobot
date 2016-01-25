@@ -76,23 +76,29 @@ def user_stats(database, nick):
 
 @command('topdesu')
 def top_desu_command(bot, database, nick, channel, message, args):
+    keys = {
+        'number': lambda x: x[1][1],
+        'average': lambda x: x[1][1] / x[1][0],
+        'undesus': lambda x: x[1][2]
+    }
+    response = ''
+    modifier = Command('NOTICE', [nick])
+
     try:
         stats = database.get_val({})
         arg = args[1].lower() if len(args) > 1 else 'number'
-        keys = {
-            'number': lambda x: x[1][1],
-            'average': lambda x: x[1][1] / x[1][0],
-            'undesus': lambda x: x[1][2]
-        }
         key = keys[arg]
 
         response = "Users with the highest score desus ({}): ".format(arg)
         for stats in sorted(stats.items(), reverse=True, key=key)[:10]:
             response += "{}: {}; ".format(stats[0], key(stats))
 
-        return response, Command('NOTICE', [nick])
     except KeyError:
-        return "Error: Not a valid argument. Valid arguments are: .", Command('NOTICE', [nick])
+        response = "Invalid argument, valid arguments are: "
+        for key in keys:
+            response += key + ', '
+
+    return response, modifier
 
 
 def update_stats(database, nick, un, number):
