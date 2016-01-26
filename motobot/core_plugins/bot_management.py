@@ -9,7 +9,6 @@ def command_command(bot, database, nick, channel, message, args):
     The 'quit' and 'part' argument have an optional quit/part message.
     The 'show' argument will return a list of currently joined channels.
     The 'set' argument will set an attribute of the bot. Use with caution.
-    The 'say' command is also accessible through an argument in this command.
     The 'reload' command will reload the plugins in the loaded packages.
     """
     response = None
