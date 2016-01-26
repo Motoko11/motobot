@@ -6,10 +6,10 @@ def command_command(bot, database, nick, channel, message, args):
     """ Command to manage the basic functions of the bot.
 
     The 'join' and 'part' argument both require a channel argument.
-    The 'quit' and 'part' argument has an optional quit/part message.
+    The 'quit' and 'part' argument have an optional quit/part message.
     The 'show' argument will return a list of currently joined channels.
     The 'set' argument will set an attribute of the bot. Use with caution.
-    The 'say' command is also accessible through an argument this command.
+    The 'say' command is also accessible through an argument in this command.
     """
     response = None
     notice = Notice(nick)
@@ -64,7 +64,7 @@ def join_channel(database, channel, notice):
     channels = database.get_val(set())
 
     if channel.lower() in channels:
-        response = ("I'm already in {}.".format(channel, notice))
+        response = ("I'm already in {}.".format(channel), notice)
     else:
         channels.add(channel.lower())
         database.set_val(channels)
@@ -80,7 +80,7 @@ def part_channel(database, channel, message, notice):
     channels = database.get_val(set())
 
     if channel.lower() not in channels:
-        response = ("I'm not in {}.".format(channel, notice))
+        response = ("I'm not in {}.".format(channel), notice)
     else:
         channels.discard(channel.lower())
         database.set_val(channels)
@@ -114,6 +114,14 @@ def say(target, message):
 
 def set_val(bot, name, value, notice):
     return ("This function has not yet been implemeneted.", notice)
+
+
+@hook('KICK')
+def handle_kick(bot, message):
+    if message.params[1] == bot.nick:
+        database = bot.database.get_entry(__name__)
+        channel = message.params[0]
+        part_channel(database, channel, None, None)
 
 
 @hook('004')
