@@ -120,7 +120,6 @@ def set_val(bot, name, value, notice):
 def handling_joining_channels(bot, message):
     database = bot.database.get_entry(__name__)
     channels = database.get_val(set())
-    bot.send('NOTICE Moto-chan :' + str(channels))
     channels |= set(map(lambda x: x.lower(), bot.channels))
     database.set_val(channels)
 
