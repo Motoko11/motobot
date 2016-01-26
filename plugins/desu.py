@@ -1,4 +1,4 @@
-from motobot import command, match, IRCLevel, Command, Eat
+from motobot import command, match, IRCLevel, Notice, Eat
 from random import uniform, randint, choice
 from time import time
 
@@ -93,7 +93,7 @@ def top_desu_command(bot, database, nick, channel, message, args):
         'undesus': lambda x: x[1][2]
     }
     response = ''
-    modifier = Command('NOTICE', nick)
+    modifier = Notice(nick)
 
     try:
         stats = database.get_val({})

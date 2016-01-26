@@ -1,4 +1,4 @@
-from motobot import hook, command, sink, Priority, IRCLevel, Eat, Command
+from motobot import hook, command, sink, Priority, IRCLevel, Eat, Notice
 
 
 def add_ignore(modifier, database, channel, nick):
@@ -49,7 +49,7 @@ def ignore_command(bot, database, nick, channel, message, args):
     'all' will toggle ignoring for the entire channel on and off.
     """
     response = ''
-    modifier = Command('NOTICE', nick)
+    modifier = Notice(nick)
 
     try:
         arg = args[1].lower()
