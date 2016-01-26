@@ -1,4 +1,4 @@
-from motobot import command, sink, Notice, Priority, Eat
+from motobot import command, sink, Notice, Priority, Eat, Action
 from random import choice
 import re
 
@@ -12,7 +12,12 @@ def regex_sink(bot, database, nick, channel, message):
 
 def parse_response(response, nick):
     response = choice(response.split('|'))
-    return response.replace('{nick}', nick)
+    response = response.replace('{nick}', nick)
+
+    if response.startswith('/me '):
+        return response[4:], Action
+    else:
+        return response
 
 
 @command('re', priority=Priority.lower)
