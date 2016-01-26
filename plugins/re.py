@@ -1,4 +1,4 @@
-from motobot import command, sink, Command, Priority, Eat
+from motobot import command, sink, Notice, Priority, Eat
 from random import choice
 import re
 
@@ -17,6 +17,12 @@ def parse_response(response, nick):
 
 @command('re', priority=Priority.lower)
 def regex_command(bot, database, nick, channel, message, args):
+    """ Manage regex matches on bot.
+
+    Valid arguments are: 'add', 'del', and 'show'.
+    'add' usage: re add [pattern] <=> [response]
+    'del' usage: re del [pattern]
+    """
     arg = args[1].lower()
     if arg == 'add':
         response = (add_regex(' '.join(args[2:]), database), Eat)
@@ -55,7 +61,7 @@ def rem_regex(string, database):
 
 def show_patterns(database, nick):
     responses = []
-    modifier = Command('NOTICE', nick)
+    modifier = Notice(nick)
 
     print(get_patterns(database))
     for pattern, response in get_patterns(database):

@@ -1,5 +1,4 @@
-from motobot import hook, command, sink, Priority, IRCLevel, Eat, Command
-from collections import namedtuple
+from motobot import hook, command, sink, Priority, IRCLevel, Eat, Notice
 
 
 def add_ignore(modifier, database, channel, nick):
@@ -43,8 +42,14 @@ def show_ignores(modifier, database, channel):
 
 @command('ignore', priority=Priority.max, level=IRCLevel.hop)
 def ignore_command(bot, database, nick, channel, message, args):
+    """ Manage ignores in a channel.
+
+    Valid arguments are: 'add', 'del', 'all, and 'show'.
+    'add' and 'del' require a nick argument.
+    'all' will toggle ignoring for the entire channel on and off.
+    """
     response = ''
-    modifier = Command('NOTICE', nick)
+    modifier = Notice(nick)
 
     try:
         arg = args[1].lower()

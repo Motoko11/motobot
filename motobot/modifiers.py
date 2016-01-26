@@ -51,6 +51,9 @@ class Command(Modifier):
         return command, params, trailing
 
 
+Notice = lambda nick: Command('NOTICE', nick)
+
+
 class EatModifier:
 
     """ Simple empty class for eating plugins. """

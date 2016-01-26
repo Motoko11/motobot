@@ -1,4 +1,4 @@
-from motobot import command, match, IRCLevel, Command, Eat
+from motobot import command, match, IRCLevel, Notice, Eat
 from random import uniform, randint, choice
 from time import time
 
@@ -54,6 +54,11 @@ def nyan_match(bot, database, nick, channel, message, match):
 
 @command('desu')
 def desu_command(bot, database, nick, channel, message, args):
+    """ Return desu stats of the queried user.
+
+    If an argument is given, queries for stats from that user.
+    If no argument is given, queries for stats from the requesting user.
+    """
     try:
         return user_stats(database, args[1])
     except IndexError:
@@ -75,14 +80,20 @@ def user_stats(database, nick):
 
 
 @command('topdesu')
+@command('desustats')
 def top_desu_command(bot, database, nick, channel, message, args):
+    """ Return the users with the highest desu score for the given argument.
+
+    Valid arguments are: 'number', 'average', and 'undesus'.
+    The default argument is 'number'.
+    """
     keys = {
         'number': lambda x: x[1][1],
         'average': lambda x: x[1][1] / x[1][0],
         'undesus': lambda x: x[1][2]
     }
     response = ''
-    modifier = Command('NOTICE', nick)
+    modifier = Notice(nick)
 
     try:
         stats = database.get_val({})
