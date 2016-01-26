@@ -1,6 +1,6 @@
-from motobot import IRCBot, hook, Priority, Modifier, EatModifier
+from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match
 from time import strftime, localtime
-import re
+from re import compile
 
 
 @hook('PRIVMSG')
@@ -105,7 +105,7 @@ def extract_response(response):
     return trailing, modifiers, eat
 
 
-pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
+pattern = compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
 
 
 def strip_control_codes(input):
@@ -129,12 +129,21 @@ def form_message(command, params, trailing):
     return message.replace('\n', '').replace('\r', '')
 
 
+@match(r'\x01(.*)\x01', priority=Priority.max)
+def ctcp_match(bot, database, nick, channel, message, match):
+    ctcp_req = match.group(1)
+    reply = ctcp_response(ctcp_req)
+    if reply is not None:
+        return reply, Notice(nick), Eat
+
+
 def ctcp_response(message):
     """ Return the appropriate response to a CTCP request. """
+    wrap = lambda x: '\x01' + x + '\x01'
     mapping = {
-        'VERSION': 'MotoBot Version 2.0',
-        'FINGER': 'Oh you dirty man!',
-        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
-        'PING': message
+        'VERSION': wrap('MotoBot Version 2.0'),
+        'FINGER': wrap('Oh you dirty man!'),
+        'TIME': wrap(strftime('%a %b %d %H:%M:%S', localtime())),
+        'PING': wrap(message)
     }
     return mapping.get(message.split(' ')[0].upper(), None)
