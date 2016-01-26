@@ -50,6 +50,7 @@ class IRCBot:
         self.channels = []
         self.masters = []
         self.database_path = None
+        self.default_help = None
         self.error_log = None
 
         for key, val in config.items():
