@@ -3,6 +3,10 @@ from motobot import command, Action, Target, IRCLevel
 
 @command('say', level=IRCLevel.master)
 def say_command(bot, database, nick, channel, message, args):
+    """ Send a message to a given target.
+
+    Usage: say <TARGET> [MESSAGE]
+    """
     try:
         target = Target(args[1])
         msg = ' '.join(args[2:])

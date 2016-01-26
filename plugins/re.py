@@ -17,6 +17,12 @@ def parse_response(response, nick):
 
 @command('re', priority=Priority.lower)
 def regex_command(bot, database, nick, channel, message, args):
+    """ Manage regex matches on bot.
+
+    Valid arguments are: 'add', 'del', and 'show'.
+    'add' usage: re add [pattern] <=> [response]
+    'del' usage: re del [pattern]
+    """
     arg = args[1].lower()
     if arg == 'add':
         response = (add_regex(' '.join(args[2:]), database), Eat)

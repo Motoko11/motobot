@@ -37,6 +37,7 @@ def silly_response(arg):
 @command('w')
 @command('weather')
 def weather_command(bot, database, nick, channel, message, args):
+    """ Get the weather for a given area. """
     response = silly_response(args[1])
     if response is not None:
         return nick + ': ' + response
