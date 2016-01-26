@@ -1,4 +1,4 @@
-from motobot import command, Action
+from motobot import command, Action, match
 
 
 @command('snuggle')
@@ -41,3 +41,13 @@ def pet_command(bot, database, nick, channel, message, args):
         response = 'pets ' + nick
 
     return response, Action
+
+
+@match(r'\*(.+? )pets desubot')
+def purr_match(bot, database, nick, channel, message, match):
+    return 'purrs', Action
+
+
+@match(r'\*(?:.+? )(kicks|pokes|hits|bites) desubot')
+def bite_match(bot, database, nick, channel, message, match):
+    return 'bites ' + nick + (' back' if match.group(1) == 'bites' else ''), Action
