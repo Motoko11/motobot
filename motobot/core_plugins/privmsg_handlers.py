@@ -12,7 +12,7 @@ def handle_privmsg(bot, message):
     """
     nick = message.nick
     channel = message.params[0]
-    message = strip_control_codes(message.params[-1])
+    message = strip_control_codes(transform_action(nick, message.params[-1]))
 
     break_priority = Priority.min
     for plugin in bot.plugins:
@@ -115,6 +115,14 @@ def strip_control_codes(input):
     """ Strip the control codes from the input. """
     output = pattern.sub('', input)
     return output
+
+
+def transform_action(nick, msg):
+    """ Transform an action CTCP into a message. """
+    if msg.startswith('\x01ACTION ') and msg.endswith('\x01'):
+        return '*' + nick + msg[7:-1]
+    else:
+        return msg
 
 
 def form_message(command, params, trailing):
