@@ -23,6 +23,16 @@ def rr_command(bot, database, nick, channel, message, args):
 
     return response
 
+
+@command('mib')
+def mib_command(bot, database, nick, channel, message, args):
+    response = "To change your nick to something you'd like type: /nick new_name; If you like that name and it is unregistered. To register it use: /ns REGISTER password [email]; More information can be found here: https://wiki.rizon.net/index.php?title=Register_your_nickname;"
+
+    if len(args) > 1:
+        response = "{}: {}".format(' '.join(args[1:]).strip(), response)
+
+    return response
+
     
 @command('a')
 @command('anime')
