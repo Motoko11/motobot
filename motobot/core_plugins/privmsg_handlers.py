@@ -29,16 +29,13 @@ def handle_privmsg(bot, message):
 def handle_plugin(bot, plugin, nick, channel, message):
     responses = None
 
-    try:
-        alt = bot.get_userlevel(channel, nick) < plugin.level
-        if plugin.type == IRCBot.command_plugin:
-            responses = handle_command(plugin, bot, nick, channel, message, alt)
-        elif plugin.type == IRCBot.match_plugin:
-            responses = handle_match(plugin, bot, nick, channel, message, alt)
-        elif plugin.type == IRCBot.sink_plugin:
-            responses = handle_sink(plugin, bot, nick, channel, message, alt)
-    finally:
-        bot.database.write_database()
+    alt = bot.get_userlevel(channel, nick) < plugin.level
+    if plugin.type == IRCBot.command_plugin:
+        responses = handle_command(plugin, bot, nick, channel, message, alt)
+    elif plugin.type == IRCBot.match_plugin:
+        responses = handle_match(plugin, bot, nick, channel, message, alt)
+    elif plugin.type == IRCBot.sink_plugin:
+        responses = handle_sink(plugin, bot, nick, channel, message, alt)
 
     return responses
 
