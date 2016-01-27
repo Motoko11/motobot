@@ -74,10 +74,10 @@ class IRCBot:
                 except UnicodeEncodeError:
                     pass
                 except:
-                    print_exc()
                     if self.error_log is not None:
                         log = open(self.error_log, 'a')
                         print_exc(file=log)
+                    print_exc()
 
     def load_plugins(self, package):
         """ Add a package to the package list and load the plugins. """
@@ -173,5 +173,8 @@ class IRCBot:
         """ Handle an IRCMessage object with the appropriate handler."""
         print(message)
 
-        for func in self.hooks.get(message.command, []):
-            func(self, message)
+        try:
+            for func in self.hooks.get(message.command, []):
+                func(self, message)
+        finally:
+            self.database.write_database()

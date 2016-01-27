@@ -1,4 +1,5 @@
-from motobot import command, Action
+from motobot import command, Action, match
+from random import choice
 
 
 @command('snuggle')
@@ -41,3 +42,28 @@ def pet_command(bot, database, nick, channel, message, args):
         response = 'pets ' + nick
 
     return response, Action
+
+
+@command('michaeljackson')
+def micky_command(bot, database, nick, channel, message, args):
+    target = ''
+    if len(args) > 1:
+        target = ' '.join(args[1:])
+    else:
+        target = nick
+
+    return "moonwalks over {}'s face".format(target), Action
+
+
+@match(r'\*(.+? )pets desubot')
+def purr_match(bot, database, nick, channel, message, match):
+    responses = [
+        'purrs', 'snuggles up against ' + nick,
+        'cuddles ' + nick, 'rubs up against ' + nick
+    ]
+    return choice(responses), Action
+
+
+@match(r'\*(?:.+? )(kicks|pokes|hits|bites) desubot')
+def bite_match(bot, database, nick, channel, message, match):
+    return 'bites ' + nick + (' back' if match.group(1) == 'bites' else ''), Action

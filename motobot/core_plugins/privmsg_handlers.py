@@ -1,6 +1,6 @@
-from motobot import IRCBot, hook, Priority, Modifier, EatModifier
+from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match
 from time import strftime, localtime
-import re
+from re import compile
 
 
 @hook('PRIVMSG')
@@ -12,7 +12,7 @@ def handle_privmsg(bot, message):
     """
     nick = message.nick
     channel = message.params[0]
-    message = strip_control_codes(message.params[-1])
+    message = strip_control_codes(transform_action(nick, message.params[-1]))
 
     break_priority = Priority.min
     for plugin in bot.plugins:
@@ -29,16 +29,13 @@ def handle_privmsg(bot, message):
 def handle_plugin(bot, plugin, nick, channel, message):
     responses = None
 
-    try:
-        alt = bot.get_userlevel(channel, nick) < plugin.level
-        if plugin.type == IRCBot.command_plugin:
-            responses = handle_command(plugin, bot, nick, channel, message, alt)
-        elif plugin.type == IRCBot.match_plugin:
-            responses = handle_match(plugin, bot, nick, channel, message, alt)
-        elif plugin.type == IRCBot.sink_plugin:
-            responses = handle_sink(plugin, bot, nick, channel, message, alt)
-    finally:
-        bot.database.write_database()
+    alt = bot.get_userlevel(channel, nick) < plugin.level
+    if plugin.type == IRCBot.command_plugin:
+        responses = handle_command(plugin, bot, nick, channel, message, alt)
+    elif plugin.type == IRCBot.match_plugin:
+        responses = handle_match(plugin, bot, nick, channel, message, alt)
+    elif plugin.type == IRCBot.sink_plugin:
+        responses = handle_sink(plugin, bot, nick, channel, message, alt)
 
     return responses
 
@@ -108,13 +105,21 @@ def extract_response(response):
     return trailing, modifiers, eat
 
 
-pattern = re.compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
+pattern = compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
 
 
 def strip_control_codes(input):
     """ Strip the control codes from the input. """
     output = pattern.sub('', input)
     return output
+
+
+def transform_action(nick, msg):
+    """ Transform an action CTCP into a message. """
+    if msg.startswith('\x01ACTION ') and msg.endswith('\x01'):
+        return '*' + nick + msg[7:-1]
+    else:
+        return msg
 
 
 def form_message(command, params, trailing):
@@ -124,12 +129,21 @@ def form_message(command, params, trailing):
     return message.replace('\n', '').replace('\r', '')
 
 
+@match(r'\x01(.*)\x01', priority=Priority.max)
+def ctcp_match(bot, database, nick, channel, message, match):
+    ctcp_req = match.group(1)
+    reply = ctcp_response(ctcp_req)
+    if reply is not None:
+        return reply, Notice(nick), Eat
+
+
 def ctcp_response(message):
     """ Return the appropriate response to a CTCP request. """
+    wrap = lambda x: '\x01' + x + '\x01'
     mapping = {
-        'VERSION': 'MotoBot Version 2.0',
-        'FINGER': 'Oh you dirty man!',
-        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
-        'PING': message
+        'VERSION': wrap('MotoBot Version 2.0'),
+        'FINGER': wrap('Oh you dirty man!'),
+        'TIME': wrap(strftime('%a %b %d %H:%M:%S', localtime())),
+        'PING': wrap(message)
     }
     return mapping.get(message.split(' ')[0].upper(), None)

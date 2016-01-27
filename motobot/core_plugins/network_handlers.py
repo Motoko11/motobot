@@ -24,13 +24,11 @@ def handle_identification(bot, message):
         bot.identified = True
 
 
-@hook('004')
+@hook('002')
 def handle_nickserv_identification(bot, message):
     """ At server welcome message 004 identify to nickserv and join channels. """
     if bot.nickserv_password is not None:
         bot.send('PRIVMSG nickserv :identify ' + bot.nickserv_password)
-    for channel in bot.channels:
-        bot.send('JOIN ' + channel)
 
 
 @hook('ERROR')
