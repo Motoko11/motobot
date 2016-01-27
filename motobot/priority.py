@@ -1,8 +1,9 @@
 class Priority:
     """ Enum class (Not really) for plugin priority. """
-    max = 7
-    highest = 6
-    higher = 5
+    max = 8
+    highest = 7
+    higher = 6
+    high = 5
     medium = 4
     low = 3
     lower = 2
