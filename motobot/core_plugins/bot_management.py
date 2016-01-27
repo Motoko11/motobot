@@ -39,9 +39,10 @@ def command_command(bot, database, nick, channel, message, args):
             response = set_val(bot, name, value, notice)
         elif arg == 'reload':
             error = bot.reload_plugins()
-            response = ("Plugins have been reloaded.", notice)
+            response = "Plugins have been reloaded."
             if error:
-                response[0] += " There were some errors."
+                response += " There were some errors."
+            response = (response, notice)
         else:
             response = ("Error: Invalid argument.", notice)
     except IndexError:
