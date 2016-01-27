@@ -64,6 +64,6 @@ def purr_match(bot, database, nick, channel, message, match):
     return choice(responses), Action
 
 
-@match(r'\*(?:.+? )(kicks|pokes|hits|bites) desubot')
+@match(r'\*(?:.+? )(kicks|pokes|hits|bites|pats) desubot')
 def bite_match(bot, database, nick, channel, message, match):
     return 'bites ' + nick + (' back' if match.group(1) == 'bites' else ''), Action
