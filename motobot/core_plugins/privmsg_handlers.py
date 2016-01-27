@@ -48,7 +48,8 @@ def handle_command(plugin, bot, nick, channel, message, alt):
         args = message[len(bot.command_prefix):].split(' ')
         database_entry = bot.database.get_entry(plugin.func.__module__)
         func = plugin.func if not alt else plugin.alt
-        return func(bot, database_entry, nick, channel, message, args)
+        if func is not None:
+            return func(bot, database_entry, nick, channel, message, args)
 
 
 def handle_match(plugin, bot, nick, channel, message, alt):
@@ -56,13 +57,15 @@ def handle_match(plugin, bot, nick, channel, message, alt):
     if match is not None:
         database_entry = bot.database.get_entry(plugin.func.__module__)
         func = plugin.func if not alt else plugin.alt
-        return func(bot, database_entry, nick, channel, message, match)
+        if func is not None:
+            return func(bot, database_entry, nick, channel, message, match)
 
 
 def handle_sink(plugin, bot, nick, channel, message, alt):
     database_entry = bot.database.get_entry(plugin.func.__module__)
     func = plugin.func if not alt else plugin.alt
-    return func(bot, database_entry, nick, channel, message)
+    if func is not None:
+        return func(bot, database_entry, nick, channel, message)
 
 
 def handle_responses(bot, nick, channel, responses):
