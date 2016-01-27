@@ -74,44 +74,58 @@ class IRCBot:
                 except UnicodeEncodeError:
                     pass
                 except:
-                    if self.error_log is not None:
-                        log = open(self.error_log, 'a')
-                        print_exc(file=log)
-                    print_exc()
+                    self.log_error()
 
     def load_plugins(self, package):
         """ Add a package to the package list and load the plugins. """
+        error = False
         if package not in self.packages:
             self.packages.append(package)
             path = import_module(package).__path__._path
             for _, module_name, _ in iter_modules(path, package + '.'):
-                self.__load_module(module_name)
+                error |= self.__load_module(module_name)
         self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x[2])
+        return error
 
     def reload_plugins(self):
         """ Reload all plugins from packages. """
+        error = False
         self.hooks = {}
         self.plugins = []
 
         for package in self.packages:
             path = import_module(package).__path__._path
             for _, module_name, _ in iter_modules(path, package + '.'):
-                self.__load_module(module_name)
+                error |= self.__load_module(module_name)
         self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x[2])
+        return error
 
     def __load_module(self, module_name):
         """ Load or reload a module. """
+        error = False
         if module_name in self.modules:
-            reload(self.modules[module_name])
-            print("Module: {} reloaded".format(module_name))
+            try:
+                reload(self.modules[module_name])
+                print("Module: {} reloaded".format(module_name))
+            except:
+                error = True
+                self.log_error()
+                print("Error: while trying to reload module: {}".format(module_name))
         else:
-            self.modules[module_name] = import_module(module_name)
-            print("Module: {} loaded".format(module_name))
+            try:
+                self.modules[module_name] = import_module(module_name)
+                print("Module: {} loaded".format(module_name))
+            except:
+                error = True
+                self.log_error()
+                print("Error: while trying to load module: {}".format(module_name))
 
-        module = self.modules[module_name]
-        for func in [getattr(module, attrib) for attrib in dir(module)]:
-            self.__add_hook(func)
-            self.__add_plugin(func)
+        if not error:
+            module = self.modules[module_name]
+            for func in [getattr(module, attrib) for attrib in dir(module)]:
+                self.__add_hook(func)
+                self.__add_plugin(func)
+        return error
 
     def __add_hook(self, func):
         """ Add a hook to the bot. """
@@ -151,10 +165,11 @@ class IRCBot:
         self.connected = True
         self.identified = False
 
-    def disconnect(self, msg=None):
-        """ Disconnect the bot. """
-        self.send('QUIT' + (': ' + msg if msg is not None else ''))
-        self.running = self.connected = self.identified = False
+    def log_error(self):
+        if self.error_log is not None:
+            log = open(self.error_log, 'a')
+            print_exc(file=log)
+        print_exc()
 
     def __recv(self):
         """ Receive messages from the socket. """
