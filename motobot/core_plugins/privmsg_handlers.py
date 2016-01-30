@@ -33,7 +33,7 @@ def handle_privmsg(bot, message):
         else:
             responses = handle_plugin(bot, plugin, nick, channel, message)
             target = channel if channel != bot.nick else nick
-            eat = handle_responses(bot, responses, [target])
+            eat = handle_responses(bot, [responses], [target])
 
             if eat is True:
                 break_priority = plugin.priority
@@ -83,22 +83,12 @@ def handle_sink(plugin, bot, nick, channel, message, alt):
 
 def handle_responses(bot, responses, params, command='PRIVMSG'):
     eat = False
-    if responses is not None:
-        if not hasattr(responses, '__iter__'):
-            responses = []
+    if responses != [None]:
+        will_eat, modifiers, trailings, iters = extract_responses(responses)
 
-        for x in responses:
-            will_eat, trailings, modifiers, iters = extract_responses(responses)
-            eat |= will_eat
+        eat |= will_eat
 
-            for trailing in trailings:
-                for mod in modifiers:
-                    command, params, trailing = mod(command, params, trailing)
-                    message = form_message(command, params, trailing)
-                    bot.send(message)
-
-            for iter in iters:
-                eat |= handle_responses(bot, iter, params, command)
+        # decide how to handle recursive modifiers
 
     return eat
 
@@ -116,7 +106,7 @@ def extract_responses(responses):
             trailings.append(x)
         elif isinstance(x, Modifier):
             modifiers.append(x)
-        elif hasattr(x, '__iter__'):
+        else:
             iters.append(x)
 
     return will_eat, trailings, modifiers, iters
