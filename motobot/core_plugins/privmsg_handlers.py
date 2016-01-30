@@ -1,6 +1,18 @@
-from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match
+from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match, command
 from time import strftime, localtime
 from re import compile
+
+
+@command('test1')
+def test1(bot, database, nick, channel, message, args):
+    modifier = Notice(nick)
+    return [("message1", modifier), ("message2", modifier)]
+
+
+@command('test2')
+def test2(bot, database, nick, channel, message, args):
+    modifier = Notice(nick)
+    return ["message1", "message2"], modifier
 
 
 @hook('PRIVMSG')
@@ -20,7 +32,8 @@ def handle_privmsg(bot, message):
             break
         else:
             responses = handle_plugin(bot, plugin, nick, channel, message)
-            eat = handle_responses(bot, nick, channel, responses)
+            target = channel if channel != bot.nick else nick
+            eat = handle_responses(bot, responses, [target])
 
             if eat is True:
                 break_priority = plugin.priority
@@ -68,44 +81,45 @@ def handle_sink(plugin, bot, nick, channel, message, alt):
         return func(bot, database_entry, nick, channel, message)
 
 
-def handle_responses(bot, nick, channel, responses):
+def handle_responses(bot, responses, params, command='PRIVMSG'):
     eat = False
     if responses is not None:
-        if not isinstance(responses, list):
-            responses = [responses]
+        if not hasattr(responses, '__iter__'):
+            responses = []
 
-        for response in responses:
-            command = 'PRIVMSG'
-            params = [channel if channel != bot.nick else nick]
-            trailing, modifiers, to_eat = extract_response(response)
-            eat |= to_eat
+        for x in responses:
+            will_eat, trailings, modifiers, iters = extract_responses(responses)
+            eat |= will_eat
 
-            if not (modifiers == [] and trailing == ''):
-                for modifier in modifiers:
-                    command, params, trailing = modifier(command, params, trailing)
+            for trailing in trailings:
+                for mod in modifiers:
+                    command, params, trailing = mod(command, params, trailing)
+                    message = form_message(command, params, trailing)
+                    bot.send(message)
 
-                message = form_message(command, params, trailing)
-                bot.send(message)
+            for iter in iters:
+                eat |= handle_responses(bot, iter, params, command)
+
     return eat
 
 
-def extract_response(response):
-    trailing = ''
+def extract_responses(responses):
+    will_eat = False
+    trailings = []
     modifiers = []
-    eat = False
+    iters = []
 
-    if not isinstance(response, tuple):
-        response = (response,)
-
-    for x in response:
-        if isinstance(x, str):
-            trailing += x
+    for x in responses:
+        if isinstance(x, EatModifier):
+            will_eat = True
+        elif isinstance(x, str):
+            trailings.append(x)
         elif isinstance(x, Modifier):
             modifiers.append(x)
-        elif isinstance(x, EatModifier):
-            eat = True
+        elif hasattr(x, '__iter__'):
+            iters.append(x)
 
-    return trailing, modifiers, eat
+    return will_eat, trailings, modifiers, iters
 
 
 pattern = compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
