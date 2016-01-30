@@ -115,6 +115,32 @@ def top_anime_command(bot, database, nick, channel, message, args):
         return format_str.format(search_users(nick))
 
 
+@command('tag')
+@command('atag')
+def atag_command(bot, database, nick, channel, message, args):
+    """ Search for anime of the given tag. """
+    tag = args[1:]
+    return search_tag(tag, 'anime')
+
+
+@command('mtag')
+def mtag_command(bot, database, nick, channel, message, args):
+    """ Search for manga of the given tag. """
+    tag = args[1:]
+    return search_tag(tag, 'manga')
+
+
+def search_tag(tag, media):
+    url = base_url + '/' + media + '/tags/' + '-'.join(tag)
+
+    response = get(url)
+
+    if response.url == url:
+        return "Search results: {}".format(url)
+    else:
+        return "{} is not a valid tag.".format(' '.join(tag))
+
+
 @command('more')
 def more_command(bot, database, nick, channel, message, args):
     """ Return more results for the most recent anime-planet.com search. """

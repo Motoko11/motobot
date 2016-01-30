@@ -34,10 +34,10 @@ def del_ignore(modifier, database, channel, nick):
 def show_ignores(modifier, database, channel):
     channel_ignores = database.get_val({}).get(channel, set())
     if channel_ignores == set():
-        return "I am not ignoring anyone on {}.".format(channel)
+        return "I am not ignoring anyone on {}.".format(channel), modifier
     else:
         return "I am currently ignoring: {} on {}.".format(
-            ", ".join(channel_ignores), channel)
+            ", ".join(channel_ignores), channel), modifier
 
 
 @command('ignore', priority=Priority.max, level=IRCLevel.hop)
