@@ -2,24 +2,22 @@ class Modifier:
 
     """ Modifier class base, modifies a plugin return message. """
 
-    def modify(self, command, params, trailing):
-        """ Override to modify the given parameters.
+    def modify_command(self, command):
+        return command
 
-        Should return command, params, trailing after modification.
-        """
-        raise NotImplementedError('Should be implemented in derived class.')
+    def modify_params(self, params):
+        return params
 
-    def __call__(self, command, params, trailing):
-        return self.modify(command, params, trailing)
+    def modify_trailing(self, trailing):
+        return trailing
 
 
 class ActionModifier(Modifier):
 
     """ Modifier class to turn a message into an action. """
 
-    def modify(self, command, params, trailing):
-        trailing = '\x01ACTION {}\x01'.format(trailing)
-        return command, params, trailing
+    def modify_trailing(self, trailing):
+        return '\x01ACTION {}\x01'.format(trailing)
 
 
 Action = ActionModifier()
@@ -32,9 +30,9 @@ class Target(Modifier):
     def __init__(self, target):
         self.target = target
 
-    def modify(self, command, params, trailing):
+    def modify_params(self, params):
         params[0] = self.target
-        return command, params, trailing
+        return params
 
 
 class Command(Modifier):
@@ -45,10 +43,11 @@ class Command(Modifier):
         self.command = command
         self.params = params if not isinstance(params, str) else [params]
 
-    def modify(self, command, params, trailing):
-        command = self.command
-        params = params if self.params is None else self.params
-        return command, params, trailing
+    def modify_command(self, command):
+        return self.command
+
+    def modify_params(self, params):
+        return params if self.params is None else self.params
 
 
 Notice = lambda nick: Command('NOTICE', nick)
