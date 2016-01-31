@@ -3,18 +3,6 @@ from time import strftime, localtime
 from re import compile
 
 
-@command('test1')
-def test1(bot, database, nick, channel, message, args):
-    modifier = Notice(nick)
-    return [("message1", modifier), ("message2", modifier)]
-
-
-@command('test2')
-def test2(bot, database, nick, channel, message, args):
-    modifier = Notice(nick)
-    return ["message1", "message2"], modifier
-
-
 @hook('PRIVMSG')
 def handle_privmsg(bot, message):
     """ Handle the privmsg commands.
