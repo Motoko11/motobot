@@ -1,4 +1,4 @@
-from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match, command
+from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match
 from time import strftime, localtime
 from re import compile
 
