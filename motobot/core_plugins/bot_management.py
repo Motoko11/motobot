@@ -12,43 +12,36 @@ def command_command(bot, database, nick, channel, message, args):
     The 'reload' command will reload the plugins in the loaded packages.
     """
     response = None
-    notice = Notice(nick)
 
     try:
         arg = args[1].lower()
 
         if arg == 'join':
             channel = args[2]
-            response = join_channel(database, channel, notice)
+            response = join_channel(database, channel)
         elif arg == 'part':
             channel = args[2]
             message = args[3:]
-            response = part_channel(database, channel, message, notice)
+            response = part_channel(database, channel, message)
         elif arg == 'quit':
             message = args[2:]
-            response = quit(bot, message, notice)
+            response = quit(bot, message)
         elif arg == 'show':
-            response = show_channels(database, notice)
-        elif arg == 'say':
-            target = args[2]
-            message = ' '.join(args[3:])
-            response = say(target, message)
+            response = show_channels(database)
         elif arg == 'set':
             name = args[2]
             value = args[3:]
-            response = set_val(bot, name, value, notice)
+            response = set_val(bot, name, value)
         elif arg == 'reload':
             error = bot.reload_plugins()
-            response = "Plugins have been reloaded."
-            if error:
-                response += " There were some errors."
-            response = (response, notice)
+            response = "Plugins have been reloaded." + \
+                " There were some errors." if error else ""
         else:
-            response = ("Error: Invalid argument.", notice)
+            response = "Error: Invalid argument."
     except IndexError:
-        response = ("Error: Too few arguments supplied.", notice)
+        response = "Error: Too few arguments supplied."
 
-    return response
+    return response, Notice(nick)
 
 
 @command('say', level=IRCLevel.master)
@@ -65,49 +58,49 @@ def say_command(bot, database, nick, channel, message, args):
         return ("Error: Too few arguments supplied.", Notice(nick))
 
 
-def join_channel(database, channel, notice):
+def join_channel(database, channel):
     response = None
     channels = database.get_val(set())
 
     if channel.lower() in channels:
-        response = ("I'm already in {}.".format(channel), notice)
+        response = "I'm already in {}.".format(channel)
     else:
         channels.add(channel.lower())
         database.set_val(channels)
         response = [
             Command('JOIN', channel),
-            ("I have joined {}.".format(channel), notice)
+            "I have joined {}.".format(channel)
         ]
     return response
 
 
-def part_channel(database, channel, message, notice):
+def part_channel(database, channel, message):
     response = None
     channels = database.get_val(set())
 
     if channel.lower() not in channels:
-        response = ("I'm not in {}.".format(channel), notice)
+        response = "I'm not in {}.".format(channel)
     else:
         channels.discard(channel.lower())
         database.set_val(channels)
         response = [
-            message, Command('PART', channel),
-            ("I have left {}.".format(channel), notice)
+            (message, Command('PART', channel)),
+            "I have left {}.".format(channel)
         ]
     return response
 
 
-def quit(bot, message, notice):
+def quit(bot, message):
     bot.running = bot.connected = bot.identified = False
     return [
-        ("Goodbye!", notice),
-        (message, Command('QUIT'))
+        (message, Command('QUIT')),
+        "Goodbye!"
     ]
 
 
-def show_channels(database, notice):
+def show_channels(database):
     channels = database.get_val(set())
-    return (notice, "I am currently in: {}.".format(', '.join(channels)))
+    return "I am currently in: {}.".format(', '.join(channels))
 
 
 def say(target, message):
@@ -118,8 +111,8 @@ def say(target, message):
         return (message, target_modifier)
 
 
-def set_val(bot, name, value, notice):
-    return ("This function has not yet been implemeneted.", notice)
+def set_val(bot, name, value):
+    return "This function has not yet been implemeneted."
 
 
 @hook('KICK')
