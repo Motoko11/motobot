@@ -46,5 +46,5 @@ def setblame_command(bot, database, nick, channel, message, args):
         next_blame = target
         response = "Next blame set to blame {}.".format(target)
     except IndexError:
-        response "Error: Please supply a user to blame."
+        response = "Error: Please supply a user to blame."
     return response, Notice(nick)
