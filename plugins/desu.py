@@ -93,7 +93,6 @@ def top_desu_command(bot, database, nick, channel, message, args):
         'undesus': lambda x: x[1][2]
     }
     response = ''
-    modifier = Notice(nick)
 
     try:
         stats = database.get_val({})
@@ -108,7 +107,7 @@ def top_desu_command(bot, database, nick, channel, message, args):
         response = "Invalid argument, valid arguments are: " + \
             ", ".join(keys.keys()) + '.'
 
-    return response, modifier
+    return response, Notice(nick)
 
 
 def update_stats(database, nick, un, number):
