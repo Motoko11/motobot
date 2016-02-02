@@ -74,8 +74,6 @@ def handle_responses(bot, responses, params, command='PRIVMSG'):
     eat = False
     if responses is not None:
         will_eat, modifiers, trailings, iters = extract_responses(responses)
-        print(modifiers, trailings, iters)
-
         eat |= will_eat
 
         for modifier in modifiers:
@@ -89,7 +87,7 @@ def handle_responses(bot, responses, params, command='PRIVMSG'):
             bot.send(message)
 
         for iter in iters:
-            handle_responses(bot, iter, params, command)
+            eat |= handle_responses(bot, iter, params, command)
 
     return eat
 
