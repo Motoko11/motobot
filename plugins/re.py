@@ -11,13 +11,11 @@ def regex_sink(bot, database, nick, channel, message):
 
 
 def parse_response(response, nick):
-    response = choice(response.split('|'))
-    response = response.replace('{nick}', nick)
+    response = choice(response.split('|')).replace('{nick}', nick)
 
     if response.startswith('/me '):
-        return response[4:], Action
-    else:
-        return response
+        response = (response[4:], Action)
+    return response
 
 
 @command('re', priority=Priority.lower)
@@ -66,13 +64,12 @@ def rem_regex(string, database):
 
 def show_patterns(database, nick):
     responses = []
-    modifier = Notice(nick)
 
-    print(get_patterns(database))
     for pattern, response in get_patterns(database):
         app = "{}: {};".format(pattern.pattern, response)
-        responses.append((app, modifier))
-    return responses
+        responses.append(app)
+
+    return responses, Notice(nick)
 
 
 patterns_cache = None
