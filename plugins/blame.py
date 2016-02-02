@@ -40,10 +40,11 @@ def blame_command(bot, database, nick, channel, message, args):
 @command('nextblame', level=IRCLevel.master)
 def setblame_command(bot, database, nick, channel, message, args):
     global next_blame
-    notice = Notice(nick)
+    response = ''
     try:
         target = ' '.join(args[1:])
         next_blame = target
-        return "Next blame set to blame {}.".format(target), notice
+        response = "Next blame set to blame {}.".format(target)
     except IndexError:
-        return "Error: Please supply a user to blame."
+        response "Error: Please supply a user to blame."
+    return response, Notice(nick)
