@@ -27,8 +27,10 @@ def regex_command(bot, database, nick, channel, message, args):
     """ Manage regex matches on bot.
 
     Valid arguments are: 'add', 'del', and 'show'.
-    'add' usage: re add [pattern] <=> [response]
-    'del' usage: re del [pattern]
+    'add' usage: re add [pattern] <=> [response];
+    'del' usage: re del [pattern];
+    'show' usage: re show [pattern];
+    If pattern is not specified, a list of triggers will be returned.
     """
     arg = args[1].lower()
     if arg == 'add':
