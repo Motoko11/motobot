@@ -1,4 +1,4 @@
-from motobot import command, sink, Notice, Priority, Eat, Action
+from motobot import command, sink, Notice, Priority, Eat, Action, format_responses
 from random import choice
 from re import compile, IGNORECASE
 
@@ -90,27 +90,6 @@ def show_patterns(database, arg):
 
     if responses == []:
         responses = "There are no patterns that match the given string."
-
-    return responses
-
-
-def format_responses(data, format_string='{}', separator=', ', max_length=400):
-    responses = []
-
-    while data != []:
-        cur = []
-        length = len(format_string)
-
-        while data != []:
-            l = len(data[0]) + len(separator)
-            if length + l <= max_length:
-                length += l
-                cur.append(data.pop(0))
-            else:
-                break
-
-        msg = format_string.format(separator.join(cur))
-        responses.append(msg)
 
     return responses
 
