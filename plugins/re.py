@@ -94,27 +94,30 @@ def show_patterns(database, arg):
     return responses
 
 
-def show_triggers(database):
-    triggers = [x[0].pattern for x in get_patterns(database)]
+def format_responses(data, format_string='{}', separator=', ', max_length=400):
     responses = []
-    format_string = "Triggers: {};"
-    separator = ", "
-    max_length = 425
 
-    while triggers != []:
+    while data != []:
         cur = []
         length = len(format_string)
 
-        while triggers != []:
-            l = len(triggers[0]) + len(separator)
+        while data != []:
+            l = len(data[0]) + len(separator)
             if length + l <= max_length:
                 length += l
-                cur.append(triggers.pop(0))
+                cur.append(data.pop(0))
             else:
                 break
 
         msg = format_string.format(separator.join(cur))
         responses.append(msg)
+
+    return responses
+
+
+def show_triggers(database):
+    triggers = [x[0].pattern for x in get_patterns(database)]
+    responses = format_responses(triggers, "Triggers: {};")
 
     if responses == []:
         responses = "There are no patterns currently saved."
