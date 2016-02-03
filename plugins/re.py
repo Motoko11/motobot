@@ -47,7 +47,7 @@ def regex_command(bot, database, nick, channel, message, args):
     return response, Eat, Notice(nick)
 
 
-parse_pattern = compile(r'^(.*?)(?: ?)<=>(?: ?)(.*)')
+parse_pattern = compile(r'^(.+?)(?: ?)<=>(?: ?)(.+)')
 
 
 def add_regex(string, database):
