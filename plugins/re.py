@@ -5,9 +5,13 @@ from re import compile, IGNORECASE
 
 @sink(priority=Priority.lowest)
 def regex_sink(bot, database, nick, channel, message):
+    responses = []
+
     for pattern, response in get_patterns(database):
         if pattern.search(message):
-            return parse_response(response, nick)
+            responses.append(parse_response(response, nick))
+
+    return responses
 
 
 def parse_response(response, nick):
