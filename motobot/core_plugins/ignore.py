@@ -1,7 +1,7 @@
 from motobot import hook, command, sink, Priority, IRCLevel, Eat, Notice
 
 
-def add_ignore(modifier, database, channel, nick):
+def add_ignore(database, channel, nick):
     response = ''
     ignores = database.get_val({})
     channel_ignores = ignores.get(channel, set())
@@ -13,10 +13,10 @@ def add_ignore(modifier, database, channel, nick):
         ignores[channel] = channel_ignores
         database.set_val(ignores)
         response = "I'm now ignoring {}.".format(nick)
-    return response, modifier
+    return response
 
 
-def del_ignore(modifier, database, channel, nick):
+def del_ignore(database, channel, nick):
     responses = ''
     ignores = database.get_val({})
     channel_ignores = ignores.get(channel, set())
@@ -28,16 +28,16 @@ def del_ignore(modifier, database, channel, nick):
         ignores[channel] = channel_ignores
         database.set_val(ignores)
         response = "I'm no longer ignoring {}.".format(nick)
-    return response, modifier
+    return response
 
 
-def show_ignores(modifier, database, channel):
+def show_ignores(database, channel):
     channel_ignores = database.get_val({}).get(channel, set())
     if channel_ignores == set():
-        return "I am not ignoring anyone on {}.".format(channel), modifier
+        return "I am not ignoring anyone on {}.".format(channel)
     else:
         return "I am currently ignoring: {} on {}.".format(
-            ", ".join(channel_ignores), channel), modifier
+            ", ".join(channel_ignores), channel)
 
 
 @command('ignore', priority=Priority.max, level=IRCLevel.hop)
@@ -49,23 +49,21 @@ def ignore_command(bot, database, nick, channel, message, args):
     'all' will toggle ignoring for the entire channel on and off.
     """
     response = ''
-    modifier = Notice(nick)
-
     try:
         arg = args[1].lower()
         if arg == 'add':
-            response = add_ignore(modifier, database, channel, args[2])
+            response = add_ignore(database, channel, args[2])
         elif arg == 'del' or arg == 'rem':
-            response = del_ignore(modifier, database, channel, args[2])
+            response = del_ignore(database, channel, args[2])
         elif arg == 'all':
             response = ignoreall(channel)
         elif arg == 'show':
-            response = show_ignores(modifier, database, channel)
+            response = show_ignores(database, channel)
         else:
-            response = ('Error: Invalid argument;', modifier)
+            response = 'Error: Invalid argument;'
     except IndexError:
-        response = ("Not enough arguments provided.", modifier)
-    return response
+        response = "Not enough arguments provided."
+    return response, Notice(nick)
 
 
 ignoring_all = set()
