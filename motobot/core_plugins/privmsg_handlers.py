@@ -80,6 +80,9 @@ def handle_responses(bot, responses, params, command='PRIVMSG'):
             command = modifier.modify_command(command)
             params = modifier.modify_params(params)
 
+        if len(trailings) == 0 and len(modifiers) != 0:
+            trailings = ['']
+
         for trailing in trailings:
             for modifier in modifiers:
                 trailing = modifier.modify_trailing(trailing)
