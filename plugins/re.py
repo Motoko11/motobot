@@ -60,22 +60,62 @@ def add_regex(string, database):
 
 
 def rem_regex(string, database):
-    removed = False
+    remove = []
+    response = "No patterns matched the string."
     patterns = get_patterns(database)
+
     for pattern, response in patterns:
-        if pattern.search(string):
-            patterns.remove((pattern, response))
-            save_patterns(database, patterns)
-            return "Pattern matching the string have been removed."
-    return "No patterns matched the string."
+        if string.lower() == pattern.pattern.lower() or pattern.search(string):
+            remove.append((pattern, response))
+
+    for pattern in remove:
+        patterns.remove(pattern)
+
+    if remove != []:
+        response = "Pattern(s) matching the string have been removed."
+        save_patterns(database, patterns)
+
+    return response
 
 
-def show_patterns(database):
+def show_patterns(database, arg):
     responses = []
 
     for pattern, response in get_patterns(database):
-        app = "{}: {};".format(pattern.pattern, response)
-        responses.append(app)
+        if arg.lower() == pattern.pattern.lower() or pattern.search(arg):
+            app = "{}: {};".format(pattern.pattern, response)
+            responses.append(app)
+
+    if responses == []:
+        responses = "There are no patterns that match the given string."
+
+    return responses
+
+
+def show_triggers(database):
+    triggers = [x[0].pattern for x in get_patterns(database)]
+    responses = []
+    format_string = "Triggers: {};"
+    separator = ", "
+    max_length = 425
+
+    while triggers != []:
+        cur = []
+        length = len(format_string)
+
+        while triggers != []:
+            l = len(triggers[0]) + len(separator)
+            if length + l <= max_length:
+                length += l
+                cur.append(triggers.pop(0))
+            else:
+                break
+
+        msg = format_string.format(separator.join(cur))
+        responses.append(msg)
+
+    if responses == []:
+        responses = "There are no patterns currently saved."
 
     return responses
 
