@@ -5,7 +5,6 @@ from re import compile, IGNORECASE
 
 @sink(priority=Priority.lowest)
 def regex_sink(bot, database, nick, channel, message):
-    print("sink triggered")
     for pattern, response in get_patterns(database):
         if pattern.search(message):
             return parse_response(response, nick)
@@ -27,7 +26,6 @@ def regex_command(bot, database, nick, channel, message, args):
     'add' usage: re add [pattern] <=> [response]
     'del' usage: re del [pattern]
     """
-    print("command triggered")
     arg = args[1].lower()
     if arg == 'add':
         response = (add_regex(' '.join(args[2:]), database))
