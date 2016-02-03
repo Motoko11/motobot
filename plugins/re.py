@@ -36,7 +36,11 @@ def regex_command(bot, database, nick, channel, message, args):
     elif arg == 'del' or arg == 'rem':
         response = (rem_regex(' '.join(args[2:]), database))
     elif arg == 'show':
-        response = show_patterns(database)
+        search = ' '.join(args[2:])
+        if search != '':
+            response = show_patterns(database, search)
+        else:
+            response = show_triggers(database)
     else:
         response = "Error: Unrecognised argument."
 
