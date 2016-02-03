@@ -84,7 +84,7 @@ class IRCBot:
             path = import_module(package).__path__._path
             for _, module_name, _ in iter_modules(path, package + '.'):
                 error |= self.__load_module(module_name)
-        self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x[2])
+        self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x.priority)
         return error
 
     def reload_plugins(self):
@@ -97,7 +97,7 @@ class IRCBot:
             path = import_module(package).__path__._path
             for _, module_name, _ in iter_modules(path, package + '.'):
                 error |= self.__load_module(module_name)
-        self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x[2])
+        self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x.priority)
         return error
 
     def __load_module(self, module_name):
