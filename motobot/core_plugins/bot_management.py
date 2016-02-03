@@ -21,10 +21,10 @@ def command_command(bot, database, nick, channel, message, args):
             response = join_channel(database, channel)
         elif arg == 'part':
             channel = args[2]
-            message = args[3:]
+            message = ' '.join(args[3:])
             response = part_channel(database, channel, message)
         elif arg == 'quit':
-            message = args[2:]
+            message = ' '.join(args[2:])
             response = quit(bot, message)
         elif arg == 'show':
             response = show_channels(database)
@@ -35,7 +35,7 @@ def command_command(bot, database, nick, channel, message, args):
         elif arg == 'reload':
             error = bot.reload_plugins()
             response = "Plugins have been reloaded." + \
-                " There were some errors." if error else ""
+                (" There were some errors." if error else "")
         else:
             response = "Error: Invalid argument."
     except IndexError:
@@ -67,10 +67,10 @@ def join_channel(database, channel):
     else:
         channels.add(channel.lower())
         database.set_val(channels)
-        response = [
-            Command('JOIN', channel),
+        response = (
+            [Command('JOIN', channel)],
             "I have joined {}.".format(channel)
-        ]
+        )
     return response
 
 
@@ -91,10 +91,10 @@ def part_channel(database, channel, message):
 
 
 def quit(bot, message):
-    bot.running = bot.connected = bot.identified = False
+    bot.running = False
     return [
-        (message, Command('QUIT')),
-        "Goodbye!"
+        "Goodbye!",
+        (message, Command('QUIT', []))
     ]
 
 
