@@ -4,17 +4,33 @@ from bs4 import BeautifulSoup
 
 
 @command('joke')
-@match(r'(tell|give) (me|us) a joke')
-def joke_command(bot, database, nick, channel, message, *args, **kwargs):
-    """ Joke command for returning the latest in shit jokes. """
-    return get_joke();
-
-
 @command('pun')
-@match(r'(tell|give) (me|us) a pun')
-def pun_command(bot, database, nick, channel, message, *args, **kwargs):
+@match(r'(?:tell|give) (.+) a (.+)')
+def pun_joke_command(bot, database, nick, channel, message, arg_match):
     """ These punny one liners sure to lighten up your day. """
-    return get_pun()
+    response = None
+    type = None
+    is_match = False
+
+    if isinstance(arg_match, list):
+        type = arg_match[0].lower()
+    else:
+        is_match = True
+        type = arg_match.group(2).lower()
+
+    if type == 'joke':
+        response = get_joke()
+    elif type == 'pun':
+        response = get_pun()
+
+    if is_match and response is not None:
+        target = arg_match.group(1)
+        targetless = ['us', 'me', 'them', 'him', 'her']
+
+        if target.lower() not in targetless:
+            response = "{}: {}".format(target, response)
+
+    return response
 
 
 def get_pun():
