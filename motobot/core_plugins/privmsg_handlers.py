@@ -148,11 +148,12 @@ def ctcp_match(bot, database, nick, channel, message, match):
 
 def ctcp_response(message):
     """ Return the appropriate response to a CTCP request. """
-    wrap = lambda x: '\x01' + x + '\x01'
     mapping = {
-        'VERSION': wrap('MotoBot Version 2.0'),
-        'FINGER': wrap('Oh you dirty man!'),
-        'TIME': wrap(strftime('%a %b %d %H:%M:%S', localtime())),
-        'PING': wrap(message)
+        'VERSION': 'MotoBot Version 2.0',
+        'FINGER': 'Oh you dirty man!',
+        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
+        'PING': message
     }
-    return mapping.get(message.split(' ')[0].upper(), None)
+    response = mapping.get(message.split(' ', 1)[0].upper(), None)
+    if response is not None:
+        return "\x01{}\x01".format(response)
