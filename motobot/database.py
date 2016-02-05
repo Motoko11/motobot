@@ -17,26 +17,22 @@ class Database:
     def __init__(self, database_path=None):
         self.database_path = database_path
         self.data = {}
-        self.changed = False
         self.load_database()
 
     def load_database(self):
         if self.database_path is not None:
             try:
-                file = open(self.database_path, 'rb')
-                self.data = load(file)
+                with open(self.database_path, 'rb') as file:
+                    self.data = load(file)
             except FileNotFoundError:
-                self.changed = True
                 self.write_database()
 
     def write_database(self):
         if self.database_path is not None:
             temp_path = self.database_path + '.temp'
-            file = open(temp_path, 'wb')
-            dump(self.data, file, HIGHEST_PROTOCOL)
-            file.close()
+            with open(temp_path, 'wb') as file:
+                dump(self.data, file, HIGHEST_PROTOCOL)
             replace(temp_path, self.database_path)
-            self.changed = False
 
     def get_entry(self, name):
         if name not in self.data:
