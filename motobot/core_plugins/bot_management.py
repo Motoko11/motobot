@@ -6,6 +6,7 @@ def command_command(bot, database, nick, channel, message, args):
     """ Command to manage the basic functions of the bot.
 
     The 'join' and 'part' argument both require a channel argument.
+    The 'join' command has an optional channel password argument.
     The 'quit' and 'part' argument have an optional quit/part message.
     The 'show' argument will return a list of currently joined channels.
     The 'set' argument will set an attribute of the bot. Use with caution.
@@ -17,7 +18,7 @@ def command_command(bot, database, nick, channel, message, args):
         arg = args[1].lower()
 
         if arg == 'join':
-            channel = args[2]
+            channel = ' '.join(args[2:])
             response = join_channel(database, channel)
         elif arg == 'part':
             channel = args[2]
