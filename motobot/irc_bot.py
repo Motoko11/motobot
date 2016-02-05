@@ -35,7 +35,7 @@ class IRCBot:
         self.userlevels = {}
         self.verified_masters = []
 
-        self.database = Database(self.database_path)
+        self.database = Database(self.database_path, self.backup_folder)
         self.load_plugins('motobot.core_plugins')
 
     def load_config(self, config):
@@ -49,6 +49,7 @@ class IRCBot:
         self.database_path = None
         self.default_help = None
         self.error_log = None
+        self.backup_folder = None
 
         for key, val in config.items():
             setattr(self, key, val)
