@@ -22,7 +22,7 @@ def can_desu(nick):
 def desu_match(bot, database, nick, channel, message, match):
     if can_desu(nick):
         chance = uniform(0, 1)
-        number = randint(1, 30)
+        number = randint(0, 30)
         string = ''
         un = chance <= 0.01
 
@@ -34,6 +34,7 @@ def desu_match(bot, database, nick, channel, message, match):
                 string = 'undesu'
         else:
             string = 'desu' * number
+            string = 'No desus for you!' if string == '' else string
 
         update_stats(database, nick, un, number)
         return string
