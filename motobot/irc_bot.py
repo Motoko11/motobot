@@ -168,7 +168,7 @@ class IRCBot:
     def log_error(self):
         if self.error_log is not None:
             with open(self.error_log, 'a') as log_file:
-                print_exc(file=log)
+                print_exc(file=log_file)
         print_exc()
 
     def __recv(self):
