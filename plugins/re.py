@@ -1,5 +1,5 @@
 from motobot import command, sink, Notice, Priority, Eat, Action, format_responses
-from random import choice
+from random import choice, uniform
 from re import compile, IGNORECASE
 
 
@@ -7,86 +7,121 @@ from re import compile, IGNORECASE
 def regex_sink(bot, database, nick, channel, message):
     responses = []
 
-    for pattern, response in get_patterns(database):
-        if pattern.search(message):
-            responses.append(parse_response(response, nick))
+    for pattern, response, extra in database.get_val([]):
+        match = pattern.search(message)
+        if match:
+            response = parse_response(response, extra, match, nick)
+            if response is not None:
+                responses.append(response)
 
     return responses
 
 
-def parse_response(response, nick):
-    response = choice(response.split('|')).replace('{nick}', nick)
+def parse_response(response, extra, match, nick):
+    chance = float(extra.get('chance', 100))
+    if chance >= uniform(0, 100):
+        response = choice(response.split('|'))
 
-    if response.startswith('/me '):
-        response = (response[4:], Action)
-    return response
+        tokens = [
+            ('{nick}', nick)
+        ]
+        for token, replace in tokens:
+            response = response.replace(token, replace)
+
+        for i, group in enumerate(match.groups()):
+            response = response.replace('${}'.format(i), group)
+
+        if response.startswith('/me '):
+            response = (response[4:], Action)
+        return response
 
 
 @command('re', priority=Priority.lower)
 def regex_command(bot, database, nick, channel, message, args):
     """ Manage regex matches on bot.
 
-    Valid arguments are: 'add', 'del', and 'show'.
+    Valid arguments are: 'add', 'del', 'set', and 'show'.
     'add' usage: re add [pattern] <=> [response];
     'del' usage: re del [pattern];
+    'set' usage: re set [pattern] [attribute] [value];
     'show' usage: re show [pattern];
     If pattern is not specified, a list of triggers will be returned.
     """
     arg = args[1].lower()
     if arg == 'add':
-        response = (add_regex(' '.join(args[2:]), database))
+        response = add_regex(' '.join(args[2:]), database)
     elif arg == 'del' or arg == 'rem':
-        response = (rem_regex(' '.join(args[2:]), database))
+        response = rem_regex(' '.join(args[2:]), database)
     elif arg == 'show':
         search = ' '.join(args[2:])
         if search != '':
             response = show_patterns(database, search)
         else:
             response = show_triggers(database)
+    elif arg == 'set':
+        response = set_attrib(' '.join(args[2:]), database)
     else:
         response = "Error: Unrecognised argument."
 
     return response, Eat, Notice(nick)
 
 
-parse_pattern = compile(r'^(.+?)(?: ?)<=>(?: ?)(.+)')
+def match_pattern(string, pattern):
+    return string.lower() == pattern.pattern.lower() \
+        or pattern.search(string) is not None
+
+
+add_parse_pattern = compile(r'^(.+?)(?: ?)<=>(?: ?)(.+)')
 
 
 def add_regex(string, database):
-    pattern, response = parse_pattern.match(string).groups()
+    response = None
+    match = add_parse_pattern.match(string)
+    if match:
+        pattern, response = match.groups()
 
-    patterns = get_patterns(database)
-    patterns.append((compile(pattern, IGNORECASE), response))
-    save_patterns(database, patterns)
-    return "Pattern added successfully."
+        patterns = database.get_val([])
+        patterns.append((compile(pattern, IGNORECASE), response, {}))
+        database.set_val(patterns)
+        response = "Pattern added successfully."
+    else:
+        response = "Error: Invalid syntax."
+    return response
+        
 
 
 def rem_regex(string, database):
     remove = []
     response = "No patterns matched the string."
-    patterns = get_patterns(database)
+    patterns = database.get_val([])
 
-    for pattern, response in patterns:
-        if string.lower() == pattern.pattern.lower() or pattern.search(string):
-            remove.append((pattern, response))
+    for pattern, response, extra in patterns:
+        if match_pattern(string, pattern):
+            remove.append((pattern, response, extra))
 
-    for pattern in remove:
-        patterns.remove(pattern)
+    for entry in remove:
+        patterns.remove(entry)
 
     if remove != []:
         response = "Pattern(s) matching the string have been removed."
-        save_patterns(database, patterns)
+        database.set_val(patterns)
 
     return response
 
 
-def show_patterns(database, arg):
+def show_patterns(database, string):
     responses = []
 
-    for pattern, response in get_patterns(database):
-        if arg.lower() == pattern.pattern.lower() or pattern.search(arg):
-            app = "{}: {};".format(pattern.pattern, response)
-            responses.append(app)
+    for pattern, response, extra in database.get_val([]):
+        if match_pattern(string, pattern):
+            extras = []
+            for x, y in extra.items():
+                extra = '{}: {};'.format(x, y)
+                extras.append(extra)
+            extras = ["None"] if extras == [] else extras
+            response = "{} - {} - {}".format(
+                pattern.pattern, response, ' '.join(extras))
+            responses.append(response)
 
     if responses == []:
         responses = "There are no patterns that match the given string."
@@ -95,7 +130,7 @@ def show_patterns(database, arg):
 
 
 def show_triggers(database):
-    triggers = [x[0].pattern for x in get_patterns(database)]
+    triggers = [pattern.pattern for pattern, _, _ in database.get_val([])]
     responses = format_responses(triggers, "Triggers: {};")
 
     if responses == []:
@@ -104,18 +139,32 @@ def show_triggers(database):
     return responses
 
 
-patterns_cache = None
+set_parse_pattern = compile(r'^(.+?)(?: ?)<=>(?: ?)(.+?) (.*)')
 
 
-def get_patterns(database):
-    global patterns_cache
-    if patterns_cache is None:
-        patterns_cache = [(compile(x, IGNORECASE), y) \
-            for x, y in database.get_val([])]
-    return patterns_cache
+def set_attrib(string, database):
+    response = None
+    match = set_parse_pattern.match(string)
 
+    if match:
+        query, attrib, val = match.groups()
+        patterns = database.get_val([])
+        set = False
 
-def save_patterns(database, patterns):
-    global patterns_cache
-    patterns_cache = patterns
-    database.set_val([(x.pattern, y) for x, y in patterns])
+        for pattern, response, extra in patterns:
+            if match_pattern(query, pattern):
+                set = True
+                if val != '':
+                    extra[attrib] = val
+                else:
+                    if attrib in extra:
+                        extra.pop(attrib)
+        database.set_val(patterns)
+
+        if set:
+            response = "Attribute set on matching patterns successfully."
+        else:
+            response = "No patterns matched the given string."
+    else:
+        response = "Error: Invalid syntax."
+    return response
