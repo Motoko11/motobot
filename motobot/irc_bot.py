@@ -1,7 +1,7 @@
 from .irc_message import IRCMessage
 from .irc_level import IRCLevel
 from .database import Database
-from socket import create_connection
+from socket import create_connection, timeout
 from importlib import import_module, reload
 from pkgutil import iter_modules
 from time import sleep
@@ -69,9 +69,9 @@ class IRCBot:
                     for msg in self.__recv():
                         message = IRCMessage(msg)
                         self.__handle_message(message)
-                except ConnectionResetError:
+                except (ConnectionResetError, timeout):
                     self.connected = False
-                    sleep(5)
+                    sleep(10)
                 except UnicodeEncodeError:
                     pass
                 except:
@@ -163,6 +163,7 @@ class IRCBot:
     def __connect(self):
         """ Connect the socket. """
         self.socket = create_connection((self.server, self.port))
+        self.socket.settimeout(10 * 60)
         self.connected = True
         self.identified = False
 
