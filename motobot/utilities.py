@@ -1,4 +1,5 @@
-def format_responses(data, format_string='{}', separator=', ', max_length=400):
+def format_responses(iterable, format_string='{}', separator=', ', max_length=400):
+    data = list(iterable)
     responses = []
 
     while data != []:
