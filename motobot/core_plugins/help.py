@@ -23,7 +23,7 @@ def help_command(bot, database, nick, channel, message, args):
     response = None
 
     if len(args) <= 1:
-        default_help = "For help on a specific command use '!help command'."
+        default_help = "For a list of commands use '{0}commands'. For help on a specific command use '{0}help command'.".format(bot.command_prefix)
         response = bot.default_help \
             if bot.default_help is not None else default_help
     else:
