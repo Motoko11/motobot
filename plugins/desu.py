@@ -61,7 +61,7 @@ def desu_command(bot, database, nick, channel, message, args):
     If no argument is given, queries for stats from the requesting user.
     """
     try:
-        return user_stats(database, args[1])
+        return user_stats(database, ' '.join(args[1:]))
     except IndexError:
         return user_stats(database, nick)
 
