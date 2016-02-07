@@ -36,7 +36,7 @@ def parse_response(response, extra, match, nick):
         return response
 
 
-@command('re', priority=Priority.lower)
+@command('re', priority=Priority.lower, hidden=True)
 def regex_command(bot, database, nick, channel, message, args):
     """ Manage regex matches on bot.
 
