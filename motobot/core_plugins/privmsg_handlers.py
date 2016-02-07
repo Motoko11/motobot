@@ -43,7 +43,7 @@ def handle_plugin(bot, plugin, nick, channel, message):
 
 
 def handle_command(plugin, bot, nick, channel, message, alt):
-    trigger = bot.command_prefix + plugin.arg
+    trigger = bot.command_prefix + plugin.arg.trigger
     test = message.split(' ', 1)[0]
 
     if trigger == test:

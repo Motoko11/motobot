@@ -4,7 +4,7 @@ from motobot import IRCBot, command, Notice
 def get_command_help(bot, command):
     responses = []
 
-    func = lambda x: x.type == IRCBot.command_plugin and x.arg.lower() == command.lower()
+    func = lambda x: x.type == IRCBot.command_plugin and x.arg.trigger.lower() == command.lower()
     for plugin in filter(func, bot.plugins):
         func = plugin.func
 
