@@ -7,33 +7,33 @@ from re import compile, IGNORECASE
 def regex_sink(bot, database, nick, channel, message):
     responses = []
 
-    for pattern, response, extra in database.get_val([]):
+    for pattern, reply, extra in database.get_val([]):
         match = pattern.search(message)
         if match:
-            response = parse_response(response, extra, match, nick)
-            if response is not None:
-                responses.append(response)
+            reply = parse_reply(reply, extra, match, nick)
+            if reply is not None:
+                responses.append(reply)
 
     return responses
 
 
-def parse_response(response, extra, match, nick):
+def parse_reply(reply, extra, match, nick):
     chance = float(extra.get('chance', 100))
     if chance >= uniform(0, 100):
-        response = choice(response.split('|'))
+        reply = choice(reply.split('|'))
 
         tokens = [
             ('{nick}', nick)
         ]
         for token, replace in tokens:
-            response = response.replace(token, replace)
+            reply = reply.replace(token, replace)
 
         for i, group in enumerate(match.groups()):
-            response = response.replace('${}'.format(i), group)
+            reply = reply.replace('${}'.format(i), group)
 
-        if response.startswith('/me '):
-            response = (response[4:], Action)
-        return response
+        if reply.startswith('/me '):
+            reply = (reply[4:], Action)
+        return reply
 
 
 @command('re', priority=Priority.lower, hidden=True)
@@ -78,10 +78,10 @@ def add_regex(string, database):
     response = None
     match = add_parse_pattern.match(string)
     if match:
-        pattern, response = match.groups()
+        pattern, reply = match.groups()
 
         patterns = database.get_val([])
-        patterns.append((compile(pattern, IGNORECASE), response, {}))
+        patterns.append((compile(pattern, IGNORECASE), reply, {}))
         database.set_val(patterns)
         response = "Pattern added successfully."
     else:
@@ -94,9 +94,9 @@ def rem_regex(string, database):
     response = "No patterns matched the string."
     patterns = database.get_val([])
 
-    for pattern, response, extra in patterns:
+    for pattern, reply, extra in patterns:
         if match_pattern(string, pattern):
-            remove.append((pattern, response, extra))
+            remove.append((pattern, reply, extra))
 
     for entry in remove:
         patterns.remove(entry)
@@ -111,16 +111,16 @@ def rem_regex(string, database):
 def show_patterns(database, string):
     responses = []
 
-    for pattern, response, extra in database.get_val([]):
+    for pattern, reply, extra in database.get_val([]):
         if match_pattern(string, pattern):
             extras = []
             for x, y in extra.items():
                 extra = '{}: {};'.format(x, y)
                 extras.append(extra)
             extras = ["None"] if extras == [] else extras
-            response = "{} - {} - {}".format(
-                pattern.pattern, response, ' '.join(extras))
-            responses.append(response)
+            reply = "{} - {} - {}".format(
+                pattern.pattern, reply, ' '.join(extras))
+            responses.append(reply)
 
     if responses == []:
         responses = "There are no patterns that match the given string."
@@ -150,7 +150,7 @@ def set_attrib(string, database):
         patterns = database.get_val([])
         set = False
 
-        for pattern, response, extra in patterns:
+        for pattern, reply, extra in patterns:
             if match_pattern(query, pattern):
                 set = True
                 if val != '':
