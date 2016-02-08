@@ -36,7 +36,7 @@ def mib_command(bot, database, nick, channel, message, args):
 
     return response
 
-    
+
 @command('a')
 @command('anime')
 def anime_search_command(bot, database, nick, channel, message, args):
@@ -166,7 +166,7 @@ def search_media(term, type, append=''):
             return "No results found."
         else:
             results = bs.find_all('li', {'class': 'card'}, recursive=True)
-            results_cache = [base_url + result.find('a')['href'] + append \
+            results_cache = [base_url + result.find('a')['href'] + append
                 for result in results]
             return results_cache.pop(0)
 

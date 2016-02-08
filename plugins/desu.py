@@ -69,14 +69,14 @@ def desu_command(bot, database, nick, channel, message, args):
 def user_stats(database, nick):
     stats = database.get_val({})
     userstats = stats.get(nick)
-    if userstats == None:
+    if userstats is None:
         return "I have no desu stats for {}.".format(nick)
     else:
         return "{} has desu'd {} times and gotten {} desus, " \
                "with an average of {:.2f} desus. " \
                "They have been undesu'd {} times.".format(
                     nick, userstats[0], userstats[1],
-                    userstats[1]/ userstats[0], userstats[2]
+                    userstats[1] / userstats[0], userstats[2]
                 )
 
 

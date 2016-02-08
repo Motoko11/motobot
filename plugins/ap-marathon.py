@@ -4,7 +4,9 @@ from bs4 import BeautifulSoup
 from time import time
 from re import sub
 
+
 base_url = 'https://marathon.chalamius.se/'
+
 
 @command('marathonlist')
 def marathonlist_command(bot, database, nick, channel, message, args):
@@ -16,6 +18,7 @@ def marathonlist_command(bot, database, nick, channel, message, args):
 def marathon_command(bot, database, nick, channel, message, args):
     """ Return details of the current show on the marathon list. """
     return get_current_marathon()
+
 
 def get_current_marathon():
     response = None

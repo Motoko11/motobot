@@ -87,7 +87,6 @@ def add_regex(string, database):
     else:
         response = "Error: Invalid syntax."
     return response
-        
 
 
 def rem_regex(string, database):
