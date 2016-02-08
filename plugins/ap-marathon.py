@@ -15,17 +15,20 @@ def marathonlist_command(bot, database, nick, channel, message, args):
 @command('marathon')
 def marathon_command(bot, database, nick, channel, message, args):
     """ Return details of the current show on the marathon list. """
-    title, date, link, note = get_current_marathon()
-    return "Today's marathon ({}) is {} ({}) {}".format(
-        date, title, link, note
-    )
-
+    return get_current_marathon()
 
 def get_current_marathon():
-    url = base_url + 'calendar.json'
-    entries = get(url).json()['items']
-    entry = entries[-1]
-    return entry['name'], entry['date'], entry['url'], entry['note']
+    response = None
+    try:
+        url = base_url + 'calendar.json'
+        entries = get(url).json()['items']
+        entry = entries[-1]
+        response = "Today's marathon ({}) is {} ({}) {}".format(
+            entry['name'], entry['date'], entry['url'], entry['note']
+        )
+    except IndexError:
+        response = "There are currently no marathons active."
+    return response
 
 
 @command('pantsu')
