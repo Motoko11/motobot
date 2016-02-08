@@ -26,7 +26,8 @@ def silly_response(arg):
         'hell': "Hell is freezing over!",
         'animu': "The weather doesn't matter... We do not go outside.",
         'nubmer6': "It's always sunny in the Village.",
-        'number6': "It's always sunny in the Village."
+        'number6': "It's always sunny in the Village.",
+        'chalamius': "As cold as ChalamiuS' heart!"
     }
 
     arg = arg.lstrip('#@!&').lower()
