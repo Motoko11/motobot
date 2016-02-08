@@ -2,14 +2,42 @@ from motobot import command
 from requests import get
 
 
-def format_temp(temp):
-    temp -= 273.15
-    return '{:.0f}C ({:.1f}F)'.format(temp, temp * 1.8 + 32)
+def get_weather(query):
+    response = None
 
+    api_key = 'd6581ca607738206'
+    weather_url = 'https://api.wunderground.com/api/{}/conditions/q/{}.json'.format(
+        api_key, query)
+    weather = get(weather_url).json()
+    
+    print(weather)
+    print(query)
 
-def format_windspeed(speed):
-    speed *= 3.6
-    return '{:.2f}kmph ({:.2f}mph)'.format(speed, speed * 0.621371)
+    if 'current_observation' in weather:
+        weather = weather['current_observation']
+        location = weather['display_location']['full']
+        type = weather['weather']
+        temp_c = weather['temp_c']
+        temp_f = weather['temp_f']
+        pressure = weather['pressure_mb']
+        humidity = weather['relative_humidity']
+        wind_kph = weather['wind_kph']
+        wind_mph = weather['wind_mph']
+        gust_kph = weather['wind_gust_kph']
+        gust_mph = weather['wind_gust_mph']
+        
+        response = "Weather in {}: {}; Temperature: {}C ({}F); Pressure: {}mb; Humidity: {}; Wind: {}kph ({}mph); Gusts: {}kph ({}mph);".format(
+            location, type, temp_c, temp_f, pressure, humidity, wind_kph, wind_mph, gust_kph, gust_mph)
+
+    elif 'results' in weather['response']:
+        q = weather['response']['results'][0]['l'][3:]
+        response = get_weather(q)
+
+    else:
+        response = "Error: Unable to find specified location."
+
+    return response
+        
 
 
 def silly_response(arg):
@@ -25,39 +53,26 @@ def silly_response(arg):
         'awkwardapples': "AwkwardApples is #anime-planet.com's prettiful pet! <3",
         'hell': "Hell is freezing over!",
         'animu': "The weather doesn't matter... We do not go outside.",
+        'bakalibre': "The weather doesn't matter... We do not go outside.",
         'nubmer6': "It's always sunny in the Village.",
         'number6': "It's always sunny in the Village.",
-        'chalamius': "As cold as ChalamiuS' heart!"
+        'chalamius': "As cold as ChalamiuS' heart!",
+        'manga_or_manha': "manga_or_manha is innocent as always!"
     }
 
-    arg = arg.lstrip('#@!&').lower()
     if arg in mapping:
-        return mapping[arg]
+        return mapping[arg.lower()]
 
 
 @command('w')
 @command('weather')
 def weather_command(bot, database, nick, channel, message, args):
     """ Get the weather for a given area. """
-    response = silly_response(args[1])
-    if response is not None:
-        return nick + ': ' + response
     try:
-        arguments = '%20'.join(args[1:])
-        url = 'http://api.openweathermap.org/data/2.5/weather?q={}&appid={}'.format(
-            arguments, '3706fd03388bce9f7340aa1999c3eb1e'
-        )
-        weather = get(url).json()
-
-        response = "{}: Weather in {}, {}: {}; Temperature: {}; Pressure: {}mb; Humidity: {}%; Wind: {};".format(
-            nick, weather['name'], weather['sys']['country'],
-            weather['weather'][0]['description'],
-            format_temp(weather['main']['temp']), weather['main']['pressure'],
-            weather['main']['humidity'], format_windspeed(weather['wind']['speed'])
-        )
-    except KeyError:
-        response = "Error: Unable to find specified location."
-    except:
-        response = "Fuck knows what went wrong. Probably connection issues."
-
+        response = silly_response(args[1])
+        if response is None:
+            response = get_weather('%20'.join(args[1:]))
+        response = "{}: {}".format(nick, response)
+    except IndexError:
+        response = "Error: You must supply a search term."
     return response
