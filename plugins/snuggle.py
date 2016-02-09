@@ -55,7 +55,7 @@ def micky_command(bot, database, nick, channel, message, args):
     return "moonwalks over {}'s face".format(target), Action
 
 
-@match(r'\*(.+? )pets desubot')
+@match(r'\*(.+? )(pets|hugs|cuddles|snuggles) desubot')
 def purr_match(bot, database, nick, channel, message, match):
     responses = [
         'purrs', 'snuggles up against ' + nick,
