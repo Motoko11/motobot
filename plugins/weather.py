@@ -6,12 +6,9 @@ def get_weather(query):
     response = None
 
     api_key = 'd6581ca607738206'
-    weather_url = 'https://api.wunderground.com/api/{}/conditions/q/{}.json'.format(
+    weather_url = 'https://api.wunderground.com/api/{}/conditions/bestfct:1/pws:0/q/{}.json'.format(
         api_key, query)
     weather = get(weather_url).json()
-    
-    print(weather)
-    print(query)
 
     if 'current_observation' in weather:
         weather = weather['current_observation']
@@ -23,11 +20,9 @@ def get_weather(query):
         humidity = weather['relative_humidity']
         wind_kph = weather['wind_kph']
         wind_mph = weather['wind_mph']
-        gust_kph = weather['wind_gust_kph']
-        gust_mph = weather['wind_gust_mph']
         
-        response = "Weather in {}: {}; Temperature: {}C ({}F); Pressure: {}mb; Humidity: {}; Wind: {}kph ({}mph); Gusts: {}kph ({}mph);".format(
-            location, type, temp_c, temp_f, pressure, humidity, wind_kph, wind_mph, gust_kph, gust_mph)
+        response = "Weather in {}: {}; Temperature: {}C ({}F); Pressure: {}mb; Humidity: {}; Wind: {}kph ({}mph);".format(
+            location, type, temp_c, temp_f, pressure, humidity, wind_kph, wind_mph)
 
     elif 'results' in weather['response']:
         q = weather['response']['results'][0]['l'][3:]
@@ -37,7 +32,6 @@ def get_weather(query):
         response = "Error: Unable to find specified location."
 
     return response
-        
 
 
 def silly_response(arg):
