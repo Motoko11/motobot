@@ -129,11 +129,13 @@ def show_patterns(database, string):
 
 
 def show_triggers(database):
-    triggers = [pattern.pattern for pattern, _, _ in database.get_val([])]
-    responses = split_response(triggers, "Triggers: {};")
+    patterns = database.get_val(None)
 
-    if responses == []:
+    if patterns is None:
         responses = "There are no patterns currently saved."
+    else:
+        triggers = map(lambda x: x[0].pattern, patterns)
+        responses = split_response(triggers, "Triggers: {};")
 
     return responses
 
