@@ -121,7 +121,7 @@ def handle_kick(bot, message):
     if message.params[1] == bot.nick:
         database = bot.database.get_entry(__name__)
         channel = message.params[0]
-        part_channel(database, channel, None, None)
+        part_channel(database, channel, None)
 
 
 @hook('004')
