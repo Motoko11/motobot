@@ -1,4 +1,4 @@
-from motobot import hook, command, sink, Priority, IRCLevel, Eat, Notice, format_responses
+from motobot import hook, command, sink, Priority, IRCLevel, Eat, Notice, split_response
 
 
 def add_ignore(database, channel, nick):
@@ -33,7 +33,7 @@ def del_ignore(database, channel, nick):
 
 def show_ignores(database, channel):
     channel_ignores = database.get_val({}).get(channel, set())
-    responses = format_responses(list(channel_ignores),
+    responses = split_response(list(channel_ignores),
         "I am currently ignoring: {} on {}".format('{}', channel))
 
     if responses == []:

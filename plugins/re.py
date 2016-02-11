@@ -1,4 +1,4 @@
-from motobot import command, sink, Notice, Priority, Eat, Action, format_responses
+from motobot import command, sink, Notice, Priority, Eat, Action, split_response
 from random import choice, uniform
 from re import compile, IGNORECASE
 
@@ -130,7 +130,7 @@ def show_patterns(database, string):
 
 def show_triggers(database):
     triggers = [pattern.pattern for pattern, _, _ in database.get_val([])]
-    responses = format_responses(triggers, "Triggers: {};")
+    responses = split_response(triggers, "Triggers: {};")
 
     if responses == []:
         responses = "There are no patterns currently saved."

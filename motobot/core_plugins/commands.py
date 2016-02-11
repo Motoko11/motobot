@@ -1,4 +1,4 @@
-from motobot import command, Notice, format_responses, IRCBot
+from motobot import command, Notice, split_response, IRCBot
 
 
 @command('commands')
@@ -18,6 +18,6 @@ def commands_command(bot, database, context, message, args):
     format_group = lambda group: '({})'.format(', '.join(group)) \
         if len(group) != 1 else group[0]
     commands = map(format_group, sorted(command_groups.values(), key=lambda x: x[0]))
-    response = format_responses(commands, "Bot Commands: {};")
+    response = split_response(commands, "Bot Commands: {};")
 
     return response, Notice(context.nick)
