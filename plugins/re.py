@@ -4,13 +4,13 @@ from re import compile, IGNORECASE
 
 
 @sink(priority=Priority.lowest)
-def regex_sink(bot, database, nick, channel, message):
+def regex_sink(bot, database, context, message):
     responses = []
 
     for pattern, reply, extra in database.get_val([]):
         match = pattern.search(message)
         if match:
-            reply = parse_reply(reply, extra, match, nick)
+            reply = parse_reply(reply, extra, match, context.nick)
             if reply is not None:
                 responses.append(reply)
 
@@ -37,7 +37,7 @@ def parse_reply(reply, extra, match, nick):
 
 
 @command('re', priority=Priority.lower, hidden=True)
-def regex_command(bot, database, nick, channel, message, args):
+def regex_command(bot, database, context, message, args):
     """ Manage regex matches on bot.
 
     Valid arguments are: 'add', 'del', 'set', and 'show'.
@@ -63,7 +63,7 @@ def regex_command(bot, database, nick, channel, message, args):
     else:
         response = "Error: Unrecognised argument."
 
-    return response, Eat, Notice(nick)
+    return response, Eat, Notice(context.nick)
 
 
 def match_pattern(string, pattern):

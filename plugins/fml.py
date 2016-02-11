@@ -21,6 +21,6 @@ def get_fml():
 
 
 @command('fml')
-def fml_command(bot, database, nick, channel, message, args):
+def fml_command(bot, database, context, message, args):
     """ You mean I have to return FMLs when asked? FML. """
     return get_fml()

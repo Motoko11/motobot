@@ -60,13 +60,13 @@ def silly_response(arg):
 
 @command('w')
 @command('weather')
-def weather_command(bot, database, nick, channel, message, args):
+def weather_command(bot, database, context, message, args):
     """ Get the weather for a given area. """
     try:
         response = silly_response(args[1])
         if response is None:
             response = get_weather('%20'.join(args[1:]))
-        response = "{}: {}".format(nick, response)
+        response = "{}: {}".format(context.nick, response)
     except IndexError:
         response = "Error: You must supply a search term."
     return response

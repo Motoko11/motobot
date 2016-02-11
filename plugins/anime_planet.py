@@ -8,15 +8,15 @@ results_cache = []
 
 
 @command('stats')
-def stats_command(bot, database, nick, channel, message, args):
+def stats_command(bot, database, context, message, args):
     """ Return the stats link for #anime-planet.com. """
-    if channel == '#anime-planet.com':
+    if context.channel.lower() == '#anime-planet.com':
         stats_url = 'https://www.chalamius.se/stats/ap.html'
         return "Channel Stats: {}".format(stats_url)
 
 
 @command('rr')
-def rr_command(bot, database, nick, channel, message, args):
+def rr_command(bot, database, context, message, args):
     """ Return the recommendations response. Takes single arg for target. """
     response = "If you are looking for anime/manga recommendations we have a database created specifically for that! Just visit www.anime-planet.com and let us do the hard work for you! For channel rules, please go to http://bit.ly/1aRaMhh"
 
@@ -27,7 +27,7 @@ def rr_command(bot, database, nick, channel, message, args):
 
 
 @command('mib')
-def mib_command(bot, database, nick, channel, message, args):
+def mib_command(bot, database, context, message, args):
     """ Help mibs get a real nick. Takes single arg for target. """
     response = "To change your nick to something you'd like type: /nick new_name; If you like that name and it is unregistered. To register it use: /ns REGISTER password [email]; More information can be found here: https://wiki.rizon.net/index.php?title=Register_your_nickname;"
 
@@ -39,7 +39,7 @@ def mib_command(bot, database, nick, channel, message, args):
 
 @command('a')
 @command('anime')
-def anime_search_command(bot, database, nick, channel, message, args):
+def anime_search_command(bot, database, context, message, args):
     """ Search for an anime on anime-planet.com. """
     if len(args) > 1:
         return "Search result: {}".format(
@@ -50,7 +50,7 @@ def anime_search_command(bot, database, nick, channel, message, args):
 
 @command('m')
 @command('manga')
-def manga_search_command(bot, database, nick, channel, message, args):
+def manga_search_command(bot, database, context, message, args):
     """ Search for a manga on anime-planet.com. """
     if len(args) > 1:
         return "Search result: {}".format(
@@ -61,20 +61,20 @@ def manga_search_command(bot, database, nick, channel, message, args):
 
 @command('u')
 @command('user')
-def user_search_command(bot, database, nick, channel, message, args):
+def user_search_command(bot, database, context, message, args):
     """ Search for a user on anime-planet.com. """
     format_str = "Search Results: {}"
 
     if len(args) > 1:
         return format_str.format(search_users(' '.join(args[1:])))
     else:
-        return format_str.format(search_users(nick))
+        return format_str.format(search_users(context.nick))
 
 
 @command('c')
 @command('char')
 @command('character')
-def character_search_command(bot, database, nick, channel, message, args):
+def character_search_command(bot, database, context, message, args):
     """ Search for a character on anime-planet.com. """
     if len(args) > 1:
         return "Search result: {}".format(
@@ -85,7 +85,7 @@ def character_search_command(bot, database, nick, channel, message, args):
 
 @command('rec')
 @command('arec')
-def anime_recommendations_search_command(bot, database, nick, channel, message, args):
+def anime_recommendations_search_command(bot, database, context, message, args):
     """ Search for an anime recommendation on anime-planet.com. """
     if len(args) > 1:
         return "Recommendations: {}".format(
@@ -95,7 +95,7 @@ def anime_recommendations_search_command(bot, database, nick, channel, message, 
 
 
 @command('mrec')
-def manga_recommendations_search_command(bot, database, nick, channel, message, args):
+def manga_recommendations_search_command(bot, database, context, message, args):
     """ Search for a manga recommendation on anime-planet.com. """
     if len(args) > 1:
         return "Recommendations: {}".format(
@@ -105,26 +105,26 @@ def manga_recommendations_search_command(bot, database, nick, channel, message, 
 
 
 @command('top')
-def top_anime_command(bot, database, nick, channel, message, args):
+def top_anime_command(bot, database, context, message, args):
     """ Search for a user's lists on anime-planet.com. """
     format_str = "Top Anime: {}/lists"
 
     if len(args) > 1:
         return format_str.format(search_users(' '.join(args[1:])))
     else:
-        return format_str.format(search_users(nick))
+        return format_str.format(search_users(context.nick))
 
 
 @command('tag')
 @command('atag')
-def atag_command(bot, database, nick, channel, message, args):
+def atag_command(bot, database, context, message, args):
     """ Search for anime of the given tag. """
     tag = args[1:]
     return search_tag(tag, 'anime')
 
 
 @command('mtag')
-def mtag_command(bot, database, nick, channel, message, args):
+def mtag_command(bot, database, context, message, args):
     """ Search for manga of the given tag. """
     tag = args[1:]
     return search_tag(tag, 'manga')
@@ -142,7 +142,7 @@ def search_tag(tag, media):
 
 
 @command('more')
-def more_command(bot, database, nick, channel, message, args):
+def more_command(bot, database, context, message, args):
     """ Return more results for the most recent anime-planet.com search. """
     try:
         return "More results: {}".format(results_cache.pop(0))
@@ -205,7 +205,7 @@ def search_characters(character):
 
 
 @command('worstcharacterofalltime')
-def sothis_wishes(bot, database, nick, channel, message, args):
+def sothis_wishes(bot, database, context, message, args):
     """ Return the worse character of all time. So says sothis. """
     url = 'http://www.anime-planet.com/characters/makoto-itou'
     return "Behold, the worst anime character of all time, Makoto Itou! {}".format(url)

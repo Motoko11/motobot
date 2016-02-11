@@ -14,7 +14,7 @@ def get_command_help(bot, command):
 
 
 @command('help')
-def help_command(bot, database, nick, channel, message, args):
+def help_command(bot, database, context, message, args):
     """ Print help messages for the user.
 
     Takes a single argument for a command name.
@@ -32,4 +32,4 @@ def help_command(bot, database, nick, channel, message, args):
         if response == []:
             response = "There is no help entry for the command: {}.".format(args[1])
 
-    return response, Notice(nick)
+    return response, Notice(context.nick)

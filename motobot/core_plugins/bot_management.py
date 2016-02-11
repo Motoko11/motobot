@@ -2,7 +2,7 @@ from motobot import command, hook, Notice, IRCLevel, Command, Target, Action
 
 
 @command('command', level=IRCLevel.master)
-def command_command(bot, database, nick, channel, message, args):
+def command_command(bot, database, context, message, args):
     """ Command to manage the basic functions of the bot.
 
     The 'join' and 'part' argument both require a channel argument.
@@ -42,11 +42,11 @@ def command_command(bot, database, nick, channel, message, args):
     except IndexError:
         response = "Error: Too few arguments supplied."
 
-    return response, Notice(nick)
+    return response, Notice(context.nick)
 
 
 @command('say', level=IRCLevel.master)
-def say_command(bot, database, nick, channel, message, args):
+def say_command(bot, database, context, message, args):
     """ Send a message to a given target.
 
     Usage: say <TARGET> [MESSAGE]
@@ -56,7 +56,7 @@ def say_command(bot, database, nick, channel, message, args):
         message = ' '.join(args[2:])
         return say(target, message)
     except IndexError:
-        return ("Error: Too few arguments supplied.", Notice(nick))
+        return ("Error: Too few arguments supplied.", Notice(context.nick))
 
 
 def join_channel(database, channel):

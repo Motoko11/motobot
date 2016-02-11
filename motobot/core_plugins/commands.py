@@ -2,8 +2,8 @@ from motobot import command, Notice, format_responses, IRCBot
 
 
 @command('commands')
-def commands_command(bot, database, nick, channel, message, args):
-    userlevel = bot.get_userlevel(channel, nick)
+def commands_command(bot, database, context, message, args):
+    userlevel = bot.get_userlevel(context.channel, context.nick)
 
     valid_command = lambda plugin: plugin.type == IRCBot.command_plugin \
         and plugin.level <= userlevel and not plugin.arg.hidden
@@ -20,4 +20,4 @@ def commands_command(bot, database, nick, channel, message, args):
     commands = map(format_group, sorted(command_groups.values(), key=lambda x: x[0]))
     response = format_responses(commands, "Bot Commands: {};")
 
-    return response, Notice(nick)
+    return response, Notice(context.nick)
