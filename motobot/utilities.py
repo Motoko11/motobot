@@ -1,19 +1,13 @@
-def format_responses(data, format_string='{}', separator=', ', max_length=400):
-    responses = []
+def split_response(iterable, format_string='{}', separator=', ', max_length=400):
+    cur = ''
+    
+    for x in iterable:
+        if len(cur) + len(format_string) + len(x) >= max_length:
+            msg = format_string.format(cur)
+            cur = ''
+            yield msg
+        cur += (separator if cur != '' else '') + x
 
-    while data != []:
-        cur = []
-        length = len(format_string)
-
-        while data != []:
-            l = len(data[0]) + len(separator)
-            if length + l <= max_length:
-                length += l
-                cur.append(data.pop(0))
-            else:
-                break
-
-        msg = format_string.format(separator.join(cur))
-        responses.append(msg)
-
-    return responses
+    if cur != '':
+        msg = format_string.format(cur)
+        yield msg

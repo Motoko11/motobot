@@ -4,7 +4,7 @@ from motobot import IRCBot, command, Notice
 def get_command_help(bot, command):
     responses = []
 
-    func = lambda x: x.type == IRCBot.command_plugin and x.arg.lower() == command.lower()
+    func = lambda x: x.type == IRCBot.command_plugin and x.arg.trigger.lower() == command.lower()
     for plugin in filter(func, bot.plugins):
         func = plugin.func
 
@@ -14,7 +14,7 @@ def get_command_help(bot, command):
 
 
 @command('help')
-def help_command(bot, database, nick, channel, message, args):
+def help_command(bot, database, context, message, args):
     """ Print help messages for the user.
 
     Takes a single argument for a command name.
@@ -23,7 +23,7 @@ def help_command(bot, database, nick, channel, message, args):
     response = None
 
     if len(args) <= 1:
-        default_help = "For help on a specific command use '!help command'."
+        default_help = "For a list of commands use '{0}commands'. For help on a specific command use '{0}help command'.".format(bot.command_prefix)
         response = bot.default_help \
             if bot.default_help is not None else default_help
     else:
@@ -32,4 +32,4 @@ def help_command(bot, database, nick, channel, message, args):
         if response == []:
             response = "There is no help entry for the command: {}.".format(args[1])
 
-    return response, Notice(nick)
+    return response, Notice(context.nick)

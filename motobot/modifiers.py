@@ -23,6 +23,17 @@ class ActionModifier(Modifier):
 Action = ActionModifier()
 
 
+class CTCPModifier(Modifier):
+
+    """ Modifier class to turn a message into an action. """
+
+    def modify_trailing(self, trailing):
+        return '\x01{}\x01'.format(trailing)
+
+
+CTCP = CTCPModifier()
+
+
 class Target(Modifier):
 
     """ Modifier class to change the target of a message. """

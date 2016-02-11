@@ -28,9 +28,9 @@ def format_duration(duration):
 
 
 @match(pattern)
-def youtube_match(bot, database, nick, channel, message, match):
+def youtube_match(bot, database, context, message, match):
     invalid_channels = ['#animu', '#bakalibre']
-    if channel in invalid_channels:
+    if context.channel in invalid_channels:
         return None
     vid = match.group(4)
     params = {
@@ -40,11 +40,10 @@ def youtube_match(bot, database, nick, channel, message, match):
     }
     response = get('https://www.googleapis.com/youtube/v3/videos', params=params)
     if response.status_code == 400:
-        return "{}: invalid id".format(nick)
+        return "{}: invalid id".format(context.nick)
     video = response.json()['items'][0]
     title = video['snippet']['title']
     duration = format_duration(video['contentDetails']['duration'])
-    channel = video['snippet']['channelTitle']
     return "{}'s video: {} - {}".format(
-        nick, title, duration
+        context.nick, title, duration
     )

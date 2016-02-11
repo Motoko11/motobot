@@ -4,8 +4,9 @@ from json import load
 
 def main():
     config_filename = 'desutest_config.json'
-    config_file = open(config_filename, 'r')
-    config = load(config_file)
+    config = {}
+    with open(config_filename, 'r') as config_file:
+        config = load(config_file)
     bot = IRCBot(config)
 
     bot.load_plugins('plugins')

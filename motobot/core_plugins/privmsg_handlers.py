@@ -1,6 +1,10 @@
 from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match
 from time import strftime, localtime
 from re import compile
+from collections import namedtuple
+
+
+Context = namedtuple('Context', 'nick channel')
 
 
 @hook('PRIVMSG')
@@ -10,17 +14,16 @@ def handle_privmsg(bot, message):
     Will send messages to each plugin accounting for priority and level.
 
     """
-    nick = message.nick
-    channel = message.params[0]
-    message = strip_control_codes(transform_action(nick, message.params[-1]))
+    context = Context(message.nick, message.params[0])
+    message = strip_control_codes(transform_action(context.nick, message.params[-1]))
 
     break_priority = Priority.min
     for plugin in bot.plugins:
         if break_priority > plugin.priority:
             break
         else:
-            responses = handle_plugin(bot, plugin, nick, channel, message)
-            target = channel if channel != bot.nick else nick
+            responses = handle_plugin(bot, plugin, context, message)
+            target = context.channel if context.channel != bot.nick else context.nick
             responses = [responses] if responses is not None else None
             eat = handle_responses(bot, responses, [target])
 
@@ -28,22 +31,22 @@ def handle_privmsg(bot, message):
                 break_priority = plugin.priority
 
 
-def handle_plugin(bot, plugin, nick, channel, message):
+def handle_plugin(bot, plugin, context, message):
     responses = None
 
-    alt = bot.get_userlevel(channel, nick) < plugin.level
+    alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
     if plugin.type == IRCBot.command_plugin:
-        responses = handle_command(plugin, bot, nick, channel, message, alt)
+        responses = handle_command(plugin, bot, context, message, alt)
     elif plugin.type == IRCBot.match_plugin:
-        responses = handle_match(plugin, bot, nick, channel, message, alt)
+        responses = handle_match(plugin, bot, context, message, alt)
     elif plugin.type == IRCBot.sink_plugin:
-        responses = handle_sink(plugin, bot, nick, channel, message, alt)
+        responses = handle_sink(plugin, bot, context, message, alt)
 
     return responses
 
 
-def handle_command(plugin, bot, nick, channel, message, alt):
-    trigger = bot.command_prefix + plugin.arg
+def handle_command(plugin, bot, context, message, alt):
+    trigger = bot.command_prefix + plugin.arg.trigger
     test = message.split(' ', 1)[0]
 
     if trigger == test:
@@ -51,23 +54,23 @@ def handle_command(plugin, bot, nick, channel, message, alt):
         database_entry = bot.database.get_entry(plugin.func.__module__)
         func = plugin.func if not alt else plugin.alt
         if func is not None:
-            return func(bot, database_entry, nick, channel, message, args)
+            return func(bot, database_entry, context, message, args)
 
 
-def handle_match(plugin, bot, nick, channel, message, alt):
+def handle_match(plugin, bot, context, message, alt):
     match = plugin.arg.search(message)
     if match is not None:
         database_entry = bot.database.get_entry(plugin.func.__module__)
         func = plugin.func if not alt else plugin.alt
         if func is not None:
-            return func(bot, database_entry, nick, channel, message, match)
+            return func(bot, database_entry, context, message, match)
 
 
-def handle_sink(plugin, bot, nick, channel, message, alt):
+def handle_sink(plugin, bot, context, message, alt):
     database_entry = bot.database.get_entry(plugin.func.__module__)
     func = plugin.func if not alt else plugin.alt
     if func is not None:
-        return func(bot, database_entry, nick, channel, message)
+        return func(bot, database_entry, context, message)
 
 
 def handle_responses(bot, responses, params, command='PRIVMSG'):
@@ -139,20 +142,21 @@ def form_message(command, params, trailing):
 
 
 @match(r'\x01(.*)\x01', priority=Priority.max)
-def ctcp_match(bot, database, nick, channel, message, match):
+def ctcp_match(bot, database, context, message, match):
     ctcp_req = match.group(1)
     reply = ctcp_response(ctcp_req)
     if reply is not None:
-        return reply, Notice(nick), Eat
+        return reply, Notice(context.nick), Eat
 
 
 def ctcp_response(message):
     """ Return the appropriate response to a CTCP request. """
-    wrap = lambda x: '\x01' + x + '\x01'
     mapping = {
-        'VERSION': wrap('MotoBot Version 2.0'),
-        'FINGER': wrap('Oh you dirty man!'),
-        'TIME': wrap(strftime('%a %b %d %H:%M:%S', localtime())),
-        'PING': wrap(message)
+        'VERSION': 'MotoBot Version 2.0',
+        'FINGER': 'Oh you dirty man!',
+        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
+        'PING': message
     }
-    return mapping.get(message.split(' ')[0].upper(), None)
+    response = mapping.get(message.split(' ', 1)[0].upper(), None)
+    if response is not None:
+        return "\x01{}\x01".format(response)

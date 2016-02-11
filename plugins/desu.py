@@ -19,10 +19,10 @@ def can_desu(nick):
 
 
 @match(r'^desu( *)$')
-def desu_match(bot, database, nick, channel, message, match):
-    if can_desu(nick):
+def desu_match(bot, database, context, message, match):
+    if can_desu(context.nick):
         chance = uniform(0, 1)
-        number = randint(1, 30)
+        number = randint(0, 30)
         string = ''
         un = chance <= 0.01
 
@@ -34,54 +34,55 @@ def desu_match(bot, database, nick, channel, message, match):
                 string = 'undesu'
         else:
             string = 'desu' * number
+            string = 'No desus for you!' if string == '' else string
 
-        update_stats(database, nick, un, number)
+        update_stats(database, context.nick, un, number)
         return string
     else:
         return "You've desu'd too recently to desu again."
 
 
 @match(r'^baka( *)$', level=IRCLevel.op, alt=lambda *x, **xs: Eat)
-def baka_match(bot, database, nick, channel, message, match):
+def baka_match(bot, database, context, message, match):
     return 'baka' * randint(1, 30)
 
 
 @match(r'^n(a+)?(y+)(a+)(n+)?(\W|$)')
-def nyan_match(bot, database, nick, channel, message, match):
+def nyan_match(bot, database, context, message, match):
     num = randint(5, 50)
     return 'Ny' + 'a' * num + '~'
 
 
 @command('desu')
-def desu_command(bot, database, nick, channel, message, args):
+def desu_command(bot, database, context, message, args):
     """ Return desu stats of the queried user.
 
     If an argument is given, queries for stats from that user.
     If no argument is given, queries for stats from the requesting user.
     """
-    try:
-        return user_stats(database, args[1])
-    except IndexError:
-        return user_stats(database, nick)
+    if len(args) > 1:
+        return user_stats(database, ' '.join(args[1:]).strip())
+    else:
+        return user_stats(database, context.nick)
 
 
 def user_stats(database, nick):
     stats = database.get_val({})
     userstats = stats.get(nick)
-    if userstats == None:
+    if userstats is None:
         return "I have no desu stats for {}.".format(nick)
     else:
         return "{} has desu'd {} times and gotten {} desus, " \
                "with an average of {:.2f} desus. " \
                "They have been undesu'd {} times.".format(
                     nick, userstats[0], userstats[1],
-                    userstats[1]/ userstats[0], userstats[2]
+                    userstats[1] / userstats[0], userstats[2]
                 )
 
 
 @command('topdesu')
 @command('desustats')
-def top_desu_command(bot, database, nick, channel, message, args):
+def top_desu_command(bot, database, context, message, args):
     """ Return the users with the highest desu score for the given argument.
 
     Valid arguments are: 'number', 'average', and 'undesus'.
@@ -107,7 +108,7 @@ def top_desu_command(bot, database, nick, channel, message, args):
         response = "Invalid argument, valid arguments are: " + \
             ", ".join(keys.keys()) + '.'
 
-    return response, Notice(nick)
+    return response, Notice(context.nick)
 
 
 def update_stats(database, nick, un, number):

@@ -28,9 +28,9 @@ def registered_nick_confirm(bot, message):
 
 
 @sink(priority=Priority.max)
-def master_verification_sink(bot, database, nick, channel, message):
+def master_verification_sink(bot, database, context, message):
     """ Checks a user that speaks in the channel. """
-    check(bot, nick)
+    check(bot, context.nick)
 
 
 @hook('353')

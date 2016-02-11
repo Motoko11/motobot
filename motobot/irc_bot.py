@@ -1,7 +1,7 @@
 from .irc_message import IRCMessage
 from .irc_level import IRCLevel
 from .database import Database
-from socket import create_connection
+from socket import create_connection, timeout
 from importlib import import_module, reload
 from pkgutil import iter_modules
 from time import sleep
@@ -35,7 +35,7 @@ class IRCBot:
         self.userlevels = {}
         self.verified_masters = []
 
-        self.database = Database(self.database_path)
+        self.database = Database(self.database_path, self.backup_folder)
         self.load_plugins('motobot.core_plugins')
 
     def load_config(self, config):
@@ -49,6 +49,7 @@ class IRCBot:
         self.database_path = None
         self.default_help = None
         self.error_log = None
+        self.backup_folder = None
 
         for key, val in config.items():
             setattr(self, key, val)
@@ -68,9 +69,9 @@ class IRCBot:
                     for msg in self.__recv():
                         message = IRCMessage(msg)
                         self.__handle_message(message)
-                except ConnectionResetError:
+                except (ConnectionResetError, timeout):
                     self.connected = False
-                    sleep(5)
+                    sleep(10)
                 except UnicodeEncodeError:
                     pass
                 except:
@@ -162,13 +163,14 @@ class IRCBot:
     def __connect(self):
         """ Connect the socket. """
         self.socket = create_connection((self.server, self.port))
+        self.socket.settimeout(10 * 60)
         self.connected = True
         self.identified = False
 
     def log_error(self):
         if self.error_log is not None:
-            log = open(self.error_log, 'a')
-            print_exc(file=log)
+            with open(self.error_log, 'a') as log_file:
+                print_exc(file=log_file)
         print_exc()
 
     def __recv(self):

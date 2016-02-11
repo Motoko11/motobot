@@ -6,6 +6,7 @@ from re import compile, IGNORECASE
 
 
 Plugin = namedtuple('Plugin', 'func alt type priority level arg')
+CommandArg = namedtuple('CommandArg', 'trigger hidden')
 
 
 def hook(command):
@@ -18,11 +19,11 @@ def hook(command):
     return register_hook
 
 
-def command(name, *, level=IRCLevel.user, priority=Priority.medium, alt=None):
+def command(name, *, level=IRCLevel.user, priority=Priority.medium, alt=None, hidden=False):
     """ Decorator to add a command to the bot. """
     def register_command(func):
         attr = getattr(func, IRCBot.plugin, [])
-        plugin = Plugin(func, alt, IRCBot.command_plugin, priority, level, name)
+        plugin = Plugin(func, alt, IRCBot.command_plugin, priority, level, CommandArg(name, hidden))
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
