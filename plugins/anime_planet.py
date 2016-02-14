@@ -18,7 +18,7 @@ def stats_command(bot, database, context, message, args):
 @command('rr')
 def rr_command(bot, database, context, message, args):
     """ Return the recommendations response. Takes single arg for target. """
-    response = "If you are looking for anime/manga recommendations we have a database created specifically for that! Just visit www.anime-planet.com and let us do the hard work for you! For channel rules, please go to http://bit.ly/1aRaMhh"
+    response = "If you are looking for anime/manga recommendations we have a database created specifically for that! Just visit www.anime-planet.com and let us do the hard work for you! For channel rules, please go to http://allspark.net/cypherswipe/animeplanet-rules.html"
 
     if len(args) > 1:
         response = "{}: {}".format(' '.join(args[1:]).strip(), response)
