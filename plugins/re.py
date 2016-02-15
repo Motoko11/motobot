@@ -43,7 +43,7 @@ def regex_command(bot, database, context, message, args):
     Valid arguments are: 'add', 'del', 'set', and 'show'.
     'add' usage: re add [pattern] <=> [response];
     'del' usage: re del [pattern];
-    'set' usage: re set [pattern] [attribute] [value];
+    'set' usage: re set [pattern] <=> [attribute] [value];
     'show' usage: re show [pattern];
     If pattern is not specified, a list of triggers will be returned.
     """
@@ -129,11 +129,13 @@ def show_patterns(database, string):
 
 
 def show_triggers(database):
-    triggers = [pattern.pattern for pattern, _, _ in database.get_val([])]
-    responses = split_response(triggers, "Triggers: {};")
+    patterns = database.get_val(None)
 
-    if responses == []:
+    if patterns is None:
         responses = "There are no patterns currently saved."
+    else:
+        triggers = map(lambda x: x[0].pattern, patterns)
+        responses = split_response(triggers, "Triggers: {};")
 
     return responses
 
