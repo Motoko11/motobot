@@ -43,7 +43,7 @@ def regex_command(bot, database, context, message, args):
     Valid arguments are: 'add', 'del', 'set', and 'show'.
     'add' usage: re add [pattern] <=> [response];
     'del' usage: re del [pattern];
-    'set' usage: re set [pattern] [attribute] [value];
+    'set' usage: re set [pattern] <=> [attribute] [value];
     'show' usage: re show [pattern];
     If pattern is not specified, a list of triggers will be returned.
     """
