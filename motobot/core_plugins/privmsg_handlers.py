@@ -14,16 +14,17 @@ def handle_privmsg(bot, message):
     Will send messages to each plugin accounting for priority and level.
 
     """
-    context = Context(message.nick, message.params[0], bot.database.get_entry(message.params[0]))
-    message = strip_control_codes(transform_action(context.nick, message.params[-1]))
+    nick = message.nick
+    channel = message.params[0]
+    message = strip_control_codes(transform_action(nick, channel))
 
     break_priority = Priority.min
     for plugin in bot.plugins:
         if break_priority > plugin.priority:
             break
         else:
-            responses = handle_plugin(bot, plugin, context, message)
-            target = context.channel if context.channel != bot.nick else context.nick
+            responses = handle_plugin(bot, plugin, nick, channel, message)
+            target = channel if channel != bot.nick else nick
             responses = [responses] if responses is not None else None
             eat = handle_responses(bot, responses, [target])
 
@@ -31,10 +32,13 @@ def handle_privmsg(bot, message):
                 break_priority = plugin.priority
 
 
-def handle_plugin(bot, plugin, context, message):
+def handle_plugin(bot, plugin, nick, channel, message):
     responses = None
 
-    alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
+    module = plugin.func.__module__
+    context = Context(nick, channel, bot.database.get_entry(module))
+    alt = bot.get_userlevel(channel, nick) < plugin.level
+
     if plugin.type == IRCBot.command_plugin:
         responses = handle_command(plugin, bot, context, message, alt)
     elif plugin.type == IRCBot.match_plugin:
@@ -51,26 +55,23 @@ def handle_command(plugin, bot, context, message, alt):
 
     if trigger == test:
         args = message[len(bot.command_prefix):].split(' ')
-        database_entry = bot.database.get_entry(plugin.func.__module__)
         func = plugin.func if not alt else plugin.alt
         if func is not None:
-            return func(bot, database_entry, context, message, args)
+            return func(bot, context, message, args)
 
 
 def handle_match(plugin, bot, context, message, alt):
     match = plugin.arg.search(message)
     if match is not None:
-        database_entry = bot.database.get_entry(plugin.func.__module__)
         func = plugin.func if not alt else plugin.alt
         if func is not None:
-            return func(bot, database_entry, context, message, match)
+            return func(bot, context, message, match)
 
 
 def handle_sink(plugin, bot, context, message, alt):
-    database_entry = bot.database.get_entry(plugin.func.__module__)
     func = plugin.func if not alt else plugin.alt
     if func is not None:
-        return func(bot, database_entry, context, message)
+        return func(bot, context, message)
 
 
 def handle_responses(bot, responses, params, command='PRIVMSG'):
