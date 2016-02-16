@@ -1,4 +1,5 @@
 def split_response(iterable, format_string='{}', separator=', ', max_length=400):
+    """ Take an iterable and output a messages generator. """
     cur = ''
     
     for x in iterable:
