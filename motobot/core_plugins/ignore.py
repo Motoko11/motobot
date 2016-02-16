@@ -85,7 +85,7 @@ def ignoreall(channel):
 
 
 def ignore_sink(bot, context, message):
-    channel_ignores = database.get({}).get(context.channel, set())
+    channel_ignores = context.database.get({}).get(context.channel, set())
     if context.nick.lower() in channel_ignores:
         return Eat
 
