@@ -32,7 +32,7 @@ def command_command(bot, context, message, args):
         elif arg == 'set':
             name = args[2]
             value = args[3:]
-            response = set(bot, name, value)
+            response = set_attribute(bot, name, value)
         elif arg == 'reload':
             error = bot.reload_plugins()
             response = "Plugins have been reloaded." + \
@@ -112,7 +112,7 @@ def say(target, message):
         return (message, target_modifier)
 
 
-def set(bot, name, value):
+def set_attribute(bot, name, value):
     return "This function has not yet been implemeneted."
 
 
