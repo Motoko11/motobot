@@ -16,7 +16,7 @@ def handle_privmsg(bot, message):
     """
     nick = message.nick
     channel = message.params[0]
-    message = strip_control_codes(transform_action(nick, channel))
+    message = strip_control_codes(transform_action(nick, message.params[-1]))
 
     break_priority = Priority.min
     for plugin in bot.plugins:
