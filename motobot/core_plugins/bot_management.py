@@ -2,7 +2,7 @@ from motobot import command, hook, Notice, IRCLevel, Command, Target, Action
 
 
 @command('command', level=IRCLevel.master)
-def command_command(bot, database, context, message, args):
+def command_command(bot, context, message, args):
     """ Command to manage the basic functions of the bot.
 
     The 'join' and 'part' argument both require a channel argument.
@@ -46,7 +46,7 @@ def command_command(bot, database, context, message, args):
 
 
 @command('say', level=IRCLevel.master)
-def say_command(bot, database, context, message, args):
+def say_command(bot, context, message, args):
     """ Send a message to a given target.
 
     Usage: say <TARGET> [MESSAGE]

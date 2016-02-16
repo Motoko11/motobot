@@ -3,7 +3,7 @@ from random import choice
 
 
 @match(r'^desubot(.+)\?')
-def question_match(bot, database, context, message, match):
+def question_match(bot, context, message, match):
     """ Answer a question in true Magic 8-Ball fashion. """
     responses = ['Yes', 'No', 'Hell yea!', 'Are you crazy!?', 'Never',
         'Of course!', 'It is certain', 'It is decidedly so', 'Without a doubt',

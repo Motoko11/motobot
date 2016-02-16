@@ -60,7 +60,7 @@ def silly_response(arg):
 
 @command('w')
 @command('weather')
-def weather_command(bot, database, context, message, args):
+def weather_command(bot, context, message, args):
     """ Get the weather for a given area. """
     try:
         response = silly_response(args[1])

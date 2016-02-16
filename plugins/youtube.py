@@ -28,7 +28,7 @@ def format_duration(duration):
 
 
 @match(pattern)
-def youtube_match(bot, database, context, message, match):
+def youtube_match(bot, context, message, match):
     invalid_channels = ['#animu', '#bakalibre']
     if context.channel in invalid_channels:
         return None

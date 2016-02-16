@@ -143,7 +143,7 @@ def form_message(command, params, trailing):
 
 
 @match(r'\x01(.*)\x01', priority=Priority.max)
-def ctcp_match(bot, database, context, message, match):
+def ctcp_match(bot, context, message, match):
     ctcp_req = match.group(1)
     reply = ctcp_response(ctcp_req)
     if reply is not None:

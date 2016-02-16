@@ -44,7 +44,7 @@ def show_ignores(database, channel):
 
 
 @command('ignore', priority=Priority.max, level=IRCLevel.hop)
-def ignore_command(bot, database, context, message, args):
+def ignore_command(bot, context, message, args):
     """ Manage ignores in a channel.
 
     Valid arguments are: 'add', 'del', 'all, and 'show'.
@@ -84,23 +84,23 @@ def ignoreall(channel):
     return response
 
 
-def ignore_sink(bot, database, context, message):
+def ignore_sink(bot, context, message):
     channel_ignores = database.get_val({}).get(context.channel, set())
     if context.nick.lower() in channel_ignores:
         return Eat
 
 
 @sink(priority=Priority.max, level=IRCLevel.hop, alt=ignore_sink)
-def hop_ignore_sink(bot, database, context, message):
+def hop_ignore_sink(bot, context, message):
     return None
 
 
-def ignoreall_sink(bot, database, context, message):
+def ignoreall_sink(bot, context, message):
     global ignoring_all
     if context.channel in ignoring_all:
         return Eat
 
 
 @sink(priority=Priority.max, level=IRCLevel.hop, alt=ignoreall_sink)
-def hop_ignoreall_sink(bot, database, context, message):
+def hop_ignoreall_sink(bot, context, message):
     return None

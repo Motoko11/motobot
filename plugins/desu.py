@@ -19,7 +19,7 @@ def can_desu(nick):
 
 
 @match(r'^desu( *)$')
-def desu_match(bot, database, context, message, match):
+def desu_match(bot, context, message, match):
     if can_desu(context.nick):
         chance = uniform(0, 1)
         number = randint(0, 30)
@@ -43,18 +43,18 @@ def desu_match(bot, database, context, message, match):
 
 
 @match(r'^baka( *)$', level=IRCLevel.op, alt=lambda *x, **xs: Eat)
-def baka_match(bot, database, context, message, match):
+def baka_match(bot, context, message, match):
     return 'baka' * randint(1, 30)
 
 
 @match(r'^n(a+)?(y+)(a+)(n+)?(\W|$)')
-def nyan_match(bot, database, context, message, match):
+def nyan_match(bot, context, message, match):
     num = randint(5, 50)
     return 'Ny' + 'a' * num + '~'
 
 
 @command('desu')
-def desu_command(bot, database, context, message, args):
+def desu_command(bot, context, message, args):
     """ Return desu stats of the queried user.
 
     If an argument is given, queries for stats from that user.
@@ -82,7 +82,7 @@ def user_stats(database, nick):
 
 @command('topdesu')
 @command('desustats')
-def top_desu_command(bot, database, context, message, args):
+def top_desu_command(bot, context, message, args):
     """ Return the users with the highest desu score for the given argument.
 
     Valid arguments are: 'number', 'average', and 'undesus'.

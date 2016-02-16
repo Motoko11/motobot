@@ -4,7 +4,7 @@ from re import compile, IGNORECASE
 
 
 @sink(priority=Priority.lowest)
-def regex_sink(bot, database, context, message):
+def regex_sink(bot, context, message):
     responses = []
 
     for pattern, reply, extra in database.get_val([]):
@@ -37,7 +37,7 @@ def parse_reply(reply, extra, match, nick):
 
 
 @command('re', priority=Priority.lower, hidden=True)
-def regex_command(bot, database, context, message, args):
+def regex_command(bot, context, message, args):
     """ Manage regex matches on bot.
 
     Valid arguments are: 'add', 'del', 'set', and 'show'.

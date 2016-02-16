@@ -3,7 +3,7 @@ from random import choice
 
 
 @command('snuggle')
-def snuggle_command(bot, database, context, message, args):
+def snuggle_command(bot, context, message, args):
     """ Snuggle your favourite person. """
     response = ''
     if len(args) > 1:
@@ -15,13 +15,13 @@ def snuggle_command(bot, database, context, message, args):
 
 
 @command('unsnuggle')
-def unsnuggle_command(bot, database, context, message, args):
+def unsnuggle_command(bot, context, message, args):
     """ Tell someone the cold hard truth. """
     return "Go ahead and call the cops... You can't be unsnuggled!"
 
 
 @command('pat')
-def pat_command(bot, database, context, message, args):
+def pat_command(bot, context, message, args):
     """ Pat someone who deserves it. """
     response = ''
     if len(args) > 1:
@@ -33,7 +33,7 @@ def pat_command(bot, database, context, message, args):
 
 
 @command('pet')
-def pet_command(bot, database, context, message, args):
+def pet_command(bot, context, message, args):
     """ Pet someone who really deserves it. """
     response = ''
     if len(args) > 1:
@@ -45,7 +45,7 @@ def pet_command(bot, database, context, message, args):
 
 
 @command('michaeljackson')
-def micky_command(bot, database, context, message, args):
+def micky_command(bot, context, message, args):
     target = ''
     if len(args) > 1:
         target = ' '.join(args[1:])
@@ -56,7 +56,7 @@ def micky_command(bot, database, context, message, args):
 
 
 @match(r'\*(.+? )(pets|hugs|cuddles|snuggles) desubot')
-def purr_match(bot, database, context, message, match):
+def purr_match(bot, context, message, match):
     responses = [
         'purrs', 'snuggles up against ' + context.nick,
         'cuddles ' + context.nick, 'rubs up against ' + context.nick
@@ -65,5 +65,5 @@ def purr_match(bot, database, context, message, match):
 
 
 @match(r'\*(?:.+? )(kicks|pokes|hits|bites|pats) desubot')
-def bite_match(bot, database, context, message, match):
+def bite_match(bot, context, message, match):
     return 'bites ' + context.nick + (' back' if match.group(1) == 'bites' else ''), Action
