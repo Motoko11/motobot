@@ -19,20 +19,20 @@ def command_command(bot, context, message, args):
 
         if arg == 'join':
             channel = ' '.join(args[2:])
-            response = join_channel(database, channel)
+            response = join_channel(context.database, channel)
         elif arg == 'part':
             channel = args[2]
             message = ' '.join(args[3:])
-            response = part_channel(database, channel, message)
+            response = part_channel(context.database, channel, message)
         elif arg == 'quit':
             message = ' '.join(args[2:])
             response = quit(bot, message)
         elif arg == 'show':
-            response = show_channels(database)
+            response = show_channels(context.database)
         elif arg == 'set':
             name = args[2]
             value = args[3:]
-            response = set_val(bot, name, value)
+            response = set(bot, name, value)
         elif arg == 'reload':
             error = bot.reload_plugins()
             response = "Plugins have been reloaded." + \
@@ -61,13 +61,13 @@ def say_command(bot, context, message, args):
 
 def join_channel(database, channel):
     response = None
-    channels = database.get_val(set())
+    channels = database.get(set())
 
     if channel.lower() in channels:
         response = "I'm already in {}.".format(channel)
     else:
         channels.add(channel.lower())
-        database.set_val(channels)
+        database.set(channels)
         response = (
             [Command('JOIN', channel)],
             "I have joined {}.".format(channel)
@@ -77,13 +77,13 @@ def join_channel(database, channel):
 
 def part_channel(database, channel, message):
     response = None
-    channels = database.get_val(set())
+    channels = database.get(set())
 
     if channel.lower() not in channels:
         response = "I'm not in {}.".format(channel)
     else:
         channels.discard(channel.lower())
-        database.set_val(channels)
+        database.set(channels)
         response = [
             (message, Command('PART', channel)),
             "I have left {}.".format(channel)
@@ -100,7 +100,7 @@ def quit(bot, message):
 
 
 def show_channels(database):
-    channels = database.get_val(set())
+    channels = database.get(set())
     return "I am currently in: {}.".format(', '.join(channels))
 
 
@@ -112,7 +112,7 @@ def say(target, message):
         return (message, target_modifier)
 
 
-def set_val(bot, name, value):
+def set(bot, name, value):
     return "This function has not yet been implemeneted."
 
 
@@ -127,9 +127,9 @@ def handle_kick(bot, message):
 @hook('004')
 def handling_joining_channels(bot, message):
     database = bot.database.get_entry(__name__)
-    channels = database.get_val(set())
+    channels = database.get(set())
     channels |= set(map(lambda x: x.lower(), bot.channels))
-    database.set_val(channels)
+    database.set(channels)
 
     for channel in channels:
         bot.send('JOIN ' + channel)

@@ -3,7 +3,7 @@ from motobot import hook, command, sink, Priority, IRCLevel, Eat, Notice, split_
 
 def add_ignore(database, channel, nick):
     response = ''
-    ignores = database.get_val({})
+    ignores = database.get({})
     channel_ignores = ignores.get(channel, set())
 
     if nick.lower() in channel_ignores:
@@ -11,14 +11,14 @@ def add_ignore(database, channel, nick):
     else:
         channel_ignores.add(nick.lower())
         ignores[channel] = channel_ignores
-        database.set_val(ignores)
+        database.set(ignores)
         response = "I'm now ignoring {}.".format(nick)
     return response
 
 
 def del_ignore(database, channel, nick):
     responses = ''
-    ignores = database.get_val({})
+    ignores = database.get({})
     channel_ignores = ignores.get(channel, set())
 
     if nick.lower() not in channel_ignores:
@@ -26,13 +26,13 @@ def del_ignore(database, channel, nick):
     else:
         channel_ignores.discard(nick.lower())
         ignores[channel] = channel_ignores
-        database.set_val(ignores)
+        database.set(ignores)
         response = "I'm no longer ignoring {}.".format(nick)
     return response
 
 
 def show_ignores(database, channel):
-    channel_ignores = database.get_val({}).get(channel, None)
+    channel_ignores = database.get({}).get(channel, None)
 
     if channel_ignores is None:
         responses = "I am not ignoring anyone on {}.".format(channel)
@@ -55,13 +55,13 @@ def ignore_command(bot, context, message, args):
     try:
         arg = args[1].lower()
         if arg == 'add':
-            response = add_ignore(database, context.channel, args[2])
+            response = add_ignore(context.database, context.channel, args[2])
         elif arg == 'del' or arg == 'rem':
-            response = del_ignore(database, context.channel, args[2])
+            response = del_ignore(context.database, context.channel, args[2])
         elif arg == 'all':
             response = ignoreall(context.channel)
         elif arg == 'show':
-            response = show_ignores(database, context.channel)
+            response = show_ignores(context.database, context.channel)
         else:
             response = 'Error: Invalid argument;'
     except IndexError:
@@ -85,7 +85,7 @@ def ignoreall(channel):
 
 
 def ignore_sink(bot, context, message):
-    channel_ignores = database.get_val({}).get(context.channel, set())
+    channel_ignores = database.get({}).get(context.channel, set())
     if context.nick.lower() in channel_ignores:
         return Eat
 

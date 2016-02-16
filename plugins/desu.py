@@ -36,7 +36,7 @@ def desu_match(bot, context, message, match):
             string = 'desu' * number
             string = 'No desus for you!' if string == '' else string
 
-        update_stats(database, context.nick, un, number)
+        update_stats(context.database, context.nick, un, number)
         return string
     else:
         return "You've desu'd too recently to desu again."
@@ -61,13 +61,13 @@ def desu_command(bot, context, message, args):
     If no argument is given, queries for stats from the requesting user.
     """
     if len(args) > 1:
-        return user_stats(database, ' '.join(args[1:]).strip())
+        return user_stats(context.database, ' '.join(args[1:]).strip())
     else:
-        return user_stats(database, context.nick)
+        return user_stats(context.database, context.nick)
 
 
 def user_stats(database, nick):
-    stats = database.get_val({})
+    stats = database.get({})
     userstats = stats.get(nick)
     if userstats is None:
         return "I have no desu stats for {}.".format(nick)
@@ -96,7 +96,7 @@ def top_desu_command(bot, context, message, args):
     response = ''
 
     try:
-        stats = database.get_val({})
+        stats = context.database.get({})
         arg = args[1].lower() if len(args) > 1 else 'number'
         key = keys[arg]
 
@@ -112,7 +112,7 @@ def top_desu_command(bot, context, message, args):
 
 
 def update_stats(database, nick, un, number):
-    stats = database.get_val({})
+    stats = database.get({})
     userstats = stats.get(nick, [0, 0, 0])
 
     userstats[0] += 1
@@ -122,4 +122,4 @@ def update_stats(database, nick, un, number):
         userstats[1] += number
 
     stats[nick] = userstats
-    database.set_val(stats)
+    database.set(stats)
