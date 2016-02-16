@@ -4,7 +4,7 @@ from re import compile
 from collections import namedtuple
 
 
-Context = namedtuple('Context', 'nick channel')
+Context = namedtuple('Context', 'nick channel database')
 
 
 @hook('PRIVMSG')
@@ -14,7 +14,7 @@ def handle_privmsg(bot, message):
     Will send messages to each plugin accounting for priority and level.
 
     """
-    context = Context(message.nick, message.params[0])
+    context = Context(message.nick, message.params[0], bot.database.get_entry(message.params[0]))
     message = strip_control_codes(transform_action(context.nick, message.params[-1]))
 
     break_priority = Priority.min
