@@ -36,7 +36,7 @@ def youtube_match(bot, context, message, match):
     params = {
         'id': vid,
         'part': 'contentDetails,snippet',
-        'key': 'AIzaSyAehOw6OjS2ofPSSo9AerCGuBzStsX5tks'
+        'key': bot.youtube_api_key
     }
     response = get('https://www.googleapis.com/youtube/v3/videos', params=params)
     if response.status_code == 400:

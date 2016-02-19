@@ -7,7 +7,7 @@ def get_weather(query):
 
     api_key = 'd6581ca607738206'
     weather_url = 'https://api.wunderground.com/api/{}/conditions/bestfct:1/pws:0/q/{}.json'.format(
-        api_key, query)
+        bot.weather_api_key, query)
     weather = get(weather_url).json()
 
     if 'current_observation' in weather:
