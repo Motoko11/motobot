@@ -2,12 +2,12 @@ from motobot import command
 from requests import get
 
 
-def get_weather(query):
+def get_weather(query, api_key):
     response = None
 
     api_key = 'd6581ca607738206'
     weather_url = 'https://api.wunderground.com/api/{}/conditions/bestfct:1/pws:0/q/{}.json'.format(
-        bot.weather_api_key, query)
+        api_key, query)
     weather = get(weather_url).json()
 
     if 'current_observation' in weather:
@@ -65,7 +65,7 @@ def weather_command(bot, context, message, args):
     try:
         response = silly_response(args[1])
         if response is None:
-            response = get_weather('%20'.join(args[1:]))
+            response = get_weather('%20'.join(args[1:]), bot.weather_api_key)
         response = "{}: {}".format(context.nick, response)
     except IndexError:
         response = "Error: You must supply a search term."
