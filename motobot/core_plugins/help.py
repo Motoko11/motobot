@@ -14,7 +14,7 @@ def get_command_help(bot, command):
 
 
 @command('help')
-def help_command(bot, database, context, message, args):
+def help_command(bot, context, message, args):
     """ Print help messages for the user.
 
     Takes a single argument for a command name.

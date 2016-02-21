@@ -19,7 +19,7 @@ def can_desu(nick):
 
 
 @match(r'^desu( *)$')
-def desu_match(bot, database, context, message, match):
+def desu_match(bot, context, message, match):
     if can_desu(context.nick):
         chance = uniform(0, 1)
         number = randint(0, 30)
@@ -36,38 +36,38 @@ def desu_match(bot, database, context, message, match):
             string = 'desu' * number
             string = 'No desus for you!' if string == '' else string
 
-        update_stats(database, context.nick, un, number)
+        update_stats(context.database, context.nick, un, number)
         return string
     else:
         return "You've desu'd too recently to desu again."
 
 
 @match(r'^baka( *)$', level=IRCLevel.op, alt=lambda *x, **xs: Eat)
-def baka_match(bot, database, context, message, match):
+def baka_match(bot, context, message, match):
     return 'baka' * randint(1, 30)
 
 
 @match(r'^n(a+)?(y+)(a+)(n+)?(\W|$)')
-def nyan_match(bot, database, context, message, match):
+def nyan_match(bot, context, message, match):
     num = randint(5, 50)
     return 'Ny' + 'a' * num + '~'
 
 
 @command('desu')
-def desu_command(bot, database, context, message, args):
+def desu_command(bot, context, message, args):
     """ Return desu stats of the queried user.
 
     If an argument is given, queries for stats from that user.
     If no argument is given, queries for stats from the requesting user.
     """
     if len(args) > 1:
-        return user_stats(database, ' '.join(args[1:]).strip())
+        return user_stats(context.database, ' '.join(args[1:]).strip())
     else:
-        return user_stats(database, context.nick)
+        return user_stats(context.database, context.nick)
 
 
 def user_stats(database, nick):
-    stats = database.get_val({})
+    stats = database.get({})
     userstats = stats.get(nick)
     if userstats is None:
         return "I have no desu stats for {}.".format(nick)
@@ -82,7 +82,7 @@ def user_stats(database, nick):
 
 @command('topdesu')
 @command('desustats')
-def top_desu_command(bot, database, context, message, args):
+def top_desu_command(bot, context, message, args):
     """ Return the users with the highest desu score for the given argument.
 
     Valid arguments are: 'number', 'average', and 'undesus'.
@@ -96,7 +96,7 @@ def top_desu_command(bot, database, context, message, args):
     response = ''
 
     try:
-        stats = database.get_val({})
+        stats = context.database.get({})
         arg = args[1].lower() if len(args) > 1 else 'number'
         key = keys[arg]
 
@@ -112,7 +112,7 @@ def top_desu_command(bot, database, context, message, args):
 
 
 def update_stats(database, nick, un, number):
-    stats = database.get_val({})
+    stats = database.get({})
     userstats = stats.get(nick, [0, 0, 0])
 
     userstats[0] += 1
@@ -122,4 +122,4 @@ def update_stats(database, nick, un, number):
         userstats[1] += number
 
     stats[nick] = userstats
-    database.set_val(stats)
+    database.set(stats)

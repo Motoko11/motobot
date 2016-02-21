@@ -4,10 +4,10 @@ from re import compile, IGNORECASE
 
 
 @sink(priority=Priority.lowest)
-def regex_sink(bot, database, context, message):
+def regex_sink(bot, context, message):
     responses = []
 
-    for pattern, reply, extra in database.get_val([]):
+    for pattern, reply, extra in context.database.get([]):
         match = pattern.search(message)
         if match:
             reply = parse_reply(reply, extra, match, context.nick)
@@ -37,7 +37,7 @@ def parse_reply(reply, extra, match, nick):
 
 
 @command('re', priority=Priority.lower, hidden=True)
-def regex_command(bot, database, context, message, args):
+def regex_command(bot, context, message, args):
     """ Manage regex matches on bot.
 
     Valid arguments are: 'add', 'del', 'set', and 'show'.
@@ -49,17 +49,17 @@ def regex_command(bot, database, context, message, args):
     """
     arg = args[1].lower()
     if arg == 'add':
-        response = add_regex(' '.join(args[2:]), database)
+        response = add_regex(' '.join(args[2:]), context.database)
     elif arg == 'del' or arg == 'rem':
-        response = rem_regex(' '.join(args[2:]), database)
+        response = rem_regex(' '.join(args[2:]), context.database)
     elif arg == 'show':
         search = ' '.join(args[2:])
         if search != '':
-            response = show_patterns(database, search)
+            response = show_patterns(context.database, search)
         else:
-            response = show_triggers(database)
+            response = show_triggers(context.database)
     elif arg == 'set':
-        response = set_attrib(' '.join(args[2:]), database)
+        response = set_attrib(' '.join(args[2:]), context.database)
     else:
         response = "Error: Unrecognised argument."
 
@@ -80,9 +80,9 @@ def add_regex(string, database):
     if match:
         pattern, reply = match.groups()
 
-        patterns = database.get_val([])
+        patterns = database.get([])
         patterns.append((compile(pattern, IGNORECASE), reply, {}))
-        database.set_val(patterns)
+        database.set(patterns)
         response = "Pattern added successfully."
     else:
         response = "Error: Invalid syntax."
@@ -92,7 +92,7 @@ def add_regex(string, database):
 def rem_regex(string, database):
     remove = []
     response = "No patterns matched the string."
-    patterns = database.get_val([])
+    patterns = database.get([])
 
     for pattern, reply, extra in patterns:
         if match_pattern(string, pattern):
@@ -103,7 +103,7 @@ def rem_regex(string, database):
 
     if remove != []:
         response = "Pattern(s) matching the string have been removed."
-        database.set_val(patterns)
+        database.set(patterns)
 
     return response
 
@@ -111,7 +111,7 @@ def rem_regex(string, database):
 def show_patterns(database, string):
     responses = []
 
-    for pattern, reply, extra in database.get_val([]):
+    for pattern, reply, extra in database.get([]):
         if match_pattern(string, pattern):
             extras = []
             for x, y in extra.items():
@@ -129,7 +129,7 @@ def show_patterns(database, string):
 
 
 def show_triggers(database):
-    patterns = database.get_val(None)
+    patterns = database.get(None)
 
     if patterns is None:
         responses = "There are no patterns currently saved."
@@ -149,7 +149,7 @@ def set_attrib(string, database):
 
     if match:
         query, attrib, val = match.groups()
-        patterns = database.get_val([])
+        patterns = database.get([])
         set = False
 
         for pattern, reply, extra in patterns:
@@ -160,7 +160,7 @@ def set_attrib(string, database):
                 else:
                     if attrib in extra:
                         extra.pop(attrib)
-        database.set_val(patterns)
+        database.set(patterns)
 
         if set:
             response = "Attribute set on matching patterns successfully."

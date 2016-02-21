@@ -17,7 +17,7 @@ def format_group(group):
 
 
 @command('commands')
-def commands_command(bot, database, context, message, args):
+def commands_command(bot, context, message, args):
     userlevel = bot.get_userlevel(context.channel, context.nick)
     groups = defaultdict(lambda: [])
 

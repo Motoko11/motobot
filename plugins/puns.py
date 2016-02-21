@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 @command('joke')
 @command('pun')
 @match(r'(?:tell|give) (.+) a ([a-zA-Z]+)')
-def pun_joke_command(bot, database, context, message, arg_match):
+def pun_joke_command(bot, context, message, arg_match):
     """ These punny one liners sure to lighten up your day. """
     response = None
     type = None

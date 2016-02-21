@@ -28,7 +28,7 @@ def format_duration(duration):
 
 
 @match(pattern)
-def youtube_match(bot, database, context, message, match):
+def youtube_match(bot, context, message, match):
     invalid_channels = ['#animu', '#bakalibre']
     if context.channel in invalid_channels:
         return None
@@ -36,7 +36,7 @@ def youtube_match(bot, database, context, message, match):
     params = {
         'id': vid,
         'part': 'contentDetails,snippet',
-        'key': 'AIzaSyAehOw6OjS2ofPSSo9AerCGuBzStsX5tks'
+        'key': bot.youtube_api_key
     }
     response = get('https://www.googleapis.com/youtube/v3/videos', params=params)
     if response.status_code == 400:

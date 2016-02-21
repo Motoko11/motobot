@@ -2,7 +2,7 @@ from motobot import command
 from requests import get
 
 
-def get_weather(query):
+def get_weather(query, api_key):
     response = None
 
     api_key = 'd6581ca607738206'
@@ -60,12 +60,12 @@ def silly_response(arg):
 
 @command('w')
 @command('weather')
-def weather_command(bot, database, context, message, args):
+def weather_command(bot, context, message, args):
     """ Get the weather for a given area. """
     try:
         response = silly_response(args[1])
         if response is None:
-            response = get_weather('%20'.join(args[1:]))
+            response = get_weather('%20'.join(args[1:]), bot.weather_api_key)
         response = "{}: {}".format(context.nick, response)
     except IndexError:
         response = "Error: You must supply a search term."

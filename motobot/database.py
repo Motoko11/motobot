@@ -9,10 +9,10 @@ class DatabaseEntry:
     def __init__(self):
         self.__data = None
 
-    def get_val(self, default=None):
+    def get(self, default=None):
         return self.__data if self.__data is not None else default
 
-    def set_val(self, value):
+    def set(self, value):
         self.__data = value
 
 

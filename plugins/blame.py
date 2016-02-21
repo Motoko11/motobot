@@ -7,7 +7,7 @@ next_blame = None
 
 
 @sink(priority=Priority.high)
-def blame_sink(bot, database, context, message):
+def blame_sink(bot, context, message):
     global active_users
     l = active_users.get(context.channel, [])
 
@@ -21,7 +21,7 @@ def blame_sink(bot, database, context, message):
 
 
 @command('blame')
-def blame_command(bot, database, context, message, args):
+def blame_command(bot, context, message, args):
     """ Blame the person who we all know did it! """
     global active_users
     global next_blame
@@ -38,7 +38,7 @@ def blame_command(bot, database, context, message, args):
 
 @command('setblame', level=IRCLevel.master)
 @command('nextblame', level=IRCLevel.master)
-def setblame_command(bot, database, context, message, args):
+def setblame_command(bot, context, message, args):
     global next_blame
     response = ''
     try:

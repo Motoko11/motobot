@@ -5,5 +5,5 @@ class IRCLevel:
     hop = halfop = 2
     aop = op = 3
     sop = protop = 4
-    owner = 5
-    master = 6
+    owner = founder = admin = 5
+    master = botadmin = 6
