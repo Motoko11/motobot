@@ -1,5 +1,4 @@
 from motobot import command
-from codecs import encode
 from re import compile, IGNORECASE
 
 
