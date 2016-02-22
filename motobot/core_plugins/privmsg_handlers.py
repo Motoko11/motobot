@@ -2,6 +2,7 @@ from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, 
 from time import strftime, localtime
 from re import compile
 from collections import namedtuple
+from itertools import tee, takewhile, dropwhile
 
 
 Context = namedtuple('Context', 'nick channel database')
@@ -37,38 +38,91 @@ def handle_plugin(bot, plugin, nick, channel, message):
 
     module = plugin.func.__module__
     context = Context(nick, channel, bot.database.get_entry(module))
-    alt = bot.get_userlevel(channel, nick) < plugin.level
 
     if plugin.type == IRCBot.command_plugin:
-        responses = handle_command(plugin, bot, context, message, alt)
+        responses = handle_command(plugin, bot, context, message)
     elif plugin.type == IRCBot.match_plugin:
-        responses = handle_match(plugin, bot, context, message, alt)
+        responses = handle_match(plugin, bot, context, message)
     elif plugin.type == IRCBot.sink_plugin:
-        responses = handle_sink(plugin, bot, context, message, alt)
+        responses = handle_sink(plugin, bot, context, message)
 
     return responses
 
 
-def handle_command(plugin, bot, context, message, alt):
+def handle_command(plugin, bot, context, message):
+    """
     trigger = bot.command_prefix + plugin.arg.trigger
     test = message.split(' ', 1)[0]
 
-    if trigger == test:
+    if trigger.lower() == test.lower():
         args = message[len(bot.command_prefix):].split(' ')
         func = plugin.func if not alt else plugin.alt
         if func is not None:
             return func(bot, context, message, args)
+    """
+    command, *tail = split_commands(message, bot.command_prefix)
+    response = call_command(bot, context, command, [plugin])
+
+    for command in tail:
+        response = handle_pipe(bot, context, command, [response])
+
+    return response
 
 
-def handle_match(plugin, bot, context, message, alt):
+def split_commands(message, prefix):
+    def is_command(string):
+        return string.lstrip(' ').startswith(prefix)
+
+    it = iter(message.split('|'))
+    command = next(it)
+
+    for x in it:
+        if not is_command(x):
+            command += '|' + x
+        else:
+            yield command.rstrip(' ')
+            command = x.lstrip(' ')
+    yield command
+
+
+def call_command(bot, context, command, plugins):
+    plugins = filter(
+        lambda x: x.type == IRCBot.command_plugin and
+        command.split(' ', 1)[0].lower() == (bot.command_prefix + x.arg.trigger).lower(),
+        plugins)
+
+    for plugin in plugins:
+        alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
+        func = plugin.func if not alt else plugin.alt
+        if func is not None:
+            args = command[len(bot.command_prefix):].split(' ')
+            yield func(bot, context, command, args)
+
+
+def handle_pipe(bot, context, command, responses):
+    for x in responses:
+        if isinstance(x, EatModifier):
+            yield x
+        elif isinstance(x, str):
+            command += ' ' + x
+            yield call_command(bot, context, command, bot.plugins)
+        elif isinstance(x, Modifier):
+            yield x
+        else:
+            yield handle_pipe(bot, context, command, x)
+
+
+def handle_match(plugin, bot, context, message):
     match = plugin.arg.search(message)
     if match is not None:
+        alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
         func = plugin.func if not alt else plugin.alt
         if func is not None:
             return func(bot, context, message, match)
 
 
-def handle_sink(plugin, bot, context, message, alt):
+def handle_sink(plugin, bot, context, message):
+    alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
     func = plugin.func if not alt else plugin.alt
     if func is not None:
         return func(bot, context, message)
