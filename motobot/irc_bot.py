@@ -3,7 +3,7 @@ from .irc_level import IRCLevel
 from .database import Database
 from socket import create_connection, timeout
 from importlib import import_module, reload
-from pkgutil import iter_modules
+from pkgutil import walk_packages
 from time import sleep
 from traceback import print_exc
 
@@ -83,8 +83,9 @@ class IRCBot:
         if package not in self.packages:
             self.packages.append(package)
             path = import_module(package).__path__._path
-            for _, module_name, _ in iter_modules(path, package + '.'):
-                error |= self.__load_module(module_name)
+            for _, module_name, is_package in walk_packages(path, package + '.'):
+                if not is_package:
+                    error |= self.__load_module(module_name)
         self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x.priority)
         return error
 
@@ -96,8 +97,9 @@ class IRCBot:
 
         for package in self.packages:
             path = import_module(package).__path__._path
-            for _, module_name, _ in iter_modules(path, package + '.'):
-                error |= self.__load_module(module_name)
+            for _, module_name, is_package in walk_packages(path, package + '.'):
+                if not is_package:
+                    error |= self.__load_module(module_name)
         self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x.priority)
         return error
 
