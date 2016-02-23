@@ -1,4 +1,5 @@
 from motobot import command
+from random import choice
 
 
 @command('shout')
@@ -24,6 +25,11 @@ def alternatingcase_command(bot, context, message, args):
     return alternatingcase(' '.join(args[1:]))
 
 
+@command('randomcase')
+def randomcase_command(bot, context, message, args):
+    return randomcase(' '.join(args[1:]))
+
+
 def alternatingcase(string):
     output = ''
     step = True
@@ -32,4 +38,14 @@ def alternatingcase(string):
             c = c.upper() if step else c.lower()
             step = not step
         output += c
+    return output
+
+
+def randomcase(string):
+    output = ''
+    for c in string:
+        if choice([True, False]):
+            output += c.upper()
+        else:
+            output += c.lower()
     return output
