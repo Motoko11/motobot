@@ -1,6 +1,7 @@
 from .irc_message import IRCMessage
 from .irc_level import IRCLevel
 from .database import Database
+from .utilities import Context
 from socket import create_connection, timeout
 from importlib import import_module, reload
 from pkgutil import walk_packages
@@ -185,7 +186,9 @@ class IRCBot:
     def send(self, msg):
         """ Send a message to the socket. """
         if msg is not None:
-            self.socket.send(bytes(msg + '\r\n', 'UTF-8'))
+            max_len = 510
+            byte_string = bytes(msg + '\r\n', 'UTF-8')
+            self.socket.send(byte_string[:510])
             print("Sent: {}".format(msg))
 
     def __handle_message(self, message):
@@ -194,6 +197,7 @@ class IRCBot:
 
         try:
             for func in self.hooks.get(message.command, []):
-                func(self, message)
+                context = Context(None, None, self.database.get_entry(func.__module__))
+                func(self, context, message)
         finally:
             self.database.write_database()
