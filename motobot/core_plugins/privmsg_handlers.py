@@ -32,21 +32,19 @@ def handle_privmsg(bot, context, message):
 def handle_plugin(bot, plugin, nick, channel, messages):
     responses = None
 
-    module = plugin.func.__module__
-    context = Context(nick, channel, bot.database.get_entry(module))
-
     for message in messages:
         if responses is None:
-            responses = call_plugins([plugin], bot, context, message)
+            responses = call_plugins([plugin], bot, nick, channel, message)
         else:
-            responses = handle_pipe(bot, context, message, responses)
+            responses = handle_pipe(bot, nick, channel, message, responses)
 
     return responses
 
 
-def call_plugins(plugins, bot, context, message):
+def call_plugins(plugins, bot, nick, channel, message):
     for plugin in plugins:
         response = None
+        context = Context(nick, channel, bot.database.get_entry(plugin.func.__module__))
         if plugin.type == IRCBot.command_plugin:
             response = handle_command(plugin, bot, context, message)
         elif plugin.type == IRCBot.match_plugin:
@@ -57,16 +55,16 @@ def call_plugins(plugins, bot, context, message):
             yield response
 
 
-def handle_pipe(bot, context, message, responses):
+def handle_pipe(bot, nick, channel, message, responses):
     for x in responses:
         if isinstance(x, EatModifier):
             yield x
         elif isinstance(x, str):
-            yield call_plugins(bot.plugins, bot, context, message + ' ' + x)
+            yield call_plugins(bot.plugins, bot, nick, channel, message + ' ' + x)
         elif isinstance(x, Modifier):
             yield x
-        elif hasattr(x, '__iter__'):
-            yield handle_pipe(bot, context, message, x)
+        else:
+            yield handle_pipe(bot, nick, channel, message, x)
 
 
 def handle_command(plugin, bot, context, message):
