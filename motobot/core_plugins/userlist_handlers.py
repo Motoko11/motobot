@@ -2,7 +2,7 @@ from motobot import hook, IRCLevel
 
 
 @hook('353')
-def handle_names(bot, message):
+def handle_names(bot, context, message):
     """ Parse the name command and record the userlevels of users. """
     channel = message.params[2]
     names = message.params[-1].split(' ')
@@ -35,14 +35,14 @@ def get_userlevels(name):
 
 
 @hook('JOIN')
-def handle_join(bot, message):
+def handle_join(bot, context, message):
     """ Handle the join of a user. """
     channel = message.params[0]
     bot.userlevels[(channel, message.nick)] = [IRCLevel.user]
 
 
 @hook('NICK')
-def handle_nick(bot, message):
+def handle_nick(bot, context, message):
     """ Handle the nick change of a user. """
     old_nick = message.nick
     new_nick = message.params[0]
@@ -54,7 +54,7 @@ def handle_nick(bot, message):
 
 
 @hook('MODE')
-def handle_mode(bot, message):
+def handle_mode(bot, context, message):
     """ Handle the mode command and update userlevels accordingly. """
     mapping = {
         'v': IRCLevel.voice,
@@ -80,14 +80,14 @@ def handle_mode(bot, message):
 
 
 @hook('PART')
-def handle_part(bot, message):
+def handle_part(bot, context, message):
     """ Handle the part of a user. """
     channel = message.params[0]
     bot.userlevels.pop((channel, message.nick))
 
 
 @hook('KICK')
-def handle_kick(bot, message):
+def handle_kick(bot, context, message):
     """ Handle the kick of a user. """
     nick = message.params[1]
     channel = message.params[0]
@@ -95,7 +95,7 @@ def handle_kick(bot, message):
 
 
 @hook('QUIT')
-def handle_quit(bot, message):
+def handle_quit(bot, context, message):
     """ Handle the quit of a user. """
     remove = []
     for channel, nick in bot.userlevels:

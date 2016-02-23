@@ -120,19 +120,17 @@ def set_attribute(bot, name, value):
 
 
 @hook('KICK')
-def handle_kick(bot, message):
+def handle_kick(bot, context, message):
     if message.params[1] == bot.nick:
-        database = bot.database.get_entry(__name__)
         channel = message.params[0]
-        part_channel(database, channel, None)
+        part_channel(context.database, channel, None)
 
 
 @hook('004')
-def handling_joining_channels(bot, message):
-    database = bot.database.get_entry(__name__)
-    channels = database.get(set())
+def handling_joining_channels(bot, context, message):
+    channels = context.database.get(set())
     channels |= set(map(lambda x: x.lower(), bot.channels))
-    database.set(channels)
+    context.database.set(channels)
 
     for channel in channels:
         bot.send('JOIN ' + channel)

@@ -6,7 +6,7 @@ from itertools import tee, takewhile, dropwhile
 
 
 @hook('PRIVMSG')
-def handle_privmsg(bot, message):
+def handle_privmsg(bot, context, message):
     """ Handle the privmsg commands.
 
     Will send messages to each plugin accounting for priority and level.

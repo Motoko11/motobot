@@ -22,7 +22,7 @@ def unverify(bot, nick):
 
 
 @hook('307')
-def registered_nick_confirm(bot, message):
+def registered_nick_confirm(bot, context, message):
     """ Hooks the user is registered reply from a WHOIS query and verifies user. """
     verify(bot, message.params[1])
 
@@ -34,7 +34,7 @@ def master_verification_sink(bot, context, message):
 
 
 @hook('353')
-def handle_names(bot, message):
+def handle_names(bot, context, message):
     """ Check users whom are present in the channel upon joining. """
     channel = message.params[2]
     names = message.params[-1].split(' ')
@@ -43,19 +43,19 @@ def handle_names(bot, message):
 
 
 @hook('JOIN')
-def handle_join(bot, message):
+def handle_join(bot, context, message):
     """ Check a user that joins a channel. """
     check(bot, message.nick)
 
 
 @hook('NICK')
-def handle_nick(bot, message):
+def handle_nick(bot, context, message):
     """ Unmark a user as verified in the bot and check new nick. """
     unverify(bot, message.nick)
     check(bot, message.params[0])
 
 
 @hook('QUIT')
-def handle_quit(bot, message):
+def handle_quit(bot, context, message):
     """ Unmark a user as verified in the bot upon quit. """
     unverify(bot, message.nick)
