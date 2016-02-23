@@ -1,11 +1,8 @@
-from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match
+from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, Eat, Notice, match
 from time import strftime, localtime
 from re import compile
 from collections import namedtuple
 from itertools import tee, takewhile, dropwhile
-
-
-Context = namedtuple('Context', 'nick channel database')
 
 
 @hook('PRIVMSG')
