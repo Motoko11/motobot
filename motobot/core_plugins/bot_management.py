@@ -7,7 +7,7 @@ def command_command(bot, context, message, args):
 
     The 'join' and 'part' argument both require a channel argument.
     The 'join' command has an optional channel password argument.
-    The 'quit' and 'part' argument have an optional quit/part message.
+    The 'quit', 'part', and 'reconnect' argument have an optional quit/part message.
     The 'show' argument will return a list of currently joined channels.
     The 'set' argument will set an attribute of the bot. Use with caution.
     The 'reload' command will reload the plugins in the loaded packages.
@@ -25,8 +25,12 @@ def command_command(bot, context, message, args):
             message = ' '.join(args[3:])
             response = part_channel(context.database, channel, message)
         elif arg == 'quit':
+            bot.running = False
             message = ' '.join(args[2:])
-            response = quit(bot, message)
+            response = quit(message)
+        elif arg == 'reconnect':
+            message = ' '.join(args[2:])
+            response = quit(message)
         elif arg == 'show':
             response = show_channels(context.database)
         elif arg == 'set':
@@ -91,8 +95,7 @@ def part_channel(database, channel, message):
     return response
 
 
-def quit(bot, message):
-    bot.running = False
+def quit(message):
     return [
         "Goodbye!",
         (message, Command('QUIT', []))
