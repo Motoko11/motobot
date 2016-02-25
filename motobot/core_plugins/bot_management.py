@@ -103,7 +103,7 @@ def quit(message):
 
 
 def show_channels(database):
-    channels = database.get(set())
+    channels = map(lambda x: x.split(' ', 1)[0], database.get(set()))
     return "I am currently in: {}.".format(', '.join(channels))
 
 
