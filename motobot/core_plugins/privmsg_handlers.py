@@ -17,16 +17,19 @@ def handle_privmsg(bot, context, message):
 
     break_priority = Priority.min
     for plugin in bot.plugins:
-        if break_priority > plugin.priority:
-            break
-        else:
-            responses = handle_plugin(bot, plugin, nick, channel, messages)
-            target = channel if channel != bot.nick else nick
-            responses = [responses] if responses is not None else None
-            eat = handle_responses(bot, responses, [target])
+        try:
+            if break_priority > plugin.priority:
+                break
+            else:
+                responses = handle_plugin(bot, plugin, nick, channel, messages)
+                target = channel if channel != bot.nick else nick
+                responses = [responses] if responses is not None else None
+                eat = handle_responses(bot, responses, [target])
 
-            if eat is True:
-                break_priority = plugin.priority
+                if eat is True:
+                    break_priority = plugin.priority
+        except:
+            bot.log_error()
 
 
 def handle_plugin(bot, plugin, nick, channel, messages):
