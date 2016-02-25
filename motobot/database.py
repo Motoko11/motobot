@@ -1,6 +1,7 @@
 from pickle import load, dump, HIGHEST_PROTOCOL
 from os import replace, mkdir, listdir
 from os.path import exists, isdir
+from shutil import copyfile
 from time import time
 from math import floor
 
@@ -8,12 +9,14 @@ from math import floor
 class DatabaseEntry:
     def __init__(self):
         self.__data = None
+        self.changed = False
 
     def get(self, default=None):
         return self.__data if self.__data is not None else default
 
     def set(self, value):
         self.__data = value
+        self.changed = True
 
 
 class Database:
@@ -40,16 +43,26 @@ class Database:
             except FileNotFoundError:
                 self.write_database()
 
-    def write_database(self, path=None):
-        if path is None:
-            path = self.database_path
+    def write_database(self):
+        if self.database_path is not None:
+            if self.prune():
+                temp_path = self.database_path + '.temp'
+                with open(temp_path, 'wb') as file:
+                    dump(self.data, file, HIGHEST_PROTOCOL)
+                replace(temp_path, self.database_path)
+                self.backup()
 
-        if path is not None:
-            temp_path = path + '.temp'
-            with open(temp_path, 'wb') as file:
-                dump(self.data, file, HIGHEST_PROTOCOL)
-            replace(temp_path, path)
-            self.backup()
+    def prune(self):
+        changed = False
+        remove = []
+        for key, entry in self.data.items():
+            changed |= entry.changed
+            entry.changed = False
+            if entry.get() is None:
+                remove.append(key)
+        for key in remove:
+            self.data.pop(key)
+        return changed
 
     def backup(self):
         if self.backup_folder is not None:
@@ -61,7 +74,7 @@ class Database:
 
             if last_backup + self.backup_frequency < current_time:
                 path = '{}/{}.{}{}'.format(self.backup_folder, self.database_path, current_time, Database.backup_extension)
-                self.write_database(path)
+                copyfile(self.database_path, path)
 
     def last_backup(self):
         last_backup = 0

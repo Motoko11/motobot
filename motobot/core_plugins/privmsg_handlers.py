@@ -1,14 +1,10 @@
-from motobot import IRCBot, hook, Priority, Modifier, EatModifier, Eat, Notice, match
+from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, Eat, Notice, match
 from time import strftime, localtime
 from re import compile
-from collections import namedtuple
-
-
-Context = namedtuple('Context', 'nick channel database')
 
 
 @hook('PRIVMSG')
-def handle_privmsg(bot, message):
+def handle_privmsg(bot, context, message):
     """ Handle the privmsg commands.
 
     Will send messages to each plugin accounting for priority and level.
@@ -17,58 +13,86 @@ def handle_privmsg(bot, message):
     nick = message.nick
     channel = message.params[0]
     message = strip_control_codes(transform_action(nick, message.params[-1]))
+    messages =  [x.strip(' ') for x in message.split('||')]
 
     break_priority = Priority.min
     for plugin in bot.plugins:
-        if break_priority > plugin.priority:
-            break
-        else:
-            responses = handle_plugin(bot, plugin, nick, channel, message)
-            target = channel if channel != bot.nick else nick
-            responses = [responses] if responses is not None else None
-            eat = handle_responses(bot, responses, [target])
+        try:
+            if break_priority > plugin.priority:
+                break
+            else:
+                responses = handle_plugin(bot, plugin, nick, channel, messages)
+                target = channel if channel != bot.nick else nick
+                responses = [responses] if responses is not None else None
+                eat = handle_responses(bot, responses, [target])
 
-            if eat is True:
-                break_priority = plugin.priority
+                if eat is True:
+                    break_priority = plugin.priority
+        except:
+            bot.log_error()
 
 
-def handle_plugin(bot, plugin, nick, channel, message):
+def handle_plugin(bot, plugin, nick, channel, messages):
     responses = None
 
-    module = plugin.func.__module__
-    context = Context(nick, channel, bot.database.get_entry(module))
-    alt = bot.get_userlevel(channel, nick) < plugin.level
-
-    if plugin.type == IRCBot.command_plugin:
-        responses = handle_command(plugin, bot, context, message, alt)
-    elif plugin.type == IRCBot.match_plugin:
-        responses = handle_match(plugin, bot, context, message, alt)
-    elif plugin.type == IRCBot.sink_plugin:
-        responses = handle_sink(plugin, bot, context, message, alt)
+    for message in messages:
+        if responses is None:
+            responses = call_plugins([plugin], bot, nick, channel, message)
+        else:
+            responses = handle_pipe(bot, nick, channel, message, responses)
 
     return responses
 
 
-def handle_command(plugin, bot, context, message, alt):
+def call_plugins(plugins, bot, nick, channel, message):
+    for plugin in plugins:
+        response = None
+        context = Context(nick, channel, bot.database.get_entry(plugin.func.__module__))
+        if plugin.type == IRCBot.command_plugin:
+            response = handle_command(plugin, bot, context, message)
+        elif plugin.type == IRCBot.match_plugin:
+            response = handle_match(plugin, bot, context, message)
+        elif plugin.type == IRCBot.sink_plugin:
+            response = handle_sink(plugin, bot, context, message)
+        if response is not None:
+            yield response
+
+
+def handle_pipe(bot, nick, channel, message, responses):
+    for x in responses:
+        if isinstance(x, EatModifier):
+            yield x
+        elif isinstance(x, str):
+            yield call_plugins(bot.plugins, bot, nick, channel, message + ' ' + x)
+        elif isinstance(x, Modifier):
+            yield x
+        else:
+            yield handle_pipe(bot, nick, channel, message, x)
+
+
+def handle_command(plugin, bot, context, message):
     trigger = bot.command_prefix + plugin.arg.trigger
     test = message.split(' ', 1)[0]
 
     if trigger == test:
+        alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
         args = message[len(bot.command_prefix):].split(' ')
         func = plugin.func if not alt else plugin.alt
         if func is not None:
             return func(bot, context, message, args)
 
 
-def handle_match(plugin, bot, context, message, alt):
+def handle_match(plugin, bot, context, message):
     match = plugin.arg.search(message)
     if match is not None:
+        alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
         func = plugin.func if not alt else plugin.alt
         if func is not None:
             return func(bot, context, message, match)
 
 
-def handle_sink(plugin, bot, context, message, alt):
+def handle_sink(plugin, bot, context, message):
+    alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
     func = plugin.func if not alt else plugin.alt
     if func is not None:
         return func(bot, context, message)

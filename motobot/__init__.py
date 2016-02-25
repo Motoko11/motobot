@@ -4,4 +4,4 @@ from .irc_bot import IRCBot
 from .decorators import hook, command, match, sink
 from .priority import Priority
 from .modifiers import Modifier, Action, CTCP, Target, Command, Notice, EatModifier, Eat
-from .utilities import split_response
+from .utilities import split_response, Context
