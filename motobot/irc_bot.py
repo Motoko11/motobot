@@ -3,6 +3,7 @@ from .irc_level import IRCLevel
 from .database import Database
 from .utilities import Context
 from socket import create_connection, timeout
+from ssl import wrap_socket
 from importlib import import_module, reload
 from pkgutil import walk_packages
 from time import sleep
@@ -43,6 +44,7 @@ class IRCBot:
         self.nick = ''
         self.server = ''
         self.port = 6667
+        self.ssl = False
         self.command_prefix = '.'
         self.nickserv_password = None
         self.channels = []
@@ -166,6 +168,8 @@ class IRCBot:
     def __connect(self):
         """ Connect the socket. """
         self.socket = create_connection((self.server, self.port))
+        if self.ssl:
+            self.socket = wrap_socket(self.socket)
         self.socket.settimeout(10 * 60)
         self.connected = True
         self.identified = False
@@ -189,7 +193,10 @@ class IRCBot:
             max_len = 510
             byte_string = bytes(msg + '\r\n', 'UTF-8')
             self.socket.send(byte_string[:510])
-            print("Sent: {}".format(msg))
+            try:
+                print("Sent: {}".format(msg))
+            except UnicodeEncodeError:
+                pass
 
     def __handle_message(self, message):
         """ Handle an IRCMessage object with the appropriate handler."""
