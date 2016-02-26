@@ -18,3 +18,7 @@ def split_response(iterable, format_string='{}', separator=', ', max_length=400)
     if cur != '':
         msg = format_string.format(cur)
         yield msg
+
+
+def get_userlevel(userlist, nick):
+    return next(filter(lambda x: x[0].lower() == nick.lower(), userlist))[1]
