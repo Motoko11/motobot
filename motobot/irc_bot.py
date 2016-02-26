@@ -193,7 +193,10 @@ class IRCBot:
             max_len = 510
             byte_string = bytes(msg + '\r\n', 'UTF-8')
             self.socket.send(byte_string[:510])
-            print("Sent: {}".format(msg))
+            try:
+                print("Sent: {}".format(msg))
+            except UnicodeEncodeError:
+                pass
 
     def __handle_message(self, message):
         """ Handle an IRCMessage object with the appropriate handler."""
