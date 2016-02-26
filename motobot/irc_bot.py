@@ -19,7 +19,7 @@ class IRCBot:
     sink_plugin = 3
     hook = 'motobot_hook'
     plugin = 'motobot_plugin'
-    request = 'motobot_request'
+    req = 'motobot_request'
 
     def __init__(self, config):
         """ Create a new instance of IRCBot. """
@@ -151,8 +151,8 @@ class IRCBot:
 
     def __add_request(self, func):
         """ Add a request to the bot. """
-        for request in getattr(func, IRCBot.request, []):
-            self.requests[request] = funcs
+        for request in getattr(func, IRCBot.req, []):
+            self.requests[request] = func
 
     def is_master(self, nick, verified=True):
         """ Check if a user is on the master list.
@@ -176,7 +176,10 @@ class IRCBot:
 
     def request(self, name, *args, **kwargs):
         """ Request something from the bot's request plugins. """
-        return self.requests.get(name, lambda *x, **xs: None)(*args, **kwargs)
+        func = self.requests.get(name, lambda *x, **xs: None)
+        module = func.__module__
+        context = Context(None, None, self.database.get_entry(module), self.sessions.get_entry(module))
+        return func(self, context, *args, **kwargs)
 
     def __connect(self):
         """ Connect the socket. """
@@ -217,7 +220,9 @@ class IRCBot:
 
         try:
             for func in self.hooks.get(message.command, []):
-                context = Context(None, None, self.database.get_entry(func.__module__))
+                module = func.__module__
+                context = Context(None, None, self.database.get_entry(module),
+                    self.sessions.get_entry(module))
                 func(self, context, message)
         finally:
             self.database.write_database()
