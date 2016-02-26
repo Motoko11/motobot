@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 
-Context = namedtuple('Context', 'nick channel database')
+Context = namedtuple('Context', 'nick channel database session')
 
 
 def split_response(iterable, format_string='{}', separator=', ', max_length=400):

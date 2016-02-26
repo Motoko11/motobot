@@ -40,6 +40,7 @@ class IRCBot:
         self.verified_masters = []
 
         self.database = Database(self.database_path, self.backup_folder)
+        self.sessions = Database()
         self.load_plugins('motobot.core_plugins')
 
     def load_config(self, config):
