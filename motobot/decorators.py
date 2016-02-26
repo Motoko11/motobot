@@ -51,3 +51,13 @@ def sink(*, level=IRCLevel.user, priority=Priority.medium, alt=None):
         setattr(func, IRCBot.plugin, attr)
         return func
     return register_sink
+
+
+def request(name):
+    """ Decorator to add request to the bot. """
+    def register_request(func):
+        attr = getattr(func, IRCBot.request, [])
+        attr.append(name)
+        setattr(func, IRCBot.request, attr)
+        return func
+    return request

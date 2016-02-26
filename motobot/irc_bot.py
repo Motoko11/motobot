@@ -19,6 +19,7 @@ class IRCBot:
     sink_plugin = 3
     hook = 'motobot_hook'
     plugin = 'motobot_plugin'
+    request = 'motobot_request'
 
     def __init__(self, config):
         """ Create a new instance of IRCBot. """
@@ -32,6 +33,7 @@ class IRCBot:
         self.modules = {}
         self.hooks = {}
         self.plugins = []
+        self.requests = {}
 
         self.ignore_list = []
         self.userlevels = {}
@@ -131,6 +133,7 @@ class IRCBot:
             for func in [getattr(module, attrib) for attrib in dir(module)]:
                 self.__add_hook(func)
                 self.__add_plugin(func)
+                self.__add_request(func)
         return error
 
     def __add_hook(self, func):
@@ -144,6 +147,11 @@ class IRCBot:
         """ Add a plugin to the bot. """
         for plugin in getattr(func, IRCBot.plugin, []):
             self.plugins.append(plugin)
+
+    def __add_request(self, func):
+        """ Add a request to the bot. """
+        for request in getattr(func, IRCBot.request, []):
+            self.requests[request] = funcs
 
     def is_master(self, nick, verified=True):
         """ Check if a user is on the master list.
@@ -164,6 +172,10 @@ class IRCBot:
             return IRCLevel.owner
         else:
             return max(self.userlevels[(channel, nick)])
+
+    def request(self, name, *args, **kwargs):
+        """ Request something from the bot's request plugins. """
+        return self.requests.get(name, lambda *x, **xs: None)(*args, **kwargs)
 
     def __connect(self):
         """ Connect the socket. """
