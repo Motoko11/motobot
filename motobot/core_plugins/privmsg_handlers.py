@@ -1,4 +1,4 @@
-from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, Eat, Notice, match
+from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, Eat, Notice, match, get_userlevel
 from time import strftime, localtime
 from re import compile
 
@@ -77,7 +77,7 @@ def handle_command(plugin, bot, context, message):
     test = message.split(' ', 1)[0]
 
     if trigger == test:
-        alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
+        alt = get_userlevel(context.userlist, context.nick) < plugin.level
         args = message[len(bot.command_prefix):].split(' ')
         func = plugin.func if not alt else plugin.alt
         if func is not None:
@@ -87,14 +87,14 @@ def handle_command(plugin, bot, context, message):
 def handle_match(plugin, bot, context, message):
     match = plugin.arg.search(message)
     if match is not None:
-        alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
+        alt = get_userlevel(context.userlist, context.nick) < plugin.level
         func = plugin.func if not alt else plugin.alt
         if func is not None:
             return func(bot, context, message, match)
 
 
 def handle_sink(plugin, bot, context, message):
-    alt = bot.get_userlevel(context.channel, context.nick) < plugin.level
+    alt = get_userlevel(context.userlist, context.nick) < plugin.level
     func = plugin.func if not alt else plugin.alt
     if func is not None:
         return func(bot, context, message)
