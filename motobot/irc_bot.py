@@ -35,10 +35,6 @@ class IRCBot:
         self.plugins = []
         self.requests = {}
 
-        self.ignore_list = []
-        self.userlevels = {}
-        self.verified_masters = []
-
         self.database = Database(self.database_path, self.backup_folder)
         self.sessions = Database()
         self.load_plugins('motobot.core_plugins')
@@ -153,26 +149,6 @@ class IRCBot:
         """ Add a request to the bot. """
         for request in getattr(func, IRCBot.req, []):
             self.requests[request] = func
-
-    def is_master(self, nick, verified=True):
-        """ Check if a user is on the master list.
-
-        The verified parameter specifies whether you want to check verified
-        masters, or non-verified ones. It's set to verified by default.
-        """
-        return any(
-            x.lower() == nick.lower()
-            for x in (self.verified_masters if verified else self.masters)
-        )
-
-    def get_userlevel(self, channel, nick):
-        """ Return the userlevel of a user in a channel. """
-        if self.is_master(nick):
-            return IRCLevel.master
-        elif channel == self.nick:
-            return IRCLevel.owner
-        else:
-            return max(self.userlevels[(channel, nick)])
 
     def request(self, name, *args, **kwargs):
         """ Request something from the bot's request plugins. """
