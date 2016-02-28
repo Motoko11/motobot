@@ -14,10 +14,11 @@ def userlevel_request(bot, context, channel, nick):
         level = IRCLevel.owner
     elif bot.request('IS_MASTER', nick):
         level = IRCLevel.master
-    for c, n in userlevel_data:
-        if c.lower() == channel.lower() and n.lower() == nick.lower():
-            level = max(userlevel_data[(c, n)])
-            break
+    else:
+        for c, n in userlevel_data:
+            if c.lower() == channel.lower() and n.lower() == nick.lower():
+                level = max(userlevel_data[(c, n)])
+                break
     return level
 
 
@@ -61,7 +62,7 @@ def handle_join(bot, context, message):
     """ Handle the join of a user. """
     channel = message.params[0]
     userlevel_data = context.session.get({})
-    bot.userlevels[(channel, message.nick)] = [IRCLevel.user]
+    userlevel_data[(channel, message.nick)] = [IRCLevel.user]
     context.session.set(userlevel_data)
 
 
