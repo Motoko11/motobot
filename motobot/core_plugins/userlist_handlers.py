@@ -9,10 +9,16 @@ def userlist_request(bot, context, channel):
 @request('USERLEVEL')
 def userlevel_request(bot, context, channel, nick):
     userlevel_data = context.session.get({})
+    level = IRCLevel.user
+    if channel.lower() == bot.nick.lower():
+        level = IRCLevel.owner
+    elif bot.request('IS_MASTER', nick):
+        level = IRCLevel.master
     for c, n in userlevel_data:
         if c.lower() == channel.lower() and n.lower() == nick.lower():
-            return max(userlevel_data[(c, n)])
-    return IRCLevel.user
+            level = max(userlevel_data[(c, n)])
+            break
+    return level
 
 
 @hook('353')
