@@ -13,7 +13,7 @@ def get_master_lists(bot, session):
 
 @request('IS_MASTER')
 def is_master_request(bot, context, nick):
-    confirmed = get_master_lists(bot, session)[0]
+    confirmed = get_master_lists(bot, context.session)[0]
     return nick.lower() in confirmed
 
 
