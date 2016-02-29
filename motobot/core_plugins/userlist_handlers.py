@@ -10,10 +10,10 @@ def userlist_request(bot, context, channel):
 def userlevel_request(bot, context, channel, nick):
     userlevel_data = context.session.get({})
     level = IRCLevel.user
-    if channel.lower() == bot.nick.lower():
-        level = IRCLevel.owner
-    elif bot.request('IS_MASTER', nick):
+    if bot.request('IS_MASTER', nick):
         level = IRCLevel.master
+    elif channel.lower() == bot.nick.lower():
+        level = IRCLevel.owner
     else:
         for c, n in userlevel_data:
             if c.lower() == channel.lower() and n.lower() == nick.lower():
