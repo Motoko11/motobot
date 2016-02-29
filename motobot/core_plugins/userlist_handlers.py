@@ -1,4 +1,25 @@
-from motobot import hook, IRCLevel
+from motobot import hook, request, IRCLevel
+
+
+@request('USERLIST')
+def userlist_request(bot, context, channel):
+    return [x[1] for x in contest.session.get({}) if x[0].lower() == channel.lower()]
+
+
+@request('USERLEVEL')
+def userlevel_request(bot, context, channel, nick):
+    userlevel_data = context.session.get({})
+    level = IRCLevel.user
+    if bot.request('IS_MASTER', nick):
+        level = IRCLevel.master
+    elif channel.lower() == bot.nick.lower():
+        level = IRCLevel.owner
+    else:
+        for c, n in userlevel_data:
+            if c.lower() == channel.lower() and n.lower() == nick.lower():
+                level = max(userlevel_data[(c, n)])
+                break
+    return level
 
 
 @hook('353')
@@ -7,13 +28,15 @@ def handle_names(bot, context, message):
     channel = message.params[2]
     names = message.params[-1].split(' ')
     for name in names:
-        handle_name(bot, channel, name)
+        handle_name(context.session, channel, name)
 
 
-def handle_name(bot, channel, name):
+def handle_name(session, channel, name):
     """ Handle a single name from the name command. """
     userlevels, nick = get_userlevels(name)
-    bot.userlevels[(channel, nick)] = userlevels
+    userlevel_data = session.get({})
+    userlevel_data[(channel, nick)] = userlevels
+    session.set(userlevel_data)
 
 
 def get_userlevels(name):
@@ -38,7 +61,9 @@ def get_userlevels(name):
 def handle_join(bot, context, message):
     """ Handle the join of a user. """
     channel = message.params[0]
-    bot.userlevels[(channel, message.nick)] = [IRCLevel.user]
+    userlevel_data = context.session.get({})
+    userlevel_data[(channel, message.nick)] = [IRCLevel.user]
+    context.session.set(userlevel_data)
 
 
 @hook('NICK')
@@ -47,10 +72,12 @@ def handle_nick(bot, context, message):
     old_nick = message.nick
     new_nick = message.params[0]
 
-    for channel, nick in bot.userlevels:
+    userlevel_data = context.session.get({})
+    for channel, nick in userlevel_data:
         if nick == old_nick:
-            bot.userlevels[(channel, new_nick)] = \
-                bot.userlevels.pop((channel, nick))
+            userlevel_data[(channel, new_nick)] = \
+                userlevel_data.pop((channel, nick))
+    context.session.set(userlevel_data)
 
 
 @hook('MODE')
@@ -68,38 +95,46 @@ def handle_mode(bot, context, message):
     add = True if message.params[1][0] == '+' else False
     modes = message.params[1][1:]
 
+    userlevel_data = context.session.get({})
     for nick, mode in zip(nicks, modes):
         if mode in mapping:
             level = mapping[mode]
-            userlevels = bot.userlevels[(channel, nick)]
+            userlevels = userlevel_data[(channel, nick)]
             if add:
                 userlevels.append(level)
             else:
                 userlevels = [x for x in userlevels if x != level]
-            bot.userlevels[(channel, nick)] = userlevels
+            userlevel_data[(channel, nick)] = userlevels
+    context.session.set(userlevel_data)
 
 
 @hook('PART')
 def handle_part(bot, context, message):
     """ Handle the part of a user. """
     channel = message.params[0]
-    bot.userlevels.pop((channel, message.nick))
+    userlevel_data = context.session.get({})
+    userlevel_data.pop((channel, message.nick))
+    context.session.set(userlevel_data)
 
 
 @hook('KICK')
 def handle_kick(bot, context, message):
     """ Handle the kick of a user. """
-    nick = message.params[1]
     channel = message.params[0]
-    bot.userlevels.pop((channel, nick))
+    nick = message.params[1]
+    userlevel_data = context.session.get({})
+    userlevel_data.pop((channel, nick))
+    context.session.set(userlevel_data)
 
 
 @hook('QUIT')
 def handle_quit(bot, context, message):
     """ Handle the quit of a user. """
     remove = []
-    for channel, nick in bot.userlevels:
+    userlevel_data = context.session.get({})
+    for channel, nick in userlevel_data:
         if nick == message.nick:
             remove.append((channel, nick))
     for pair in remove:
-        bot.userlevels.pop(pair)
+        userlevel_data.pop(pair)
+    context.session.set(userlevel_data)

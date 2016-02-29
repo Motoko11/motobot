@@ -19,6 +19,7 @@ class IRCBot:
     sink_plugin = 3
     hook = 'motobot_hook'
     plugin = 'motobot_plugin'
+    req = 'motobot_request'
 
     def __init__(self, config):
         """ Create a new instance of IRCBot. """
@@ -32,12 +33,10 @@ class IRCBot:
         self.modules = {}
         self.hooks = {}
         self.plugins = []
-
-        self.ignore_list = []
-        self.userlevels = {}
-        self.verified_masters = []
+        self.requests = {}
 
         self.database = Database(self.database_path, self.backup_folder)
+        self.sessions = Database()
         self.load_plugins('motobot.core_plugins')
 
     def load_config(self, config):
@@ -131,6 +130,7 @@ class IRCBot:
             for func in [getattr(module, attrib) for attrib in dir(module)]:
                 self.__add_hook(func)
                 self.__add_plugin(func)
+                self.__add_request(func)
         return error
 
     def __add_hook(self, func):
@@ -145,25 +145,17 @@ class IRCBot:
         for plugin in getattr(func, IRCBot.plugin, []):
             self.plugins.append(plugin)
 
-    def is_master(self, nick, verified=True):
-        """ Check if a user is on the master list.
+    def __add_request(self, func):
+        """ Add a request to the bot. """
+        for request in getattr(func, IRCBot.req, []):
+            self.requests[request] = func
 
-        The verified parameter specifies whether you want to check verified
-        masters, or non-verified ones. It's set to verified by default.
-        """
-        return any(
-            x.lower() == nick.lower()
-            for x in (self.verified_masters if verified else self.masters)
-        )
-
-    def get_userlevel(self, channel, nick):
-        """ Return the userlevel of a user in a channel. """
-        if self.is_master(nick):
-            return IRCLevel.master
-        elif channel == self.nick:
-            return IRCLevel.owner
-        else:
-            return max(self.userlevels[(channel, nick)])
+    def request(self, name, *args, **kwargs):
+        """ Request something from the bot's request plugins. """
+        func = self.requests.get(name, lambda *x, **xs: None)
+        module = func.__module__
+        context = Context(None, None, self.database.get_entry(module), self.sessions.get_entry(module))
+        return func(self, context, *args, **kwargs)
 
     def __connect(self):
         """ Connect the socket. """
@@ -204,7 +196,9 @@ class IRCBot:
 
         try:
             for func in self.hooks.get(message.command, []):
-                context = Context(None, None, self.database.get_entry(func.__module__))
+                module = func.__module__
+                context = Context(None, None, self.database.get_entry(module),
+                    self.sessions.get_entry(module))
                 func(self, context, message)
         finally:
             self.database.write_database()

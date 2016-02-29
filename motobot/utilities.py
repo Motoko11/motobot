@@ -1,13 +1,13 @@
 from collections import namedtuple
 
 
-Context = namedtuple('Context', 'nick channel database')
+Context = namedtuple('Context', 'nick channel database session')
 
 
 def split_response(iterable, format_string='{}', separator=', ', max_length=400):
     """ Take an iterable and output a messages generator. """
     cur = ''
-    
+
     for x in iterable:
         if len(cur) + len(format_string) + len(x) >= max_length:
             msg = format_string.format(cur)
