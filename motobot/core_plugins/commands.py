@@ -18,7 +18,7 @@ def format_group(group):
 
 @command('commands')
 def commands_command(bot, context, message, args):
-    userlevel = bot.get_userlevel(context.channel, context.nick)
+    userlevel = bot.request('USERLEVEL', context.channel, context.nick)
     groups = defaultdict(lambda: [])
 
     for command, func in filter_plugins(bot.plugins, userlevel):
