@@ -85,7 +85,7 @@ class IRCBot:
         if package not in self.packages:
             self.packages.append(package)
             module = import_module(package)
-            paths = module.__path__[0]
+            paths = module.__path__
             for _, module_name, is_package in walk_packages(paths, package + '.'):
                 if not is_package:
                     error |= self.__load_module(module_name)
