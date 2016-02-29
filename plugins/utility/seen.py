@@ -6,8 +6,12 @@ from time import strftime, localtime
 def seen_command(bot, context, message, args):
     response = None
     try:
-        response = context.database.get({})[(context.channel, args[1].lower())]
-    except ValueError:
+        query = args[1].lower()
+        if query == bot.nick.lower():
+            response = "I have never seen myself; it's too dark in {}'s slave labour camp.".format(context.channel)
+        else:
+            response = context.database.get({})[(context.channel, query)]
+    except IndexError:
         response = "I see you!"
     except KeyError:
         response = "I've never seen {}.".format(args[1])
