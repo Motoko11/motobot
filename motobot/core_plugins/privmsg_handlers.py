@@ -1,4 +1,4 @@
-from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, Eat, Notice, match
+from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, Eat, Notice, match, __VERSION__
 from time import strftime, localtime
 from re import compile
 
@@ -179,7 +179,7 @@ def ctcp_match(bot, context, message, match):
 def ctcp_response(message):
     """ Return the appropriate response to a CTCP request. """
     mapping = {
-        'VERSION': 'MotoBot Version 2.0',
+        'VERSION': 'MotoBot Version ' + __VERSION__,
         'FINGER': 'Oh you dirty man!',
         'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
         'PING': message
