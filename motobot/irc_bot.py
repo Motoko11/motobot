@@ -84,8 +84,9 @@ class IRCBot:
         error = False
         if package not in self.packages:
             self.packages.append(package)
-            path = import_module(package).__path__._path
-            for _, module_name, is_package in walk_packages(path, package + '.'):
+            module = import_module(package)
+            paths = module.__path__[0]
+            for _, module_name, is_package in walk_packages(paths, package + '.'):
                 if not is_package:
                     error |= self.__load_module(module_name)
         self.plugins = sorted(self.plugins, reverse=True, key=lambda x: x.priority)
