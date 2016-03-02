@@ -13,7 +13,7 @@ def handle_privmsg(bot, context, message):
     nick = message.nick
     channel = message.params[0]
     message = strip_control_codes(transform_action(nick, message.params[-1]))
-    messages =  [x.strip(' ') for x in message.split('||')]
+    messages = list(split_messages(message, bot.command_prefix))
 
     break_priority = Priority.min
     for plugin in bot.plugins:
@@ -30,6 +30,20 @@ def handle_privmsg(bot, context, message):
                     break_priority = plugin.priority
         except:
             bot.log_error()
+
+
+def split_messages(message, command_prefix):
+    messages = iter(message.split('|'))
+    current_message = next(messages)
+
+    for message in messages:
+        test_message = message.lstrip(' ')
+        if test_message.startswith(command_prefix):
+            yield current_message
+            current_message = test_message
+        else:
+            current_message += '|' + message
+    yield current_message
 
 
 def handle_plugin(bot, plugin, nick, channel, messages):
@@ -65,7 +79,8 @@ def handle_pipe(bot, nick, channel, message, responses):
         if isinstance(x, EatModifier):
             yield x
         elif isinstance(x, str):
-            yield call_plugins(bot.plugins, bot, nick, channel, message + ' ' + x)
+            plugins = filter(lambda x: x.type == IRCBot.command_plugin, bot.plugins)
+            yield call_plugins(plugins, bot, nick, channel, message + ' ' + x)
         elif isinstance(x, Modifier):
             yield x
         else:
