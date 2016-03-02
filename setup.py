@@ -5,7 +5,7 @@ from motobot import __VERSION__
 setup(
     name='motobot',
     version=__VERSION__,
-    description='A plugin-able IRC Bot core.',
+    description='A plugin-able IRC Bot core',
     long_description='',
     url='https://github.com/Motoko11/desubot',
     author='Motoko11',
