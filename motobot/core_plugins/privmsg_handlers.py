@@ -73,11 +73,11 @@ def call_plugins(plugins, bot, nick, channel, message):
 
 
 def handle_pipe(bot, nick, channel, message, responses):
+    plugins = list(filter(lambda x: x.type == IRCBot.command_plugin, bot.plugins))
     for x in responses:
         if isinstance(x, EatModifier):
             yield x
         elif isinstance(x, str):
-            plugins = filter(lambda x: x.type == IRCBot.command_plugin, bot.plugins)
             yield call_plugins(plugins, bot, nick, channel, message + ' ' + x)
         elif isinstance(x, Modifier):
             yield x
