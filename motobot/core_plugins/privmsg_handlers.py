@@ -1,4 +1,5 @@
-from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, strip_control_codes
+from motobot import IRCBot, hook, Priority, Context, strip_control_codes
+from motobot.modifiers import Modifier, CommandModifier, ParamsModifier, TrailingModifier, EatType
 
 
 @hook('PRIVMSG')
@@ -83,9 +84,7 @@ def call_plugins(plugins, bot, nick, channel, message):
 def handle_pipe(bot, nick, channel, message, responses):
     plugins = list(filter(lambda x: x.type == IRCBot.command_plugin, bot.plugins))
     for x in responses:
-        if isinstance(x, EatModifier):
-            yield x
-        elif isinstance(x, str):
+        if isinstance(x, str):
             yield call_plugins(plugins, bot, nick, channel, message + ' ' + x)
         elif isinstance(x, Modifier):
             yield x
@@ -121,48 +120,61 @@ def handle_sink(plugin, bot, context, message):
         return func(bot, context, message)
 
 
-def handle_responses(bot, responses, params, command='PRIVMSG'):
+def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=[]):
     eat = False
     if responses is not None:
-        will_eat, modifiers, trailings, iters = extract_responses(responses)
+        trailings = []
+        command_mods = []
+        param_mods = []
+        iters = []
+        will_eat = extract_responses(responses, trailings, command_mods,
+                                     param_mods, trailing_mods, iters)
         eat |= will_eat
 
-        for modifier in modifiers:
+        require_trailing = True
+
+        for modifier in command_mods:
+            require_trailing &= modifier.require_trailing
             command = modifier.modify_command(command)
+        for modifier in param_mods:
+            require_trailing &= modifier.require_trailing
             params = modifier.modify_params(params)
 
-        if len(trailings) == 0 and len(modifiers) != 0:
+        if not require_trailing and trailings == []:
             trailings = ['']
 
         for trailing in trailings:
-            for modifier in modifiers:
+            for modifier in trailing_mods:
                 trailing = modifier.modify_trailing(trailing)
             message = form_message(command, params, trailing)
             bot.send(message)
 
         for iter in iters:
-            eat |= handle_responses(bot, iter, params, command)
+            eat |= handle_responses(bot, iter, params, command, trailing_mods)
 
     return eat
 
 
-def extract_responses(responses):
+def extract_responses(responses, trailings, command_mods,
+                      param_mods, trailing_mods, iters):
     will_eat = False
-    modifiers = []
-    trailings = []
-    iters = []
 
     for x in responses:
-        if isinstance(x, EatModifier):
+        if isinstance(x, EatType):
             will_eat = True
         elif isinstance(x, str):
             trailings.append(x)
         elif isinstance(x, Modifier):
-            modifiers.append(x)
+            if isinstance(x, CommandModifier):
+                command_mods.append(x)
+            if isinstance(x, ParamsModifier):
+                param_mods.append(x)
+            if isinstance(x, TrailingModifier):
+                trailing_mods.append(x)
         else:
             iters.append(x)
 
-    return will_eat, modifiers, trailings, iters
+    return will_eat
 
 
 def form_message(command, params, trailing):
