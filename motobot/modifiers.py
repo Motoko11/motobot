@@ -1,18 +1,36 @@
 class Modifier:
 
-    """ Modifier class base, modifies a plugin return message. """
+    """ Modifier class base. """
 
+    require_trailing = True
+
+
+class CommandModifier(Modifier):
     def modify_command(self, command):
-        return command
+        raise NotImplementedError
 
+
+class ParamsModifier(Modifier):
     def modify_params(self, params):
-        return params
+        raise NotImplementedError
 
+
+class TrailingModifier(Modifier):
     def modify_trailing(self, trailing):
-        return trailing
+        raise NotImplementedError
 
 
-class ActionModifier(Modifier):
+class EatType(Modifier):
+
+    """ Simple empty class for eating plugins. """
+
+    pass
+
+
+Eat = EatType()
+
+
+class ActionType(TrailingModifier):
 
     """ Modifier class to turn a message into an action. """
 
@@ -20,21 +38,21 @@ class ActionModifier(Modifier):
         return '\x01ACTION {}\x01'.format(trailing)
 
 
-Action = ActionModifier()
+Action = ActionType()
 
 
-class CTCPModifier(Modifier):
+class CTCPType(TrailingModifier):
 
-    """ Modifier class to turn a message into an action. """
+    """ Modifier class to turn a message into a CTCP message. """
 
     def modify_trailing(self, trailing):
         return '\x01{}\x01'.format(trailing)
 
 
-CTCP = CTCPModifier()
+CTCP = CTCPType()
 
 
-class Target(Modifier):
+class Target(ParamsModifier):
 
     """ Modifier class to change the target of a message. """
 
@@ -42,13 +60,14 @@ class Target(Modifier):
         self.target = target
 
     def modify_params(self, params):
-        params[0] = self.target
-        return params
+        return [self.target]
 
 
-class Command(Modifier):
+class Command(CommandModifier, ParamsModifier):
 
     """ Modifier class to override the command, and optionally the params of a message. """
+
+    require_trailing = False
 
     def __init__(self, command, params=None):
         self.command = command
@@ -61,14 +80,7 @@ class Command(Modifier):
         return params if self.params is None else self.params
 
 
-Notice = lambda nick: Command('NOTICE', nick)
-
-
-class EatModifier:
-
-    """ Simple empty class for eating plugins. """
-
-    pass
-
-
-Eat = EatModifier()
+def Notice(nick):
+    command = Command('NOTICE', nick)
+    command.require_trailing = False
+    return command
