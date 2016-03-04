@@ -30,6 +30,14 @@ def handle_privmsg(bot, context, message):
             bot.log_error()
 
 
+def transform_action(nick, msg):
+    """ Transform an action CTCP into a message. """
+    if msg.startswith('\x01ACTION ') and msg.endswith('\x01'):
+        return '*' + nick + msg[7:-1]
+    else:
+        return msg
+
+
 def split_messages(message, command_prefix):
     messages = iter(message.split('|'))
     current_message = next(messages)
@@ -155,14 +163,6 @@ def extract_responses(responses):
             iters.append(x)
 
     return will_eat, modifiers, trailings, iters
-
-
-def transform_action(nick, msg):
-    """ Transform an action CTCP into a message. """
-    if msg.startswith('\x01ACTION ') and msg.endswith('\x01'):
-        return '*' + nick + msg[7:-1]
-    else:
-        return msg
 
 
 def form_message(command, params, trailing):
