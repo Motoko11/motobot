@@ -159,15 +159,6 @@ def extract_responses(responses):
     return will_eat, modifiers, trailings, iters
 
 
-pattern = compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
-
-
-def strip_control_codes(input):
-    """ Strip the control codes from the input. """
-    output = pattern.sub('', input)
-    return output
-
-
 def transform_action(nick, msg):
     """ Transform an action CTCP into a message. """
     if msg.startswith('\x01ACTION ') and msg.endswith('\x01'):

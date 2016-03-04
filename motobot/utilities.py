@@ -1,4 +1,5 @@
 from collections import namedtuple
+from re import compile
 
 
 Context = namedtuple('Context', 'nick channel database session')
@@ -18,3 +19,12 @@ def split_response(iterable, format_string='{}', separator=', ', max_length=400)
     if cur != '':
         msg = format_string.format(cur)
         yield msg
+
+
+pattern = compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
+
+
+def strip_control_codes(input):
+    """ Strip the control codes from the input. """
+    output = pattern.sub('', input)
+    return output
