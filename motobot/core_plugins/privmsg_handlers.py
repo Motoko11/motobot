@@ -1,6 +1,4 @@
-from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, Eat, Notice, match, __VERSION__
-from time import strftime, localtime
-from re import compile
+from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, strip_control_codes
 
 
 @hook('PRIVMSG')
@@ -172,24 +170,3 @@ def form_message(command, params, trailing):
     message += '' if params == [] else ' ' + ' '.join(params)
     message += '' if trailing == '' else ' :' + trailing
     return message.replace('\n', '').replace('\r', '')
-
-
-@match(r'\x01(.*)\x01', priority=Priority.max)
-def ctcp_match(bot, context, message, match):
-    ctcp_req = match.group(1)
-    reply = ctcp_response(ctcp_req)
-    if reply is not None:
-        return reply, Notice(context.nick), Eat
-
-
-def ctcp_response(message):
-    """ Return the appropriate response to a CTCP request. """
-    mapping = {
-        'VERSION': 'MotoBot Version ' + __VERSION__,
-        'FINGER': 'Oh you dirty man!',
-        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
-        'PING': message
-    }
-    response = mapping.get(message.split(' ', 1)[0].upper(), None)
-    if response is not None:
-        return "\x01{}\x01".format(response)
