@@ -7,6 +7,8 @@ def handle_privmsg(bot, context, message):
     """ Handle the privmsg commands.
 
     Will send messages to each plugin accounting for priority and level.
+    Will then parse the responses from each plugin, if any, and send them
+    via the bot.
 
     """
     nick = message.nick
