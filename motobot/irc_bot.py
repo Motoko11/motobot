@@ -1,5 +1,4 @@
 from .irc_message import IRCMessage
-from .irc_level import IRCLevel
 from .database import Database
 from .utilities import Context
 from socket import create_connection, timeout
@@ -200,7 +199,7 @@ class IRCBot:
             for func in self.hooks.get(message.command, []):
                 module = func.__module__
                 context = Context(None, None, self.database.get_entry(module),
-                    self.sessions.get_entry(module))
+                                  self.sessions.get_entry(module))
                 func(self, context, message)
         finally:
             self.database.write_database()
