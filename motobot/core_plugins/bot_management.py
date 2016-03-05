@@ -1,7 +1,7 @@
-from motobot import command, hook, Notice, IRCLevel, Command, Target, Action
+from motobot import command, hook, Notice, IRCLevel, Command, Target, Action, Priority
 
 
-@command('command', level=IRCLevel.master)
+@command('command', level=IRCLevel.master, priority=Priority.max)
 def command_command(bot, context, message, args):
     """ Command to manage the basic functions of the bot.
 
