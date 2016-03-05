@@ -11,23 +11,21 @@ def handle_privmsg(bot, context, message):
     """
     nick = message.nick
     channel = message.params[0]
+    target = channel if channel != bot.nick else nick
     message = strip_control_codes(transform_action(nick, message.params[-1]))
     messages = list(split_messages(message, bot.command_prefix))
 
     break_priority = Priority.min
     for plugin in bot.plugins:
-        try:
-            if break_priority > plugin.priority:
-                break
-            else:
+        if break_priority > plugin.priority:
+            break
+        else:
+            try:
                 responses = handle_plugin(bot, plugin, nick, channel, messages)
-                target = channel if channel != bot.nick else nick
-                eat = handle_responses(bot, responses, [target])
-
-                if eat is True:
+                if handle_responses(bot, responses, [target]):
                     break_priority = plugin.priority
-        except:
-            bot.log_error()
+            except:
+                bot.log_error()
 
 
 def transform_action(nick, msg):
@@ -69,7 +67,7 @@ def call_plugins(plugins, bot, nick, channel, message):
         response = None
         module = plugin.func.__module__
         context = Context(nick, channel, bot.database.get_entry(module),
-            bot.sessions.get_entry(module))
+                          bot.sessions.get_entry(module))
         if plugin.type == IRCBot.command_plugin:
             response = handle_command(plugin, bot, context, message)
         elif plugin.type == IRCBot.match_plugin:
@@ -97,9 +95,9 @@ def handle_command(plugin, bot, context, message):
 
     if trigger == test:
         alt = bot.request('USERLEVEL', context.channel, context.nick) < plugin.level
-        args = message[len(bot.command_prefix):].split(' ')
         func = plugin.func if not alt else plugin.alt
         if func is not None:
+            args = message[len(bot.command_prefix):].split(' ')
             return func(bot, context, message, args)
 
 
@@ -119,18 +117,15 @@ def handle_sink(plugin, bot, context, message):
         return func(bot, context, message)
 
 
-def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=None):
+def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=None, require_trailing=True):
     eat = False
     trailings = []
     command_mods = []
     param_mods = []
     trailing_mods = [] if trailing_mods is None else trailing_mods
     iters = []
-    will_eat = extract_responses(responses, trailings, command_mods,
-                                 param_mods, trailing_mods, iters)
-    eat |= will_eat
-
-    require_trailing = True
+    eat |= extract_responses(responses, trailings, command_mods,
+                             param_mods, trailing_mods, iters)
 
     for modifier in command_mods:
         require_trailing &= modifier.require_trailing
@@ -139,7 +134,7 @@ def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=No
         require_trailing &= modifier.require_trailing
         params = modifier.modify_params(params)
 
-    if not require_trailing and trailings == []:
+    if not require_trailing and trailings:
         trailings = ['']
 
     for trailing in trailings:
@@ -149,7 +144,7 @@ def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=No
         bot.send(message)
 
     for iter in iters:
-            eat |= handle_responses(bot, iter, params, command, trailing_mods)
+            eat |= handle_responses(bot, iter, params, command, trailing_mods, require_trailing)
     return eat
 
 
@@ -177,6 +172,6 @@ def extract_responses(responses, trailings, command_mods,
 
 def form_message(command, params, trailing):
     message = command
-    message += '' if params == [] else ' ' + ' '.join(params)
-    message += '' if trailing == '' else ' :' + trailing
-    return message.replace('\n', '').replace('\r', '')
+    message += '' if params else ' ' + ' '.join(params)
+    message += '' if trailing else ' :' + trailing
+    return message
