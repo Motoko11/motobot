@@ -120,36 +120,36 @@ def handle_sink(plugin, bot, context, message):
         return func(bot, context, message)
 
 
-def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=[]):
+def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=None):
     eat = False
-    if responses is not None:
-        trailings = []
-        command_mods = []
-        param_mods = []
-        iters = []
-        will_eat = extract_responses(responses, trailings, command_mods,
-                                     param_mods, trailing_mods, iters)
-        eat |= will_eat
+    trailings = []
+    command_mods = []
+    param_mods = []
+    trailing_mods = [] if trailing_mods is None else trailing_mods
+    iters = []
+    will_eat = extract_responses(responses, trailings, command_mods,
+                                 param_mods, trailing_mods, iters)
+    eat |= will_eat
 
-        require_trailing = True
+    require_trailing = True
 
-        for modifier in command_mods:
-            require_trailing &= modifier.require_trailing
-            command = modifier.modify_command(command)
-        for modifier in param_mods:
-            require_trailing &= modifier.require_trailing
-            params = modifier.modify_params(params)
+    for modifier in command_mods:
+        require_trailing &= modifier.require_trailing
+        command = modifier.modify_command(command)
+    for modifier in param_mods:
+        require_trailing &= modifier.require_trailing
+        params = modifier.modify_params(params)
 
-        if not require_trailing and trailings == []:
-            trailings = ['']
+    if not require_trailing and trailings == []:
+        trailings = ['']
 
-        for trailing in trailings:
-            for modifier in trailing_mods:
-                trailing = modifier.modify_trailing(trailing)
-            message = form_message(command, params, trailing)
-            bot.send(message)
+    for trailing in trailings:
+        for modifier in trailing_mods:
+            trailing = modifier.modify_trailing(trailing)
+        message = form_message(command, params, trailing)
+        bot.send(message)
 
-        for iter in iters:
+    for iter in iters:
             eat |= handle_responses(bot, iter, params, command, trailing_mods)
 
     return eat
