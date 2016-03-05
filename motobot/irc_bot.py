@@ -183,14 +183,14 @@ class IRCBot:
 
     def send(self, msg):
         """ Send a message to the socket. """
-        if msg is not None:
-            max_len = 510
-            byte_string = bytes(msg + '\r\n', 'UTF-8')
-            self.socket.send(byte_string[:510])
-            try:
-                print("Sent: {}".format(msg))
-            except UnicodeEncodeError:
-                pass
+        max_len = 510
+        byte_string = bytes(msg, 'UTF-8')
+        message = byte_string.replace(b'\r').replace(b'\n')[:max_len] + b'\r\n'
+        self.socket.send(message)
+        try:
+            print("Sent: {}".format(msg))
+        except UnicodeEncodeError:
+            pass
 
     def __handle_message(self, message):
         """ Handle an IRCMessage object with the appropriate handler."""
