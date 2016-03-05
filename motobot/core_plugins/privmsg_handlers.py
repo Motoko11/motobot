@@ -67,7 +67,7 @@ def handle_plugin(bot, plugin, nick, channel, messages):
 def call_plugins(plugins, bot, nick, channel, message):
     for plugin in plugins:
         response = None
-        module = plugin.func.__module__
+        module = plugin.module
         context = Context(nick, channel, bot.database.get_entry(module),
                           bot.sessions.get_entry(module))
         if plugin.type == IRCBot.command_plugin:
