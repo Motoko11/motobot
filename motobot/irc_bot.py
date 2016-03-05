@@ -185,7 +185,7 @@ class IRCBot:
         """ Send a message to the socket. """
         max_len = 510
         byte_string = bytes(msg, 'UTF-8')
-        message = byte_string.replace(b'\r').replace(b'\n')[:max_len] + b'\r\n'
+        message = byte_string.replace(b'\r', b'').replace(b'\n', b'')[:max_len] + b'\r\n'
         self.socket.send(message)
         try:
             print("Sent: {}".format(msg))
