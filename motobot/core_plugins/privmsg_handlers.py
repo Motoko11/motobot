@@ -134,7 +134,7 @@ def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=No
         require_trailing &= modifier.require_trailing
         params = modifier.modify_params(params)
 
-    if not require_trailing and trailings:
+    if not require_trailing and not trailings:
         trailings = ['']
 
     for trailing in trailings:
@@ -172,6 +172,6 @@ def extract_responses(responses, trailings, command_mods,
 
 def form_message(command, params, trailing):
     message = command
-    message += '' if params else ' ' + ' '.join(params)
-    message += '' if trailing else ' :' + trailing
+    message += ' ' + ' '.join(params) if params else ''
+    message += ' :' + trailing if trailing else ''
     return message
