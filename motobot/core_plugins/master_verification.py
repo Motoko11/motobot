@@ -64,7 +64,6 @@ def master_verification_sink(bot, context, message):
 @hook('353')
 def handle_names(bot, context, message):
     """ Check users whom are present in the channel upon joining. """
-    channel = message.params[2]
     names = message.params[-1].split(' ')
     for name in names:
         check(bot, context.session, name.lstrip('+%@&~'))
