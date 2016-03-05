@@ -22,7 +22,6 @@ def handle_privmsg(bot, context, message):
             else:
                 responses = handle_plugin(bot, plugin, nick, channel, messages)
                 target = channel if channel != bot.nick else nick
-                responses = [responses] if responses is not None else None
                 eat = handle_responses(bot, responses, [target])
 
                 if eat is True:
@@ -85,7 +84,7 @@ def handle_pipe(bot, nick, channel, message, responses):
     plugins = list(filter(lambda x: x.type == IRCBot.command_plugin, bot.plugins))
     for x in responses:
         if isinstance(x, str):
-            yield call_plugins(plugins, bot, nick, channel, message + ' ' + x)
+            yield call_plugins(plugins, bot, nick, channel, message.rstrip(' ') + ' ' + x)
         elif isinstance(x, Modifier):
             yield x
         else:
@@ -151,7 +150,6 @@ def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=No
 
     for iter in iters:
             eat |= handle_responses(bot, iter, params, command, trailing_mods)
-
     return eat
 
 
