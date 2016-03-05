@@ -12,8 +12,6 @@ def command_command(bot, context, message, args):
     The 'set' argument will set an attribute of the bot. Use with caution.
     The 'reload' command will reload the plugins in the loaded packages.
     """
-    response = None
-
     try:
         arg = args[1].lower()
 
