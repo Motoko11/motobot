@@ -56,13 +56,13 @@ def del_ignore(database, channel, nick):
 
 
 def show_ignores(database, channel):
-    channel_ignores = database.get({}).get(channel, None)
+    channel_ignores = database.get({}).get(channel, set())
 
-    if channel_ignores is None:
-        responses = "I am not ignoring anyone on {}.".format(channel)
-    else:
+    if channel_ignores:
         responses = split_response(channel_ignores,
             "I am currently ignoring: {} on {}".format('{}', channel))
+    else:
+        responses = "I am not ignoring anyone on {}.".format(channel)
 
     return responses
 
