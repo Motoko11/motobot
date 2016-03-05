@@ -24,7 +24,7 @@ def commands_command(bot, context, message, args):
     for command, func in filter_plugins(bot.plugins, userlevel):
         groups[func].append(command)
 
-    commands = map(format_group, sorted(groups.values(), key=lambda x: x[0]))
+    commands = map(format_group, sorted(groups.values()))
     response = split_response(commands, "Bot Commands: {};")
 
     return response, Notice(context.nick)
