@@ -13,6 +13,7 @@ def ctcp_match(bot, context, message, match):
     try:
         ctcp_req = match.group(1)
         reply = ctcp_response[ctcp_req]
-        return reply, Notice(context.nick), Eat
+        response = (reply, Notice(context.nick), Eat)
     except KeyError:
-        return None
+        response = None
+    return response
