@@ -47,11 +47,11 @@ def split_messages(message, command_prefix):
     for message in messages:
         test_message = message.lstrip(' ')
         if test_message.startswith(command_prefix):
-            yield current_message
+            yield current_message.rstrip(' ')
             current_message = test_message
         else:
             current_message += '|' + message
-    yield current_message
+    yield current_message.rstrip(' ')
 
 
 def handle_plugin(bot, plugin, nick, channel, host, messages):
