@@ -1,5 +1,5 @@
 from motobot import match, Notice, Eat, Priority, __VERSION__
-from time import strftime, localtime
+from time import strftime, gmtime
 
 
 @match(r'\x01(.+)\x01', priority=Priority.max)
@@ -7,7 +7,7 @@ def ctcp_match(bot, context, message, match):
     ctcp_response = {
         'VERSION': 'MotoBot Version ' + __VERSION__,
         'FINGER': 'Oh you dirty man!',
-        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
+        'TIME': strftime('%a %b %d %H:%M:%S UTC', gmtime()),
         'PING': message
     }
     try:
