@@ -19,17 +19,15 @@ def handle_privmsg(bot, context, message):
     messages = list(split_messages(message, bot.command_prefix))
 
     break_priority = Priority.min
-    for plugin in bot.plugins:
+    for plugin in bot.request('GET_PLUGINS', channel):
         if break_priority > plugin.priority:
             break
-        else:
-            try:
-                responses = handle_plugin(bot, plugin, nick, channel, messages)
-                if handle_responses(bot, responses, [target]):
-                    break_priority = plugin.priority
-            except:
-                bot.log_error()
+        try:
             responses = handle_plugin(bot, plugin, nick, channel, host, messages)
+            if handle_responses(bot, responses, [target]):
+                break_priority = plugin.priority
+        except:
+            bot.log_error()
 
 
 def transform_action(nick, msg):

@@ -21,7 +21,7 @@ def commands_command(bot, context, message, args):
     userlevel = bot.request('USERLEVEL', context.channel, context.nick)
     groups = defaultdict(lambda: [])
 
-    for command, func in filter_plugins(bot.plugins, userlevel):
+    for command, func in filter_plugins(bot.request('GET_PLUGINS', context.channel), userlevel):
         groups[func].append(command)
 
     commands = map(format_group, sorted(groups.values()))
