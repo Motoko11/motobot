@@ -70,7 +70,7 @@ class IRCBot:
                     for msg in self.__recv():
                         message = IRCMessage(msg)
                         self.__handle_message(message)
-                except (ConnectionResetError, timeout):
+                except (ConnectionResetError, ConnectionAbortedError, timeout):
                     self.connected = False
                     sleep(10)
                 except UnicodeEncodeError:
@@ -155,7 +155,7 @@ class IRCBot:
         """ Request something from the bot's request plugins. """
         func = self.requests.get(name, lambda *x, **xs: None)
         module = func.__module__
-        context = Context(None, None, self.database.get_entry(module), self.sessions.get_entry(module))
+        context = Context(None, None, None, self.database.get_entry(module), self.sessions.get_entry(module))
         return func(self, context, *args, **kwargs)
 
     def __connect(self):
@@ -198,7 +198,7 @@ class IRCBot:
         try:
             for func in self.hooks.get(message.command, []):
                 module = func.__module__
-                context = Context(None, None, self.database.get_entry(module),
+                context = Context(None, None, None, self.database.get_entry(module),
                                   self.sessions.get_entry(module))
                 func(self, context, message)
         finally:

@@ -13,6 +13,7 @@ def handle_privmsg(bot, context, message):
     """
     nick = message.nick
     channel = message.params[0]
+    host = message.host
     target = channel if channel != bot.nick else nick
     message = strip_control_codes(transform_action(nick, message.params[-1]))
     messages = list(split_messages(message, bot.command_prefix))
@@ -28,6 +29,7 @@ def handle_privmsg(bot, context, message):
                     break_priority = plugin.priority
             except:
                 bot.log_error()
+            responses = handle_plugin(bot, plugin, nick, channel, host, messages)
 
 
 def transform_action(nick, msg):
@@ -52,23 +54,23 @@ def split_messages(message, command_prefix):
     yield current_message
 
 
-def handle_plugin(bot, plugin, nick, channel, messages):
+def handle_plugin(bot, plugin, nick, channel, host, messages):
     responses = None
 
     for message in messages:
         if responses is None:
-            responses = call_plugins([plugin], bot, nick, channel, message)
+            responses = call_plugins([plugin], bot, nick, channel, host, message)
         else:
-            responses = handle_pipe(bot, nick, channel, message, responses)
+            responses = handle_pipe(bot, nick, channel, host, message, responses)
 
     return responses
 
 
-def call_plugins(plugins, bot, nick, channel, message):
+def call_plugins(plugins, bot, nick, channel, host, message):
     for plugin in plugins:
         response = None
         module = plugin.module
-        context = Context(nick, channel, bot.database.get_entry(module),
+        context = Context(nick, channel, host, bot.database.get_entry(module),
                           bot.sessions.get_entry(module))
         if plugin.type == IRCBot.command_plugin:
             response = handle_command(plugin, bot, context, message)
@@ -80,15 +82,15 @@ def call_plugins(plugins, bot, nick, channel, message):
             yield response
 
 
-def handle_pipe(bot, nick, channel, message, responses):
-    plugins = list(filter(lambda x: x.type == IRCBot.command_plugin, bot.plugins))
+def handle_pipe(bot, nick, channel, host, message, responses):
+    plugins = list(filter(lambda x: x.type == IRCBot.command_plugin, bot.request('GET_PLUGINS', channel)))
     for x in responses:
         if isinstance(x, str):
-            yield call_plugins(plugins, bot, nick, channel, message.rstrip(' ') + ' ' + x)
+            yield call_plugins(plugins, bot, nick, channel, host, message.rstrip(' ') + ' ' + x)
         elif isinstance(x, Modifier):
             yield x
-        else:
-            yield handle_pipe(bot, nick, channel, message, x)
+        elif hasattr(x, '__iter__'):
+            yield handle_pipe(bot, nick, channel, host, message, x)
 
 
 def handle_command(plugin, bot, context, message):
@@ -166,7 +168,7 @@ def extract_responses(responses, trailings, command_mods,
                 param_mods.append(x)
             if isinstance(x, TrailingModifier):
                 trailing_mods.append(x)
-        else:
+        elif hasattr(x, '__iter__'):
             iters.append(x)
 
     return will_eat
