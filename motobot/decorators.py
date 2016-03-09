@@ -5,7 +5,7 @@ from collections import namedtuple
 from re import compile, IGNORECASE
 
 
-Plugin = namedtuple('Plugin', 'func alt type priority level arg')
+Plugin = namedtuple('Plugin', 'func alt module type priority level arg')
 CommandArg = namedtuple('CommandArg', 'trigger hidden')
 
 
@@ -23,7 +23,7 @@ def command(name, *, level=IRCLevel.user, priority=Priority.medium, alt=None, hi
     """ Decorator to add a command to the bot. """
     def register_command(func):
         attr = getattr(func, IRCBot.plugin, [])
-        plugin = Plugin(func, alt, IRCBot.command_plugin, priority, level, CommandArg(name, hidden))
+        plugin = Plugin(func, alt, func.__module__, IRCBot.command_plugin, priority, level, CommandArg(name, hidden))
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
@@ -35,7 +35,7 @@ def match(pattern, *, level=IRCLevel.user, priority=Priority.medium, alt=None):
     def register_pattern(func):
         attr = getattr(func, IRCBot.plugin, [])
         compiled = compile(pattern, IGNORECASE)
-        plugin = Plugin(func, alt, IRCBot.match_plugin, priority, level, compiled)
+        plugin = Plugin(func, alt, func.__module__, IRCBot.match_plugin, priority, level, compiled)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
@@ -46,7 +46,7 @@ def sink(*, level=IRCLevel.user, priority=Priority.medium, alt=None):
     """ Decorator to add sink to the bot. """
     def register_sink(func):
         attr = getattr(func, IRCBot.plugin, [])
-        plugin = Plugin(func, alt, IRCBot.sink_plugin, priority, level, None)
+        plugin = Plugin(func, alt, func.__module__, IRCBot.sink_plugin, priority, level, None)
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func

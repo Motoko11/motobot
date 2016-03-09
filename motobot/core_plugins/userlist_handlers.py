@@ -3,7 +3,7 @@ from motobot import hook, request, IRCLevel
 
 @request('USERLIST')
 def userlist_request(bot, context, channel):
-    return [x[1] for x in contest.session.get({}) if x[0].lower() == channel.lower()]
+    return [x[1] for x in context.session.get({}) if x[0].lower() == channel.lower()]
 
 
 @request('USERLEVEL')

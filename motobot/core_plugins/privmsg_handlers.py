@@ -1,6 +1,5 @@
-from motobot import IRCBot, hook, Priority, Context, Modifier, EatModifier, Eat, Notice, match, __VERSION__
-from time import strftime, localtime
-from re import compile
+from motobot import IRCBot, hook, Priority, Context, strip_control_codes
+from motobot.modifiers import Modifier, CommandModifier, ParamsModifier, TrailingModifier, EatType
 
 
 @hook('PRIVMSG')
@@ -8,28 +7,35 @@ def handle_privmsg(bot, context, message):
     """ Handle the privmsg commands.
 
     Will send messages to each plugin accounting for priority and level.
+    Will then parse the responses from each plugin, if any, and send them
+    via the bot.
 
     """
     nick = message.nick
     channel = message.params[0]
+    host = message.host
+    target = channel if channel != bot.nick else nick
     message = strip_control_codes(transform_action(nick, message.params[-1]))
     messages = list(split_messages(message, bot.command_prefix))
 
     break_priority = Priority.min
-    for plugin in bot.plugins:
+    for plugin in bot.request('GET_PLUGINS', channel):
+        if break_priority > plugin.priority:
+            break
         try:
-            if break_priority > plugin.priority:
-                break
-            else:
-                responses = handle_plugin(bot, plugin, nick, channel, messages)
-                target = channel if channel != bot.nick else nick
-                responses = [responses] if responses is not None else None
-                eat = handle_responses(bot, responses, [target])
-
-                if eat is True:
-                    break_priority = plugin.priority
+            responses = handle_plugin(bot, plugin, nick, channel, host, messages)
+            if handle_responses(bot, responses, [target]):
+                break_priority = plugin.priority
         except:
             bot.log_error()
+
+
+def transform_action(nick, msg):
+    """ Transform an action CTCP into a message. """
+    if msg.startswith('\x01ACTION ') and msg.endswith('\x01'):
+        return '*' + nick + msg[7:-1]
+    else:
+        return msg
 
 
 def split_messages(message, command_prefix):
@@ -39,31 +45,31 @@ def split_messages(message, command_prefix):
     for message in messages:
         test_message = message.lstrip(' ')
         if test_message.startswith(command_prefix):
-            yield current_message
+            yield current_message.rstrip(' ')
             current_message = test_message
         else:
             current_message += '|' + message
-    yield current_message
+    yield current_message.rstrip(' ')
 
 
-def handle_plugin(bot, plugin, nick, channel, messages):
+def handle_plugin(bot, plugin, nick, channel, host, messages):
     responses = None
 
     for message in messages:
         if responses is None:
-            responses = call_plugins([plugin], bot, nick, channel, message)
+            responses = call_plugins([plugin], bot, nick, channel, host, message)
         else:
-            responses = handle_pipe(bot, nick, channel, message, responses)
+            responses = handle_pipe(bot, nick, channel, host, message, responses)
 
     return responses
 
 
-def call_plugins(plugins, bot, nick, channel, message):
+def call_plugins(plugins, bot, nick, channel, host, message):
     for plugin in plugins:
         response = None
-        module = plugin.func.__module__
-        context = Context(nick, channel, bot.database.get_entry(module),
-            bot.sessions.get_entry(module))
+        module = plugin.module
+        context = Context(nick, channel, host, bot.database.get_entry(module),
+                          bot.sessions.get_entry(module))
         if plugin.type == IRCBot.command_plugin:
             response = handle_command(plugin, bot, context, message)
         elif plugin.type == IRCBot.match_plugin:
@@ -74,17 +80,15 @@ def call_plugins(plugins, bot, nick, channel, message):
             yield response
 
 
-def handle_pipe(bot, nick, channel, message, responses):
+def handle_pipe(bot, nick, channel, host, message, responses):
+    plugins = list(filter(lambda x: x.type == IRCBot.command_plugin, bot.request('GET_PLUGINS', channel)))
     for x in responses:
-        if isinstance(x, EatModifier):
-            yield x
-        elif isinstance(x, str):
-            plugins = filter(lambda x: x.type == IRCBot.command_plugin, bot.plugins)
-            yield call_plugins(plugins, bot, nick, channel, message + ' ' + x)
+        if isinstance(x, str):
+            yield call_plugins(plugins, bot, nick, channel, host, message.rstrip(' ') + ' ' + x)
         elif isinstance(x, Modifier):
             yield x
-        else:
-            yield handle_pipe(bot, nick, channel, message, x)
+        elif hasattr(x, '__iter__'):
+            yield handle_pipe(bot, nick, channel, host, message, x)
 
 
 def handle_command(plugin, bot, context, message):
@@ -93,9 +97,9 @@ def handle_command(plugin, bot, context, message):
 
     if trigger == test:
         alt = bot.request('USERLEVEL', context.channel, context.nick) < plugin.level
-        args = message[len(bot.command_prefix):].split(' ')
         func = plugin.func if not alt else plugin.alt
         if func is not None:
+            args = message[len(bot.command_prefix):].split(' ')
             return func(bot, context, message, args)
 
 
@@ -115,90 +119,61 @@ def handle_sink(plugin, bot, context, message):
         return func(bot, context, message)
 
 
-def handle_responses(bot, responses, params, command='PRIVMSG'):
+def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=None, require_trailing=True):
     eat = False
-    if responses is not None:
-        will_eat, modifiers, trailings, iters = extract_responses(responses)
-        eat |= will_eat
+    trailings = []
+    command_mods = []
+    param_mods = []
+    trailing_mods = [] if trailing_mods is None else trailing_mods
+    iters = []
+    eat |= extract_responses(responses, trailings, command_mods,
+                             param_mods, trailing_mods, iters)
 
-        for modifier in modifiers:
-            command = modifier.modify_command(command)
-            params = modifier.modify_params(params)
+    for modifier in command_mods:
+        require_trailing &= modifier.require_trailing
+        command = modifier.modify_command(command)
+    for modifier in param_mods:
+        require_trailing &= modifier.require_trailing
+        params = modifier.modify_params(params)
 
-        if len(trailings) == 0 and len(modifiers) != 0:
-            trailings = ['']
+    if not require_trailing and not trailings:
+        trailings = ['']
 
-        for trailing in trailings:
-            for modifier in modifiers:
-                trailing = modifier.modify_trailing(trailing)
-            message = form_message(command, params, trailing)
-            bot.send(message)
+    for trailing in trailings:
+        for modifier in trailing_mods:
+            trailing = modifier.modify_trailing(trailing)
+        message = form_message(command, params, trailing)
+        bot.send(message)
 
-        for iter in iters:
-            eat |= handle_responses(bot, iter, params, command)
-
+    for iter in iters:
+            eat |= handle_responses(bot, iter, params, command, trailing_mods, require_trailing)
     return eat
 
 
-def extract_responses(responses):
+def extract_responses(responses, trailings, command_mods,
+                      param_mods, trailing_mods, iters):
     will_eat = False
-    modifiers = []
-    trailings = []
-    iters = []
 
     for x in responses:
-        if isinstance(x, EatModifier):
+        if isinstance(x, EatType):
             will_eat = True
         elif isinstance(x, str):
             trailings.append(x)
         elif isinstance(x, Modifier):
-            modifiers.append(x)
-        else:
+            if isinstance(x, CommandModifier):
+                command_mods.append(x)
+            if isinstance(x, ParamsModifier):
+                param_mods.append(x)
+            if isinstance(x, TrailingModifier):
+                trailing_mods.append(x)
+        elif hasattr(x, '__iter__'):
             iters.append(x)
 
-    return will_eat, modifiers, trailings, iters
-
-
-pattern = compile(r'\x03[0-9]{0,2},?[0-9]{0,2}|\x02|\x1D|\x1F|\x16|\x0F+')
-
-
-def strip_control_codes(input):
-    """ Strip the control codes from the input. """
-    output = pattern.sub('', input)
-    return output
-
-
-def transform_action(nick, msg):
-    """ Transform an action CTCP into a message. """
-    if msg.startswith('\x01ACTION ') and msg.endswith('\x01'):
-        return '*' + nick + msg[7:-1]
-    else:
-        return msg
+    return will_eat
 
 
 def form_message(command, params, trailing):
     message = command
-    message += '' if params == [] else ' ' + ' '.join(params)
-    message += '' if trailing == '' else ' :' + trailing
-    return message.replace('\n', '').replace('\r', '')
-
-
-@match(r'\x01(.*)\x01', priority=Priority.max)
-def ctcp_match(bot, context, message, match):
-    ctcp_req = match.group(1)
-    reply = ctcp_response(ctcp_req)
-    if reply is not None:
-        return reply, Notice(context.nick), Eat
-
-
-def ctcp_response(message):
-    """ Return the appropriate response to a CTCP request. """
-    mapping = {
-        'VERSION': 'MotoBot Version ' + __VERSION__,
-        'FINGER': 'Oh you dirty man!',
-        'TIME': strftime('%a %b %d %H:%M:%S', localtime()),
-        'PING': message
-    }
-    response = mapping.get(message.split(' ', 1)[0].upper(), None)
-    if response is not None:
-        return "\x01{}\x01".format(response)
+    message += ' ' + ' '.join(params) if params else ''
+    message += ' :' + trailing if trailing else ''
+    return message

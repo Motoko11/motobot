@@ -1,6 +1,6 @@
 from pickle import load, dump, HIGHEST_PROTOCOL
 from os import replace, mkdir, listdir
-from os.path import exists, isdir
+from os.path import exists
 from shutil import copyfile
 from time import time
 from math import floor
