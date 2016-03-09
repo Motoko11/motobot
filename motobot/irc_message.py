@@ -6,6 +6,7 @@ class IRCMessage:
         """ Parse a raw IRC message to IRCMessage. """
         self.sender = None
         self.nick = None
+        self.host = None
         self.command = None
         self.params = []
 
@@ -14,7 +15,13 @@ class IRCMessage:
     def __parse_msg(self, msg):
         if msg[0] == ':':
             self.sender, msg = msg[1:].split(' ', 1)
-            self.nick = get_nick(self.sender)
+            print(self.sender.split('!', 1))
+            split = self.sender.split('!', 1)
+            self.nick = split[0]
+            try:
+                self.host = split[1]
+            except IndexError:
+                pass
 
         if ' :' in msg:
             msg, trailing = msg.split(' :', 1)
@@ -28,8 +35,3 @@ class IRCMessage:
         """ Print the IRCMessage all nice 'n' pretty. """
         return "Sender: {};\nCommand: {};\nParams: {};\n".format(
             self.sender, self.command, self.params)
-
-
-def get_nick(host):
-    """ Get the user's nick from a host. """
-    return host.split('!', 1)[0]
