@@ -15,7 +15,6 @@ class IRCMessage:
     def __parse_msg(self, msg):
         if msg[0] == ':':
             self.sender, msg = msg[1:].split(' ', 1)
-            print(self.sender.split('!', 1))
             split = self.sender.split('!', 1)
             self.nick = split[0]
             try:
