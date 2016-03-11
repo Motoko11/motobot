@@ -81,7 +81,8 @@ def call_plugins(plugins, bot, nick, channel, host, message):
 
 
 def handle_pipe(bot, nick, channel, host, message, responses):
-    plugins = list(filter(lambda x: x.type == IRCBot.command_plugin, bot.request('GET_PLUGINS', channel)))
+    plugins = list(filter(lambda x: x.type == IRCBot.command_plugin,
+                          bot.request('GET_PLUGINS', channel)))
     for x in responses:
         if isinstance(x, str):
             yield call_plugins(plugins, bot, nick, channel, host, message.rstrip(' ') + ' ' + x)
@@ -119,7 +120,8 @@ def handle_sink(plugin, bot, context, message):
         return func(bot, context, message)
 
 
-def handle_responses(bot, responses, params, command='PRIVMSG', trailing_mods=None, require_trailing=True):
+def handle_responses(bot, responses, params, command='PRIVMSG',
+                     trailing_mods=None, require_trailing=True):
     eat = False
     trailings = []
     command_mods = []

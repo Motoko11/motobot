@@ -59,8 +59,8 @@ def show_ignores(database, channel):
     channel_ignores = database.get({}).get(channel, set())
 
     if channel_ignores:
-        responses = split_response(channel_ignores,
-            "I am currently ignoring: {} on {}".format('{}', channel))
+        responses = split_response(
+            channel_ignores, "I am currently ignoring: {} on {}".format('{}', channel))
     else:
         responses = "I am not ignoring anyone on {}.".format(channel)
 

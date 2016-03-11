@@ -23,7 +23,8 @@ def command(name, *, level=IRCLevel.user, priority=Priority.medium, alt=None, hi
     """ Decorator to add a command to the bot. """
     def register_command(func):
         attr = getattr(func, IRCBot.plugin, [])
-        plugin = Plugin(func, alt, func.__module__, IRCBot.command_plugin, priority, level, CommandArg(name, hidden))
+        plugin = Plugin(func, alt, func.__module__, IRCBot.command_plugin, priority, level,
+                        CommandArg(name, hidden))
         attr.append(plugin)
         setattr(func, IRCBot.plugin, attr)
         return func
