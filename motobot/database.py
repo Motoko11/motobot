@@ -73,7 +73,8 @@ class Database:
             current_time = int(floor(time()))
 
             if last_backup + self.backup_frequency < current_time:
-                path = '{}/{}.{}{}'.format(self.backup_folder, self.database_path, current_time, Database.backup_extension)
+                path = '{}/{}.{}{}'.format(self.backup_folder, self.database_path, current_time,
+                                           Database.backup_extension)
                 copyfile(self.database_path, path)
 
     def last_backup(self):

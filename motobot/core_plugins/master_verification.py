@@ -50,9 +50,16 @@ def unverify(bot, session, nick):
 
 
 @hook('307')
-def registered_nick_confirm(bot, context, message):
+def registered_nick_confirm_rizon(bot, context, message):
     """ Hooks the user is registered reply from a WHOIS query and verifies user. """
     verify(bot, context.session, message.params[1])
+
+
+@hook('330')
+def registered_nick_confirm_freenode(bot, context, message):
+    """ Hooks the user is registered reply from a WHOIS query and verifies user. """
+    if message.params[1] == message.params[2]:
+        verify(bot, context.session, message.params[2])
 
 
 @sink(priority=Priority.max)

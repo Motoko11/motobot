@@ -12,7 +12,9 @@ def help_command(bot, context, message, args):
     try:
         response = get_command_help(bot, args[1])
     except IndexError:
-        default_help = "For a list of commands use '{0}commands'. For help on a specific command use '{0}help command'.".format(bot.command_prefix)
+        default_help = "For a list of commands use '{0}commands'. " \
+                       "For help on a specific command use '{0}help command'.".format(
+                            bot.command_prefix)
         response = getattr(bot, 'default_help', default_help)
 
     return response, Notice(context.nick)

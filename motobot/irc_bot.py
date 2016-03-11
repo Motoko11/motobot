@@ -155,7 +155,8 @@ class IRCBot:
         """ Request something from the bot's request plugins. """
         func = self.requests.get(name, lambda *x, **xs: None)
         module = func.__module__
-        context = Context(None, None, None, self.database.get_entry(module), self.sessions.get_entry(module))
+        context = Context(None, None, None, self.database.get_entry(module),
+                          self.sessions.get_entry(module))
         return func(self, context, *args, **kwargs)
 
     def __connect(self):
