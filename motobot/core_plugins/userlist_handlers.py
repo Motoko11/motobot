@@ -73,10 +73,14 @@ def handle_nick(bot, context, message):
     new_nick = message.params[0]
 
     userlevel_data = context.session.get({})
+    changes = []
     for channel, nick in userlevel_data:
         if nick == old_nick:
-            userlevel_data[(channel, new_nick)] = \
-                userlevel_data.pop((channel, nick))
+            old = (channel, new_nick)
+            new = (channel, nick)
+            changes.append((old, new))
+    for old, new in changes:
+        userlevel_data[new] = userlevel_data.pop(old)
     context.session.set(userlevel_data)
 
 

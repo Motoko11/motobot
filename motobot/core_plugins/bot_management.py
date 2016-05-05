@@ -5,11 +5,11 @@ from motobot import command, hook, Notice, IRCLevel, Command, Target, Action, Pr
 def command_command(bot, context, message, args):
     """ Command to manage the basic functions of the bot.
 
+    Valid arguments are: 'join', 'part', 'quit', 'show', 'reconnect' and 'reload'.
     The 'join' and 'part' argument both require a channel argument.
     The 'join' command has an optional channel password argument.
     The 'quit', 'part', and 'reconnect' argument have an optional quit/part message.
     The 'show' argument will return a list of currently joined channels.
-    The 'set' argument will set an attribute of the bot. Use with caution.
     The 'reload' command will reload the plugins in the loaded packages.
     """
     try:
@@ -31,10 +31,6 @@ def command_command(bot, context, message, args):
             response = quit(message)
         elif arg == 'show':
             response = show_channels(context.database)
-        elif arg == 'set':
-            name = args[2]
-            value = args[3:]
-            response = set_attribute(bot, name, value)
         elif arg == 'reload':
             error = bot.reload_plugins()
             response = "Plugins have been reloaded." + \
@@ -111,10 +107,6 @@ def say(target, message):
         return (message[4:], target_modifier, Action)
     else:
         return (message, target_modifier)
-
-
-def set_attribute(bot, name, value):
-    return "This function has not yet been implemeneted."
 
 
 @hook('KICK')
