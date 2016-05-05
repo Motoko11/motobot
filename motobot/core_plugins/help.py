@@ -1,4 +1,4 @@
-from motobot import IRCBot, command, Notice
+from motobot import IRCBot, command, Notice, split_response
 
 
 @command('help')
@@ -15,7 +15,7 @@ def help_command(bot, context, message, args):
         default_help = "For a list of commands use '{0}commands'. " \
                        "For help on a specific command use '{0}help command'.".format(
                             bot.command_prefix)
-        response = getattr(bot, 'default_help', default_help)
+        response = default_help
 
     return response, Notice(context.nick)
 
@@ -25,7 +25,7 @@ def get_command_help(bot, command):
     for docstring in filter_plugins(bot.plugins, command):
         if docstring is not None:
             has_help = True
-            yield ' '.join(docstring.split())
+            yield split_response(docstring.split(), separator=' ')
     if not has_help:
         yield "There is no help entry for the command: {}.".format(command)
 
