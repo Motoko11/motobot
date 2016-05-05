@@ -48,7 +48,6 @@ class IRCBot:
         self.channels = []
         self.masters = []
         self.database_path = None
-        self.default_help = None
         self.error_log = None
         self.backup_folder = None
 
@@ -72,9 +71,7 @@ class IRCBot:
                         self.__handle_message(message)
                 except (ConnectionResetError, ConnectionAbortedError, timeout):
                     self.connected = False
-                    sleep(10)
-                except UnicodeEncodeError:
-                    pass
+                    sleep(5)
                 except:
                     self.log_error()
 
@@ -161,12 +158,17 @@ class IRCBot:
 
     def __connect(self):
         """ Connect the socket. """
-        self.socket = create_connection((self.server, self.port))
-        if self.ssl:
-            self.socket = wrap_socket(self.socket)
-        self.socket.settimeout(10 * 60)
-        self.connected = True
-        self.identified = False
+        while True:
+            try:
+                self.socket = create_connection((self.server, self.port))
+                if self.ssl:
+                    self.socket = wrap_socket(self.socket)
+                self.socket.settimeout(5 * 60)
+                self.connected = True
+                self.identified = False
+                break
+            except:
+                sleep(5)
 
     def log_error(self):
         if self.error_log is not None:
@@ -194,7 +196,10 @@ class IRCBot:
 
     def __handle_message(self, message):
         """ Handle an IRCMessage object with the appropriate handler."""
-        print(message)
+        try:
+            print(message)
+        except UnicodeEncodeError:
+            pass
 
         try:
             for func in self.hooks.get(message.command, []):
