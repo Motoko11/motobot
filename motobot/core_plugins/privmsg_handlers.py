@@ -1,5 +1,42 @@
-from motobot import IRCBot, hook, Priority, Context, strip_control_codes
+from motobot import IRCBot, hook, request, Priority, Context, strip_control_codes
 from motobot.modifiers import Modifier, CommandModifier, ParamsModifier, TrailingModifier, EatType
+
+
+@request('HANDLE_MESSAGE')
+def handle_message_request(bot, context, nick, channel, host, message):
+    messages = list(split_messages(message, bot.command_prefix))
+
+    break_priority = Priority.min
+    for plugin in bot.request('GET_PLUGINS', channel):
+        if break_priority > plugin.priority:
+            break
+        try:
+            responses = handle_plugin(bot, plugin, nick, channel, host, messages)
+            responses, eat = check_eat(responses)
+            if eat:
+                break_priority = plugin.priority
+            yield responses
+        except:
+            bot.log_error()
+
+
+def check_eat(responses):
+    will_eat = False
+
+    def extract_responses(responses):
+        for x in responses:
+            if isinstance(x, EatType):
+                nonlocal will_eat
+                will_eat = True
+            elif isinstance(x, str):
+                yield x
+            elif isinstance(x, Modifier):
+                yield x
+            elif hasattr(x, '__iter__'):
+                yield extract_responses(x)
+
+    responses = extract_responses(responses)
+    return responses, will_eat
 
 
 @hook('PRIVMSG')
@@ -14,20 +51,11 @@ def handle_privmsg(bot, context, message):
     nick = message.nick
     channel = message.params[0]
     host = message.host
-    target = channel if channel != bot.nick else nick
     message = strip_control_codes(transform_action(nick, message.params[-1]))
-    messages = list(split_messages(message, bot.command_prefix))
+    target = channel if channel != bot.nick else nick
 
-    break_priority = Priority.min
-    for plugin in bot.request('GET_PLUGINS', channel):
-        if break_priority > plugin.priority:
-            break
-        try:
-            responses = handle_plugin(bot, plugin, nick, channel, host, messages)
-            if handle_responses(bot, responses, [target]):
-                break_priority = plugin.priority
-        except:
-            bot.log_error()
+    responses = bot.request('HANDLE_MESSAGE', nick, channel, host, message)
+    handle_responses(bot, responses, [target])
 
 
 def transform_action(nick, msg):
@@ -122,14 +150,13 @@ def handle_sink(plugin, bot, context, message):
 
 def handle_responses(bot, responses, params, command='PRIVMSG',
                      trailing_mods=None, require_trailing=True):
-    eat = False
     trailings = []
     command_mods = []
     param_mods = []
     trailing_mods = [] if trailing_mods is None else trailing_mods
     iters = []
-    eat |= extract_responses(responses, trailings, command_mods,
-                             param_mods, trailing_mods, iters)
+    extract_responses(responses, trailings, command_mods,
+                      param_mods, trailing_mods, iters)
 
     for modifier in command_mods:
         require_trailing &= modifier.require_trailing
@@ -148,18 +175,13 @@ def handle_responses(bot, responses, params, command='PRIVMSG',
         bot.send(message)
 
     for iter in iters:
-            eat |= handle_responses(bot, iter, params, command, trailing_mods, require_trailing)
-    return eat
+        handle_responses(bot, iter, params, command, trailing_mods, require_trailing)
 
 
 def extract_responses(responses, trailings, command_mods,
                       param_mods, trailing_mods, iters):
-    will_eat = False
-
     for x in responses:
-        if isinstance(x, EatType):
-            will_eat = True
-        elif isinstance(x, str):
+        if isinstance(x, str):
             trailings.append(x)
         elif isinstance(x, Modifier):
             if isinstance(x, CommandModifier):
@@ -170,8 +192,6 @@ def extract_responses(responses, trailings, command_mods,
                 trailing_mods.append(x)
         elif hasattr(x, '__iter__'):
             iters.append(x)
-
-    return will_eat
 
 
 def form_message(command, params, trailing):
