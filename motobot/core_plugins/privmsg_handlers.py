@@ -1,5 +1,6 @@
 from motobot import IRCBot, hook, request, Priority, Context, strip_control_codes
 from motobot.modifiers import Modifier, CommandModifier, ParamsModifier, TrailingModifier, EatType
+from itertools import tee
 
 
 @request('HANDLE_MESSAGE')
@@ -21,13 +22,10 @@ def handle_message_request(bot, context, nick, channel, host, message):
 
 
 def check_eat(responses):
-    will_eat = False
-
     def extract_responses(responses):
         for x in responses:
             if isinstance(x, EatType):
-                nonlocal will_eat
-                will_eat = True
+                pass
             elif isinstance(x, str):
                 yield x
             elif isinstance(x, Modifier):
@@ -35,8 +33,21 @@ def check_eat(responses):
             elif hasattr(x, '__iter__'):
                 yield extract_responses(x)
 
-    responses = extract_responses(responses)
-    return responses, will_eat
+    def find_eat(responses):
+        for x in responses:
+            if isinstance(x, EatType):
+                return True
+            elif isinstance(x, str):
+                pass
+            elif isinstance(x, Modifier):
+                pass
+            elif hasattr(x, '__iter__'):
+                if find_eat(x):
+                    return True
+        return False
+
+    it1, it2 = tee(responses)
+    return extract_responses(it1), find_eat(it2)
 
 
 @hook('PRIVMSG')
