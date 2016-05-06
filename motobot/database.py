@@ -7,8 +7,8 @@ from math import floor
 
 
 class DatabaseEntry:
-    def __init__(self):
-        self.__data = None
+    def __init__(self, data=None):
+        self.__data = data
         self.changed = False
 
     def get(self, default=None):
@@ -17,6 +17,9 @@ class DatabaseEntry:
     def set(self, value):
         self.__data = value
         self.changed = True
+
+    def __repr__(self):
+        return 'DatabaseEntry({})'.format(repr(self.__data))
 
 
 class Database:
