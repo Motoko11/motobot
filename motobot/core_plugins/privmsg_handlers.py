@@ -22,32 +22,21 @@ def handle_message_request(bot, context, nick, channel, host, message):
 
 
 def check_eat(responses):
-    def extract_responses(responses):
-        for x in responses:
-            if isinstance(x, EatType):
-                pass
-            elif isinstance(x, str):
-                yield x
-            elif isinstance(x, Modifier):
-                yield x
-            elif hasattr(x, '__iter__'):
-                yield extract_responses(x)
+    eat = False
+    new_responses = []
 
-    def find_eat(responses):
-        for x in responses:
+    for x in responses:
             if isinstance(x, EatType):
-                return True
+                eat = True
             elif isinstance(x, str):
-                pass
+                new_responses.append(x)
             elif isinstance(x, Modifier):
-                pass
+                new_responses.append(x)
             elif hasattr(x, '__iter__'):
-                if find_eat(x):
-                    return True
-        return False
+                x, eat = check_eat(x)
+                new_responses.append(x)
 
-    it1, it2 = tee(responses)
-    return extract_responses(it1), find_eat(it2)
+    return new_responses, eat
 
 
 @hook('PRIVMSG')
