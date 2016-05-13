@@ -1,4 +1,4 @@
-from motobot import command, hook, Notice, IRCLevel, Command, Target, Action, Priority
+from motobot import command, hook, Notice, IRCLevel, Command, Target, Action, Priority, split_response
 
 
 @command('command', level=IRCLevel.master, priority=Priority.max)
@@ -41,6 +41,21 @@ def command_command(bot, context, message, args):
         response = "Error: Too few arguments supplied."
 
     return response, Notice(context.nick)
+
+
+@command('channel', level=IRCLevel.master, priority=Priority.max)
+def channel_command(bot, context, message, args):
+    """ Override the channel to make a command act as if it were in another channel. """
+    try:
+        channel = args[1]
+        if channel.lower() in context.database.get(set()):
+            message = ' '.join(args[2:])
+            response = bot.request('HANDLE_MESSAGE', context.nick, channel, context.host, message)
+        else:
+            response = "Error: Please provide a channel that I'm currently in.", Notice(context.nick)
+    except IndexError:
+        response = "Error: Please provide a channel.", Notice(context.nick)
+    return response
 
 
 @command('say', level=IRCLevel.master)
@@ -98,7 +113,7 @@ def quit(message):
 
 def show_channels(database):
     channels = map(lambda x: x.split(' ', 1)[0], database.get(set()))
-    return "I am currently in: {}.".format(', '.join(channels))
+    return split_response(channels, "I am currently in: {}")
 
 
 def say(target, message):
