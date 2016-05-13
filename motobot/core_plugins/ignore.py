@@ -32,12 +32,12 @@ def add_ignore(database, channel, nick):
     channel_ignores = ignores.get(channel, set())
 
     if nick.lower() in channel_ignores:
-        response = "I'm already ignoring {}.".format(nick)
+        response = "I'm already ignoring {} on {}.".format(nick, channel)
     else:
         channel_ignores.add(nick.lower())
         ignores[channel] = channel_ignores
         database.set(ignores)
-        response = "I'm now ignoring {}.".format(nick)
+        response = "I'm now ignoring {} on {}.".format(nick, channel)
     return response
 
 
@@ -49,9 +49,9 @@ def del_ignore(database, channel, nick):
         channel_ignores.remove(nick.lower())
         ignores[channel] = channel_ignores
         database.set(ignores)
-        response = "I'm no longer ignoring {}.".format(nick)
+        response = "I'm no longer ignoring {} on {}.".format(nick, channel)
     except KeyError:
-        response = "I'm not ignoring {}.".format(nick)
+        response = "I'm not ignoring {} on {}.".format(nick, channel)
     return response
 
 
@@ -59,12 +59,12 @@ def show_ignores(database, channel):
     channel_ignores = database.get({}).get(channel, set())
 
     if channel_ignores:
-        responses = split_response(
+        response = split_response(
             channel_ignores, "I am currently ignoring: {} on {}".format('{}', channel))
     else:
-        responses = "I am not ignoring anyone on {}.".format(channel)
+        response = "I am not ignoring anyone on {}.".format(channel)
 
-    return responses
+    return response
 
 
 ignoring_all = set()
