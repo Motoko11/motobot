@@ -8,6 +8,7 @@ def ignore_command(bot, context, message, args):
     Valid arguments are: 'add', 'del', 'all, and 'show'.
     'add' and 'del' require a nick argument.
     'all' will toggle ignoring for the entire channel on and off.
+    'show' will show the currently ignored nicks in the channel.
     """
     response = ''
     try:

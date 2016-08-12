@@ -1,6 +1,11 @@
 from motobot import IRCBot, hook, request, Priority, Context, strip_control_codes
 from motobot.modifiers import Modifier, CommandModifier, ParamsModifier, TrailingModifier, EatType
 from itertools import tee
+from time import sleep, time, sleep
+
+
+MESSAGE_DELAY = 0.2
+next_message = 0
 
 
 @request('HANDLE_MESSAGE')
@@ -169,10 +174,14 @@ def handle_responses(bot, responses, params, command='PRIVMSG',
         trailings = ['']
 
     for trailing in trailings:
+        global next_message
         for modifier in trailing_mods:
             trailing = modifier.modify_trailing(trailing)
         message = form_message(command, params, trailing)
+        cur_time = time()
+        sleep(max(next_message - cur_time, 0))
         bot.send(message)
+        next_message = time() + MESSAGE_DELAY
 
     for iter in iters:
         handle_responses(bot, iter, params, command, trailing_mods, require_trailing)

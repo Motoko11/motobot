@@ -72,6 +72,13 @@ def say_command(bot, context, message, args):
         return ("Error: Too few arguments supplied.", Notice(context.nick))
 
 
+@command('raw', level=IRCLevel.master)
+def raw_command(bot, context, message, args):
+    """ Send a raw IRC message to the server. """
+
+    bot.send(' '.join(args[1:]))
+
+
 def join_channel(database, channel):
     response = None
     channels = database.get(set())
