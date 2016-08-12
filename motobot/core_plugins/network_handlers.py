@@ -19,7 +19,8 @@ def handle_wait(bot, context, message):
 def handle_identification(bot, context, message):
     """ Use the notice message to identify and register to the server. """
     if not bot.identified:
-        bot.send('USER MotoBot localhost localhost MotoBot')
+        user = getattr(bot, 'user', 'MotoBot')
+        bot.send('USER {0} localhost localhost {0}'.format(user))
         bot.send('NICK ' + bot.nick)
         bot.identified = True
 
