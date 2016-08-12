@@ -80,7 +80,7 @@ def handle_nick(bot, context, message):
             new = (channel, nick)
             changes.append((old, new))
     for old, new in changes:
-        userlevel_data[new] = userlevel_data.pop(old)
+        userlevel_data[new] = userlevel_data.pop(old, [IRCLevel.user])
     context.session.set(userlevel_data)
 
 
