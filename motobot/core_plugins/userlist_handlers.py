@@ -95,8 +95,8 @@ def handle_nick(bot, context, message):
     changes = []
     for channel, nick in userlevel_data:
         if nick == old_nick:
-            old = (channel, new_nick)
-            new = (channel, nick)
+            old = (channel, old_nick)
+            new = (channel, new_nick)
             changes.append((old, new))
     for old, new in changes:
         userlevel_data[new] = userlevel_data.pop(old, [IRCLevel.user])
