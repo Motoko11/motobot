@@ -190,7 +190,7 @@ class IRCBot:
         message = byte_string.replace(b'\r', b'').replace(b'\n', b'')[:max_len] + b'\r\n'
         self.socket.send(message)
         try:
-            print("Sent: {}".format(msg))
+            print("Sent: {}".format(message))
         except UnicodeEncodeError:
             pass
 

@@ -1,4 +1,23 @@
-from motobot import hook, request, IRCLevel
+from motobot import hook, request, command, IRCLevel, Notice
+
+
+@command('levelprobe')
+def levelprobe_command(bot, context, message, args):
+    try:
+        nick = args[1]
+        mapping = {
+            IRCLevel.user: "Regular User",
+            IRCLevel.voice: "Voice",
+            IRCLevel.hop: "Half-op",
+            IRCLevel.aop: "Op",
+            IRCLevel.sop: "Protected Op",
+            IRCLevel.owner: "Owner",
+            IRCLevel.master: "Bot Admin",
+        }
+        level = bot.request('USERLEVEL', context.channel, nick)
+        return "{} is a {} ({}) on {}.".format(nick, mapping.get(level, "Unknown"), level, context.channel)
+    except IndexError:
+        return "Please provide a nick argument.", Notice(context.nick)
 
 
 @request('USERLIST')
@@ -76,8 +95,8 @@ def handle_nick(bot, context, message):
     changes = []
     for channel, nick in userlevel_data:
         if nick == old_nick:
-            old = (channel, new_nick)
-            new = (channel, nick)
+            old = (channel, old_nick)
+            new = (channel, new_nick)
             changes.append((old, new))
     for old, new in changes:
         userlevel_data[new] = userlevel_data.pop(old, [IRCLevel.user])
