@@ -207,5 +207,3 @@ class IRCBot:
                 context = Context(None, None, None, self.database.get_entry(module),
                                   self.sessions.get_entry(module))
                 func(self, context, message)
-        finally:
-            self.database.write_database()
