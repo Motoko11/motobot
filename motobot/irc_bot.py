@@ -201,9 +201,8 @@ class IRCBot:
         except UnicodeEncodeError:
             pass
 
-        try:
-            for func in self.hooks.get(message.command, []):
-                module = func.__module__
-                context = Context(None, None, None, self.database.get_entry(module),
-                                  self.sessions.get_entry(module))
-                func(self, context, message)
+        for func in self.hooks.get(message.command, []):
+            module = func.__module__
+            context = Context(None, None, None, self.database.get_entry(module),
+                              self.sessions.get_entry(module))
+            func(self, context, message)
