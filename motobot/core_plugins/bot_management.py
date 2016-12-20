@@ -48,7 +48,7 @@ def channel_command(bot, context, message, args):
     """ Override the channel to make a command act as if it were in another channel. """
     try:
         channel = args[1]
-        if channel.lower() in context.database.get(set()):
+        if channel.lower() in context.database.get([]):
             message = ' '.join(args[2:])
             response = bot.request('HANDLE_MESSAGE', context.nick, channel, context.host, message)
         else:
@@ -81,7 +81,7 @@ def raw_command(bot, context, message, args):
 
 def join_channel(database, channel):
     response = None
-    channels = database.get(set())
+    channels = database.get([])
 
     if channel.lower() in channels:
         response = "I'm already in {}.".format(channel)
@@ -97,7 +97,7 @@ def join_channel(database, channel):
 
 def part_channel(database, channel, message):
     response = None
-    channels = database.get(set())
+    channels = database.get([])
 
     if channel.lower() not in channels:
         response = "I'm not in {}.".format(channel)
@@ -119,7 +119,7 @@ def quit(message):
 
 
 def show_channels(database):
-    channels = map(lambda x: x.split(' ', 1)[0], database.get(set()))
+    channels = map(lambda x: x.split(' ', 1)[0], database.get([]))
     return split_response(channels, "I am currently in: {}")
 
 
@@ -140,7 +140,7 @@ def handle_kick(bot, context, message):
 
 @hook('004')
 def handling_joining_channels(bot, context, message):
-    channels = context.database.get(set())
+    channels = context.database.get([])
     channels |= set(map(lambda x: x.lower(), bot.channels))
     context.database.set(channels)
 
