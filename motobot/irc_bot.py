@@ -1,5 +1,6 @@
 from .irc_message import IRCMessage
 from .database import Database
+from .session import Session
 from .utilities import Context
 from socket import create_connection, timeout
 from ssl import wrap_socket
@@ -35,7 +36,7 @@ class IRCBot:
         self.requests = {}
 
         self.database = Database(self.database_path, self.backup_folder)
-        self.sessions = Database()
+        self.sessions = Session()
         self.load_plugins('motobot.core_plugins')
 
     def load_config(self, config):
