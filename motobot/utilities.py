@@ -5,6 +5,13 @@ from re import compile
 Context = namedtuple('Context', 'nick channel host database session')
 
 
+class BotError(Exception):
+
+    """ Exception class for MotoBot plugins. """
+
+    pass
+
+
 def split_response(iterable, format_string='{}', separator=', ', max_length=400):
     """ Take an iterable and output a messages generator. """
     cur = ''
