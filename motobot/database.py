@@ -15,8 +15,8 @@ class DatabaseEntry:
     def get(self, default=None):
         c = self.__database.cursor()
         c.execute('SELECT data FROM plugin_data WHERE name=?', (self.__name,))
-        data = c.fetchone()[0]
-        return loads(data) if data is not None else default
+        data = c.fetchone()
+        return loads(data[0]) if data is not None else default
 
     def set(self, value):
         data = dumps(value)
