@@ -35,8 +35,8 @@ class Database:
 
     backup_extension = '.bak'
 
-    def __init__(self, database_path=':memory:', backup_folder=None, backup_frequency=DAILY):
-        self.database_path = database_path
+    def __init__(self, database_path=None, backup_folder=None, backup_frequency=DAILY):
+        self.database_path = ':memory:' if database_path is None else database_path
         self.backup_folder = backup_folder
         self.backup_frequency = backup_frequency
         self.load_database()
