@@ -1,6 +1,14 @@
 from motobot import command, sink, Priority, IRCLevel, Eat, Notice, split_response
 
 
+def get_ignores(database):
+    return set(database.get([]))
+
+
+def set_ignores(database, ignores):
+    return database.set(list(ignores))
+
+
 @command('globalignore', priority=Priority.max, level=IRCLevel.master)
 def globalignore_command(bot, context, message, args):
     """ Manage global ignores.
@@ -26,23 +34,23 @@ def globalignore_command(bot, context, message, args):
 
 
 def add_ignore(database, channel, nick):
-    ignores = database.get([])
+    ignores = get_ignores(database)
 
     if nick.lower() in ignores:
         response = "I'm already ignoring {}.".format(nick)
     else:
         ignores.add(nick.lower())
-        database.set(ignores)
+        set_ignores(database, ignores)
         response = "I'm now ignoring {}.".format(nick)
     return response
 
 
 def del_ignore(database, channel, nick):
-    ignores = database.get([])
+    ignores = get_ignores(database)
 
     try:
         ignores.remove(nick.lower())
-        database.set(ignores)
+        set_ignores(database, ignores)
         response = "I'm no longer ignoring {}.".format(nick)
     except KeyError:
         response = "I'm not ignoring {}.".format(nick)
@@ -50,7 +58,7 @@ def del_ignore(database, channel, nick):
 
 
 def show_ignores(database, channel):
-    ignores = database.get([])
+    ignores = get_ignores(database)
 
     if ignores:
         response = split_response(ignores, "I am currently ignoring: {}.")
@@ -61,7 +69,7 @@ def show_ignores(database, channel):
 
 
 def globalignore_sink(bot, context, message):
-    ignores = context.database.get([])
+    ignores = get_ignores(context.database)
     if context.nick.lower() in ignores:
         return Eat
 

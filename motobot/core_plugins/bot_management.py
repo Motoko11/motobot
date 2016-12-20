@@ -1,6 +1,14 @@
 from motobot import command, hook, Notice, IRCLevel, Command, Target, Action, Priority, split_response
 
 
+def get_channels(database):
+    return set(database.get([]))
+
+
+def set_channels(database, channels):
+    return database.set(list(channels))
+
+
 @command('command', level=IRCLevel.master, priority=Priority.max)
 def command_command(bot, context, message, args):
     """ Command to manage the basic functions of the bot.
@@ -48,7 +56,7 @@ def channel_command(bot, context, message, args):
     """ Override the channel to make a command act as if it were in another channel. """
     try:
         channel = args[1]
-        if channel.lower() in context.database.get([]):
+        if channel.lower() in get_channels(context.database):
             message = ' '.join(args[2:])
             response = bot.request('HANDLE_MESSAGE', context.nick, channel, context.host, message)
         else:
@@ -81,13 +89,13 @@ def raw_command(bot, context, message, args):
 
 def join_channel(database, channel):
     response = None
-    channels = database.get([])
+    channels = get_channels(database)
 
     if channel.lower() in channels:
         response = "I'm already in {}.".format(channel)
     else:
         channels.add(channel.lower())
-        database.set(channels)
+        set_channels(database, channels)
         response = (
             [Command('JOIN', channel)],
             "I have joined {}.".format(channel)
@@ -97,13 +105,13 @@ def join_channel(database, channel):
 
 def part_channel(database, channel, message):
     response = None
-    channels = database.get([])
+    channels = get_channels(database)
 
     if channel.lower() not in channels:
         response = "I'm not in {}.".format(channel)
     else:
         channels.discard(channel.lower())
-        database.set(channels)
+        set_channels(database, channels)
         response = [
             (message, Command('PART', channel)),
             "I have left {}.".format(channel)
@@ -112,14 +120,11 @@ def part_channel(database, channel, message):
 
 
 def quit(message):
-    return [
-        "Goodbye!",
-        (message, Command('QUIT', []))
-    ]
+    return ("Goodbye!", (message, Command('QUIT', [])))
 
 
 def show_channels(database):
-    channels = map(lambda x: x.split(' ', 1)[0], database.get([]))
+    channels = map(lambda x: x.split(' ', 1)[0], get_channels(database))
     return split_response(channels, "I am currently in: {}")
 
 
@@ -140,9 +145,9 @@ def handle_kick(bot, context, message):
 
 @hook('004')
 def handling_joining_channels(bot, context, message):
-    channels = context.database.get([])
-    channels.extend(map(lambda x: x.lower(), bot.channels))
-    context.database.set(channels)
+    channels = get_channels(context.database)
+    channels |= set(map(lambda x: x.lower(), bot.channels))
+    set_channels(context.database, channels)
 
     for channel in channels:
         bot.send('JOIN ' + channel)
