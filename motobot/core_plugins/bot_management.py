@@ -141,7 +141,7 @@ def handle_kick(bot, context, message):
 @hook('004')
 def handling_joining_channels(bot, context, message):
     channels = context.database.get([])
-    channels |= set(map(lambda x: x.lower(), bot.channels))
+    channels.extend(map(lambda x: x.lower(), bot.channels))
     context.database.set(channels)
 
     for channel in channels:

@@ -2,10 +2,10 @@ from motobot import hook, sink, request, Priority
 
 
 def get_master_lists(bot, session):
-    confirmed, unconfirmed = session.get((set(), None))
+    confirmed, unconfirmed = session.get(([], None))
 
     if unconfirmed is None:
-        unconfirmed = set(map(str.lower, bot.masters))
+        unconfirmed = list(map(str.lower, bot.masters))
         session.set((confirmed, unconfirmed))
 
     return confirmed, unconfirmed
@@ -32,7 +32,7 @@ def verify(bot, session, nick):
 
     try:
         unconfirmed.remove(nick)
-        confirmed.add(nick)
+        confirmed.append(nick)
     except KeyError:
         pass
 
@@ -44,7 +44,7 @@ def unverify(bot, session, nick):
 
     try:
         confirmed.remove(nick)
-        unconfirmed.add(nick)
+        unconfirmed.append(nick)
     except KeyError:
         pass
 
