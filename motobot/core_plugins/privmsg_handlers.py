@@ -1,4 +1,4 @@
-from motobot import IRCBot, hook, request, Priority, Context, strip_control_codes
+from motobot import IRCBot, hook, request, Priority, Context, strip_control_codes, BotError
 from motobot.modifiers import Modifier, CommandModifier, ParamsModifier, TrailingModifier, EatType
 from itertools import tee
 from time import sleep, time, sleep
@@ -19,11 +19,15 @@ def handle_message_request(bot, context, nick, channel, host, message):
         try:
             responses = handle_plugin(bot, plugin, nick, channel, host, messages)
             responses, eat = check_eat(responses)
-            if eat:
-                break_priority = plugin.priority
-            yield responses
+        except BotError as error:
+            responses = error.args
+            responses, eat = check_eat(responses)
         except:
             bot.log_error()
+
+        if eat:
+            break_priority = plugin.priority
+        yield responses
 
 
 def check_eat(responses):
