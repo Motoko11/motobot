@@ -1,4 +1,5 @@
-from pickle import load, dump, HIGHEST_PROTOCOL
+from sqlite3 import connect
+from json import dumps, loads
 from os import replace, mkdir, listdir
 from os.path import exists
 from shutil import copyfile
@@ -7,19 +8,26 @@ from math import floor
 
 
 class DatabaseEntry:
-    def __init__(self, data=None):
-        self.__data = data
-        self.changed = False
+    def __init__(self, database, name):
+        self.__database = database
+        self.__name = name
+        self.__data_cache = None
 
     def get(self, default=None):
-        return self.__data if self.__data is not None else default
+        if self.__data_cache is None:
+            c = self.__database.cursor()
+            c.execute('SELECT data FROM plugin_data WHERE name=?', (self.__name,))
+            data = c.fetchone()
+            self.__data_cache = loads(data[0]) if data is not None else default
+        return self.__data_cache
 
     def set(self, value):
-        self.__data = value
-        self.changed = True
-
-    def __repr__(self):
-        return 'DatabaseEntry({})'.format(repr(self.__data))
+        data = dumps(value)
+        self.__data_cache = value
+        c = self.__database.cursor()
+        c.execute('INSERT OR REPLACE INTO plugin_data (name, data) VALUES(?, ?)',
+                  (self.__name, data))
+        self.__database.commit()
 
 
 class Database:
@@ -32,40 +40,17 @@ class Database:
     backup_extension = '.bak'
 
     def __init__(self, database_path=None, backup_folder=None, backup_frequency=DAILY):
-        self.database_path = database_path
+        self.database_path = ':memory:' if database_path is None else database_path
         self.backup_folder = backup_folder
         self.backup_frequency = backup_frequency
-        self.data = {}
+        self.entry_cache = {}
         self.load_database()
 
     def load_database(self):
-        if self.database_path is not None:
-            try:
-                with open(self.database_path, 'rb') as file:
-                    self.data = load(file)
-            except FileNotFoundError:
-                self.write_database()
-
-    def write_database(self):
-        if self.database_path is not None:
-            if self.prune():
-                temp_path = self.database_path + '.temp'
-                with open(temp_path, 'wb') as file:
-                    dump(self.data, file, HIGHEST_PROTOCOL)
-                replace(temp_path, self.database_path)
-                self.backup()
-
-    def prune(self):
-        changed = False
-        remove = []
-        for key, entry in self.data.items():
-            changed |= entry.changed
-            entry.changed = False
-            if entry.get() is None:
-                remove.append(key)
-        for key in remove:
-            self.data.pop(key)
-        return changed
+        self.database = connect(self.database_path)
+        c = self.database.cursor()
+        c.execute('CREATE TABLE if not EXISTS plugin_data (name TEXT PRIMARY KEY, data TEXT)')
+        self.database.commit()
 
     def backup(self):
         if self.backup_folder is not None:
@@ -90,6 +75,6 @@ class Database:
         return last_backup
 
     def get_entry(self, name):
-        if name not in self.data:
-            self.data[name] = DatabaseEntry()
-        return self.data[name]
+        if name not in self.entry_cache:
+            self.entry_cache[name] = DatabaseEntry(self.database, name)
+        return self.entry_cache[name]
