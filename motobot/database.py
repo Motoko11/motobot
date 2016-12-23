@@ -11,15 +11,19 @@ class DatabaseEntry:
     def __init__(self, database, name):
         self.__database = database
         self.__name = name
+        self.__data_cache = None
 
     def get(self, default=None):
-        c = self.__database.cursor()
-        c.execute('SELECT data FROM plugin_data WHERE name=?', (self.__name,))
-        data = c.fetchone()
-        return loads(data[0]) if data is not None else default
+        if self.__data_cache is None:
+            c = self.__database.cursor()
+            c.execute('SELECT data FROM plugin_data WHERE name=?', (self.__name,))
+            data = c.fetchone()
+            self.__data_cache = loads(data[0]) if data is not None else default
+        return self.__data_cache
 
     def set(self, value):
         data = dumps(value)
+        self.__data_cache = value
         c = self.__database.cursor()
         c.execute('INSERT OR REPLACE INTO plugin_data (name, data) VALUES(?, ?)',
                   (self.__name, data))
@@ -39,6 +43,7 @@ class Database:
         self.database_path = ':memory:' if database_path is None else database_path
         self.backup_folder = backup_folder
         self.backup_frequency = backup_frequency
+        self.entry_cache = {}
         self.load_database()
 
     def load_database(self):
@@ -70,4 +75,6 @@ class Database:
         return last_backup
 
     def get_entry(self, name):
-        return DatabaseEntry(self.database, name)
+        if name not in self.entry_cache:
+            self.entry_cache[name] = DatabaseEntry(self.database, name)
+        return self.entry_cache[name]
