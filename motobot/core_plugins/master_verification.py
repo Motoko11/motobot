@@ -44,7 +44,7 @@ def unverify(bot, session, nick):
 
     try:
         confirmed.remove(nick)
-        unconfirmed.append(nick)
+        unconfirmed.add(nick)
     except KeyError:
         pass
 
