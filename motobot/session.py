@@ -6,7 +6,8 @@ class SessionEntry:
         self.data = None
 
     def get(self, default=None):
-        return default if self.data is None else self.data
+        self.data = default if self.data is None else self.data
+        return self.data
 
     def set(self, data):
         self.data = data
