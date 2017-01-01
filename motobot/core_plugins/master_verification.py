@@ -1,95 +1,81 @@
-from motobot import hook, sink, request, Priority
-
-
-def get_master_lists(bot, session):
-    confirmed, unconfirmed = session.get((set(), None))
-
-    if unconfirmed is None:
-        unconfirmed = set(map(str.lower, bot.masters))
-        session.set((confirmed, unconfirmed))
-
-    return confirmed, unconfirmed
+from motobot import hook, request, command, BotError, Notice, hostmask_check, Priority, IRCLevel, split_response
 
 
 @request('IS_MASTER')
-def is_master_request(bot, context, nick):
-    confirmed = get_master_lists(bot, context.session)[0]
-    return nick.lower() in confirmed
+def is_master_request(bot, context, nick, host=None):
+    recognised = context.session.get(set())
+    admin_masks = context.database.get([])
+    return nick.lower() in recognised or \
+           any(hostmask_check(nick, host, mask) for mask in admin_masks)
 
 
-def check(bot, session, nick):
-    """ Check a user by sending a WHOIS query. """
-    confirmed, unconfirmed = get_master_lists(bot, session)
-
-    if nick.lower() in unconfirmed:
-        bot.send('WHOIS ' + nick)
-
-
-def verify(bot, session, nick):
-    """ Mark a master as verified in the bot. """
-    nick = nick.lower()
-    confirmed, unconfirmed = get_master_lists(bot, session)
-
+@command('identify', hidden=True, priority=Priority.max)
+def identify_command(bot, context, message, args):
     try:
-        unconfirmed.remove(nick)
-        confirmed.add(nick)
-    except KeyError:
-        pass
+        password = bot.admin_pass
+    except AttributeError:
+        raise BotError("Error: I've not been configured with a password.", Notice(context.nick))
+
+    input_pass = ' '.join(args[1:])
+    if input_pass == password:
+        recognise(context.session, context.nick)
+        response = 'You are now recognised as a bot admin.'
+    else:
+        response = 'Error: Password incorrect.'
+    return response, Notice(context.nick)
 
 
-def unverify(bot, session, nick):
-    """ Unmark a user as verified in the bot. """
-    nick = nick.lower()
-    confirmed, unconfirmed = get_master_lists(bot, session)
+def recognise(session, nick):
+    admins = session.get(set())
+    admins.add(nick.lower())
+    session.set(admins)
 
+
+@command('adminmask', level=IRCLevel.master)
+def adminmask_command(bot, context, message, args):
     try:
-        confirmed.remove(nick)
-        unconfirmed.add(nick)
-    except KeyError:
-        pass
+        arg = args[1].lower()
+        if arg == 'add':
+            response = add_mask(context.database, args[2])
+        elif arg in ('del', 'rem'):
+            response = del_mask(context.database, args[2])
+        elif arg in ('show', 'list'):
+            response = show_masks(context.database)
+        else:
+            response = 'Error: Invalid argument;'
+    except IndexError:
+        response = "Not enough arguments provided."
+    return response, Notice(context.nick)
 
 
-@hook('307')
-def registered_nick_confirm_rizon(bot, context, message):
-    """ Hooks the user is registered reply from a WHOIS query and verifies user. """
-    verify(bot, context.session, message.params[1])
+def add_mask(database, mask):
+    masks = database.get([])
+    if mask not in masks:
+        masks.append(mask)
+        database.set(masks)
+        response = "Mask added successfully."
+    else:
+        response = "Error: Mask already in masks list."
+    return response
 
 
-@hook('330')
-def registered_nick_confirm_freenode(bot, context, message):
-    """ Hooks the user is registered reply from a WHOIS query and verifies user. """
-    if message.params[1] == message.params[2]:
-        verify(bot, context.session, message.params[2])
+def del_mask(database, mask):
+    masks = database.get([])
+    try:
+        masks.remove(mask)
+        database.set(masks)
+        response = "Mask successfully deleted."
+    except ValueError:
+        response = "Error: Mask not in masks list."
+    return response
 
 
-@sink(priority=Priority.max)
-def master_verification_sink(bot, context, message):
-    """ Checks a user that speaks in the channel. """
-    check(bot, context.session, context.nick)
+def show_masks(database):
+    masks = database.get([])
 
+    if masks:
+        response = split_response(masks, "Admin masks: {};")
+    else:
+        response = "I don't have any admin masks."
 
-@hook('353')
-def handle_names(bot, context, message):
-    """ Check users whom are present in the channel upon joining. """
-    names = message.params[-1].split(' ')
-    for name in names:
-        check(bot, context.session, name.lstrip('+%@&~'))
-
-
-@hook('JOIN')
-def handle_join(bot, context, message):
-    """ Check a user that joins a channel. """
-    check(bot, context.session, message.nick)
-
-
-@hook('NICK')
-def handle_nick(bot, context, message):
-    """ Unmark a user as verified in the bot and check new nick. """
-    unverify(bot, context.session, message.nick)
-    check(bot, context.session, message.params[0])
-
-
-@hook('QUIT')
-def handle_quit(bot, context, message):
-    """ Unmark a user as verified in the bot upon quit. """
-    unverify(bot, context.session, message.nick)
+    return response
