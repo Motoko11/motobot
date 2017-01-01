@@ -27,7 +27,6 @@ class DatabaseEntry:
         c = self.__database.cursor()
         c.execute('INSERT OR REPLACE INTO plugin_data (name, data) VALUES(?, ?)',
                   (self.__name, data))
-        self.__database.commit()
 
 
 class Database:
@@ -78,3 +77,6 @@ class Database:
         if name not in self.entry_cache:
             self.entry_cache[name] = DatabaseEntry(self.database, name)
         return self.entry_cache[name]
+
+    def commit(self):
+        self.database.commit()
