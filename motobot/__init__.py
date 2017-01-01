@@ -7,4 +7,4 @@ from .modifiers import Action, CTCP, Target, Command, Notice, Eat
 from .utilities import strip_control_codes, split_response, Context, BotError
 
 
-__VERSION__ = '0.2'
+__VERSION__ = '0.3'
