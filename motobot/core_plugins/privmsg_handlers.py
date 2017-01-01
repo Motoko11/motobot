@@ -134,7 +134,7 @@ def handle_command(plugin, bot, context, message):
     test = message.split(' ', 1)[0]
 
     if trigger == test:
-        alt = bot.request('USERLEVEL', context.channel, context.nick) < plugin.level
+        alt = bot.request('USERLEVEL', context.channel, context.nick, context.host) < plugin.level
         func = plugin.func if not alt else plugin.alt
         if func is not None:
             args = message[len(bot.command_prefix):].split(' ')
@@ -144,14 +144,14 @@ def handle_command(plugin, bot, context, message):
 def handle_match(plugin, bot, context, message):
     match = plugin.arg.search(message)
     if match is not None:
-        alt = bot.request('USERLEVEL', context.channel, context.nick) < plugin.level
+        alt = bot.request('USERLEVEL', context.channel, context.nick, context.host) < plugin.level
         func = plugin.func if not alt else plugin.alt
         if func is not None:
             return func(bot, context, message, match)
 
 
 def handle_sink(plugin, bot, context, message):
-    alt = bot.request('USERLEVEL', context.channel, context.nick) < plugin.level
+    alt = bot.request('USERLEVEL', context.channel, context.nick, context.host) < plugin.level
     func = plugin.func if not alt else plugin.alt
     if func is not None:
         return func(bot, context, message)
