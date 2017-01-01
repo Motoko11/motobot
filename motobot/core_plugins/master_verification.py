@@ -31,7 +31,7 @@ def recognise(session, nick):
     session.set(admins)
 
 
-@command('adminmask')
+@command('adminmask', level=IRCLevel.master)
 def adminmask_command(bot, context, message, args):
     try:
         arg = args[1].lower()
