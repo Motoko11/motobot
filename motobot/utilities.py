@@ -1,5 +1,6 @@
 from collections import namedtuple
-from re import compile
+from re import compile, match, IGNORECASE
+from fnmatch import translate
 
 
 Context = namedtuple('Context', 'nick channel host database session')
@@ -35,3 +36,10 @@ def strip_control_codes(input):
     """ Strip the control codes from the input. """
     output = pattern.sub('', input)
     return output
+
+
+def hostmask_check(nick, host, mask):
+    """ Check a nick and host against a hostmask. """
+    nickhost = "{}!{}".format(nick, host)
+    mask_regex = translate(mask)
+    return match(mask_regex, nickhost, IGNORECASE)
