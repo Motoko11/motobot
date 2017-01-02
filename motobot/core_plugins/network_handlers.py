@@ -23,11 +23,13 @@ def handle_identification(bot, context, message):
         bot.send('USER {0} localhost localhost {0}'.format(user))
         bot.send('NICK ' + bot.nick)
         bot.identified = True
+        sleep(1)
 
 
-@hook('002')
+@hook('001')
 def handle_nickserv_identification(bot, context, message):
     """ At server welcome message 004 identify to nickserv and join channels. """
+    bot.send('CAP REQ multi-prefix')
     if bot.nickserv_password is not None:
         bot.send('PRIVMSG nickserv :identify ' + bot.nickserv_password)
         sleep(1)

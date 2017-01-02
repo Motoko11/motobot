@@ -4,7 +4,7 @@ from .irc_bot import IRCBot
 from .decorators import hook, command, match, sink, request
 from .priority import Priority
 from .modifiers import Action, CTCP, Target, Command, Notice, Eat
-from .utilities import strip_control_codes, split_response, Context
+from .utilities import strip_control_codes, split_response, Context, BotError, hostmask_check
 
 
-__VERSION__ = '0.2'
+__VERSION__ = '0.3'

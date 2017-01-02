@@ -30,12 +30,12 @@ def ignore_command(bot, context, message, args):
 
 def add_ignore(database, channel, nick):
     ignores = database.get({})
-    channel_ignores = ignores.get(channel, set())
+    channel_ignores = ignores.get(channel, [])
 
     if nick.lower() in channel_ignores:
         response = "I'm already ignoring {} on {}.".format(nick, channel)
     else:
-        channel_ignores.add(nick.lower())
+        channel_ignores.append(nick.lower())
         ignores[channel] = channel_ignores
         database.set(ignores)
         response = "I'm now ignoring {} on {}.".format(nick, channel)
@@ -44,7 +44,7 @@ def add_ignore(database, channel, nick):
 
 def del_ignore(database, channel, nick):
     ignores = database.get({})
-    channel_ignores = ignores.get(channel, set())
+    channel_ignores = ignores.get(channel, [])
 
     try:
         channel_ignores.remove(nick.lower())
@@ -57,7 +57,7 @@ def del_ignore(database, channel, nick):
 
 
 def show_ignores(database, channel):
-    channel_ignores = database.get({}).get(channel, set())
+    channel_ignores = database.get({}).get(channel, [])
 
     if channel_ignores:
         response = split_response(
@@ -84,7 +84,7 @@ def ignoreall(channel):
 
 
 def ignore_sink(bot, context, message):
-    channel_ignores = context.database.get({}).get(context.channel, set())
+    channel_ignores = context.database.get({}).get(context.channel, [])
     if context.nick.lower() in channel_ignores:
         return Eat
 
