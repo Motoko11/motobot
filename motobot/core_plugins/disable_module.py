@@ -15,7 +15,27 @@ def filter_plugins(plugins, disabled):
     )
 
 
-@command('module', priority=Priority.max, level=IRCLevel.op)
+def user_module_command(bot, context, message, args):
+    try:
+        arg = args[1].lower()
+
+        if arg == ('enable', 'disable', 'show'):
+            response = "Error: You do not have the privileges to use this argument."
+        elif arg == 'list':
+            module = ' '.join(args[2:])
+            response = list_module(bot, module)
+        elif arg == 'get':
+            module = ' '.join(args[2:])
+            response = get_module(bot, module)
+        else:
+            response = "Error: Invalid argument."
+    except IndexError:
+        response = "Error: Too few arguments supplied."
+
+    return response, Notice(context.nick)
+
+
+@command('module', priority=Priority.max, level=IRCLevel.op, alt=user_module_command)
 def module_command(bot, context, message, args):
     """ Command to enable or disable modules in the bot.
 
