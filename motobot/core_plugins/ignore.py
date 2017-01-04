@@ -3,6 +3,7 @@ from motobot import command, sink, Priority, IRCLevel, Eat, Notice, split_respon
 
 @command('ignore', priority=Priority.max, level=IRCLevel.hop)
 def ignore_command(bot, context, message, args):
+    """ Ignore a nick or host mask in the current channel. """
     try:
         response = add_ignore(context.database, context.channel, args[1])
     except IndexError:
@@ -12,6 +13,7 @@ def ignore_command(bot, context, message, args):
 
 @command('unignore', priority=Priority.max, level=IRCLevel.hop)
 def unignore_command(bot, context, message, args):
+    """ Unignore a nick or host mask in the current channel. """
     try:
         response = del_ignore(context.database, context.channel, args[1])
     except IndexError:
@@ -21,11 +23,13 @@ def unignore_command(bot, context, message, args):
 
 @command('ignorelist', priority=Priority.max, level=IRCLevel.hop)
 def ignorelist_command(bot, context, message, args):
+    """ List the ignored host masks in the current channel. """
     return show_ignores(context.database, context.channel), Notice(context.nick)
 
 
 @command('ignoreall', priority=Priority.max, level=IRCLevel.hop)
 def ignoreall_command(bot, context, message, args):
+    """ Toggle on or off ignoring everyone in the current channel. """
     return ignoreall(context.channel)
 
 
