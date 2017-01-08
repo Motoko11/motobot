@@ -1,7 +1,7 @@
 from motobot import IRCBot, hook, request, Priority, Context, strip_control_codes, BotError
 from motobot.modifiers import Modifier, CommandModifier, ParamsModifier, TrailingModifier, EatType
 from itertools import tee
-from time import sleep, time, sleep
+from time import sleep, time
 
 
 MESSAGE_DELAY = 0.2
