@@ -1,58 +1,71 @@
-from motobot import command, sink, Priority, IRCLevel, Eat, Notice, split_response
+from motobot import command, sink, Priority, IRCLevel, Eat, Notice, split_response, hostmask_check
 
 
 @command('ignore', priority=Priority.max, level=IRCLevel.hop)
 def ignore_command(bot, context, message, args):
-    """ Manage ignores in a channel.
-
-    Valid arguments are: 'add', 'del', 'all, and 'show'.
-    'add' and 'del' require a nick argument.
-    'all' will toggle ignoring for the entire channel on and off.
-    'show' will show the currently ignored nicks in the channel.
-    """
-    response = ''
+    """ Ignore a nick or host mask in the current channel. """
     try:
-        arg = args[1].lower()
-        if arg == 'add':
-            response = add_ignore(context.database, context.channel, args[2])
-        elif arg == 'del' or arg == 'rem':
-            response = del_ignore(context.database, context.channel, args[2])
-        elif arg == 'all':
-            response = ignoreall(context.channel)
-        elif arg == 'show':
-            response = show_ignores(context.database, context.channel)
-        else:
-            response = 'Error: Invalid argument;'
+        response = add_ignore(context.database, context.channel, args[1])
     except IndexError:
-        response = "Not enough arguments provided."
+        response = "Error: Please provide a mask or nick to ignore."
     return response, Notice(context.nick)
+
+
+@command('unignore', priority=Priority.max, level=IRCLevel.hop)
+def unignore_command(bot, context, message, args):
+    """ Unignore a nick or host mask in the current channel. """
+    try:
+        response = del_ignore(context.database, context.channel, args[1])
+    except IndexError:
+        response = "Error: Please provide a mask or nick to unignore."
+    return response, Notice(context.nick)
+
+
+@command('ignorelist', priority=Priority.max, level=IRCLevel.hop)
+def ignorelist_command(bot, context, message, args):
+    """ List the ignored host masks in the current channel. """
+    return show_ignores(context.database, context.channel), Notice(context.nick)
+
+
+@command('ignoreall', priority=Priority.max, level=IRCLevel.hop)
+def ignoreall_command(bot, context, message, args):
+    """ Toggle on or off ignoring everyone in the current channel. """
+    return ignoreall(context.channel)
+
+
+def nick_to_mask(mask):
+    if '!' not in mask and '@' not in mask:
+        mask += '!*@*'
+    return mask.lower()
 
 
 def add_ignore(database, channel, nick):
     ignores = database.get({})
     channel_ignores = ignores.get(channel, [])
+    mask = nick_to_mask(nick)
 
-    if nick.lower() in channel_ignores:
+    if mask in channel_ignores:
         response = "I'm already ignoring {} on {}.".format(nick, channel)
     else:
-        channel_ignores.append(nick.lower())
+        channel_ignores.append(mask)
         ignores[channel] = channel_ignores
         database.set(ignores)
-        response = "I'm now ignoring {} on {}.".format(nick, channel)
+        response = "I'm now ignoring {} on {}.".format(mask, channel)
     return response
 
 
 def del_ignore(database, channel, nick):
     ignores = database.get({})
     channel_ignores = ignores.get(channel, [])
+    mask = nick_to_mask(nick)
 
     try:
-        channel_ignores.remove(nick.lower())
+        channel_ignores.remove(mask)
         ignores[channel] = channel_ignores
         database.set(ignores)
-        response = "I'm no longer ignoring {} on {}.".format(nick, channel)
-    except KeyError:
-        response = "I'm not ignoring {} on {}.".format(nick, channel)
+        response = "I'm no longer ignoring {} on {}.".format(mask, channel)
+    except ValueError:
+        response = "I'm not ignoring {} on {}.".format(mask, channel)
     return response
 
 
@@ -85,8 +98,9 @@ def ignoreall(channel):
 
 def ignore_sink(bot, context, message):
     channel_ignores = context.database.get({}).get(context.channel, [])
-    if context.nick.lower() in channel_ignores:
-        return Eat
+    for mask in channel_ignores:
+        if hostmask_check(context.nick, context.host, mask):
+            return Eat
 
 
 @sink(priority=Priority.max, level=IRCLevel.hop, alt=ignore_sink)

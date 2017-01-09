@@ -1,25 +1,6 @@
 from motobot import hook, request, command, IRCLevel, Notice
 
 
-@command('levelprobe')
-def levelprobe_command(bot, context, message, args):
-    try:
-        nick = args[1]
-        mapping = {
-            IRCLevel.user: "Regular User",
-            IRCLevel.voice: "Voice",
-            IRCLevel.hop: "Half-op",
-            IRCLevel.aop: "Op",
-            IRCLevel.sop: "Protected Op",
-            IRCLevel.owner: "Owner",
-            IRCLevel.master: "Bot Admin",
-        }
-        level = bot.request('USERLEVEL', context.channel, nick)
-        return "{} is a {} ({}) on {}.".format(nick, mapping.get(level, "Unknown"), level, context.channel)
-    except IndexError:
-        return "Please provide a nick argument.", Notice(context.nick)
-
-
 @request('USERLIST')
 def userlist_request(bot, context, channel):
     return [x[1] for x in context.session.get({}) if x[0].lower() == channel.lower()]
@@ -29,7 +10,7 @@ def userlist_request(bot, context, channel):
 def userlevel_request(bot, context, channel, nick, host=None):
     userlevel_data = context.session.get({})
     level = IRCLevel.user
-    if bot.request('IS_MASTER', nick, host):
+    if host is not None and bot.request('IS_MASTER', nick, host):
         level = IRCLevel.master
     elif channel.lower() == bot.nick.lower():
         level = IRCLevel.owner

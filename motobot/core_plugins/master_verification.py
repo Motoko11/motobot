@@ -2,7 +2,7 @@ from motobot import hook, request, command, BotError, Notice, hostmask_check, Pr
 
 
 @request('IS_MASTER')
-def is_master_request(bot, context, nick, host=None):
+def is_master_request(bot, context, nick, host):
     recognised = context.session.get(set())
     admin_masks = context.database.get([])
     return nick.lower() in recognised or \
